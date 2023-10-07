@@ -1,0 +1,27 @@
+import mariadb
+
+#Create a connection
+conn = mariadb.connect(host='10.10.2.3', 
+                       port=3306, 
+                       user='py_interface', 
+                       password='sshDB#532', 
+                       database='automateDB')
+
+# Create a cursor object
+cur = conn.cursor()
+
+print('writing query')
+
+# Write out query to write to database
+query = "SELECT * FROM accounts"
+
+# Execute the query
+cur.execute(query)
+
+# Get the query data
+table_list = []
+
+for(table) in cur.fetchall():
+    table_list.append(table)
+    
+print(table_list)

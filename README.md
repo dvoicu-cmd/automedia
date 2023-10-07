@@ -1,8 +1,8 @@
-#Project-Automatic
+# Project-Automatic
 A system to autogenerate and upload short form content
 
-## Tree file structure 
-'''bash
+## Tree File Structure 
+```
 .
 ├── deployments
 │   ├── environments
@@ -15,24 +15,27 @@ A system to autogenerate and upload short form content
     ├── publisher
     └── scraper
 
-'''
+```
 
-###deployments:
+### deployments:
 infrastructure documentation, constraints and set up for the project
 
-###doc:
+### doc:
 project documentation.
 
-###scripts:
+### scripts:
 contains the script files to deploy
-| scraper |
+
+scraper:
 Visit predetermined source websites and media from the internet.
-| creator |
+
+creator:
 Take from database server media files and construct procedurally generated content.
-| publisher |
+
+publisher: 
 Take saved video content from database server and publish the content.
 
-## account pipeline
+## Account Pipeline
 ![diagram](/doc/system_diagram.png)
 - abstract diagram of system
 

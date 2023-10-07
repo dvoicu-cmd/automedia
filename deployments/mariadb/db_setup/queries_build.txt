@@ -1,0 +1,100 @@
+-- create the users:
+
+CREATE USER 'py_interface'@'10.10.2.%' IDENTIFIED BY 'sshDB#532';
+GRANT SELECT, INSERT, UPDATE, DELETE ON *.* TO 'py_interface'@'10.10.2.%';
+
+CREATE USER 'py_read'@'10.10.2.%' IDENTIFIED BY '2read';
+GRANT SELECT ON *.* TO 'py_read'@'10.10.2.%';
+
+-- create the db:
+CREATE DATABASE automateDB;
+
+--Create the tables:
+
+--Create accounts table.
+--Adding future constrains: ALTER TABLE <Database> ADD CONSTRAINT <table> CHECK (<property> IN ());
+--Naming conventions for keys: https://stackoverflow.com/questions/465136/is-prefixing-each-field-name-in-a-table-with-abbreviated-table-name-a-good-pract/465146#465146
+
+CREATE TABLE automateDB.accounts (
+	id INT NOT NULL AUTO_INCREMENT,
+	email VARCHAR(255) NOT NULL,
+	platform VARCHAR(255) NOT NULL,
+	username VARCHAR(255) NOT NULL,
+	password VARCHAR(255) NOT NULL,
+	UNIQUE (id),
+	PRIMARY KEY (id) 
+);
+
+-- For platform, just make sure the strings stay like so: 'tiktok','yt_shorts','instagram_reels','yt_videos'
+-- Alter tables by adding properties.
+ALTER TABLE automateDB.accounts ADD password VARCHAR(255) NOT NULL;
+
+
+--Create media table.
+CREATE TABLE automateDB.media (
+	id INT NOT NULL AUTO_INCREMENT,
+	account_id INT NOT NULL,
+	title VARCHAR(255),
+	type VARCHAR(255) NOT NULL,
+	location VARCHAR(255),
+	FOREIGN KEY(account_id) REFERENCES automateDB.accounts(id),
+	UNIQUE (id),
+	PRIMARY KEY (id)
+);
+
+-- For type, just make sure the strings are one of the following: 'video','audio','text','image'
+
+--Create export table.
+CREATE TABLE automateDB.export (
+	id INT NOT NULL AUTO_INCREMENT,
+	account_id INT NOT NULL,
+	title VARCHAR(255),
+	uploaded TINYINT(1) DEFAULT 0,
+	archived TINYINT(1) DEFAULT 0,
+	location VARCHAR(255),
+	UNIQUE (id),	
+	PRIMARY KEY (id),
+	FOREIGN KEY(account_id) REFERENCES automateDB.accounts(id)
+);
+
+
+--Inserting values into these tables:
+
+
+--accounts table
+INSERT INTO accounts (email, platform, username, password)
+VALUES (<'email'>,<'tiktok','yt_shorts','instagram_reels','yt_videos'>,<'username'>,<'password'>);
+
+--example:
+INSERT INTO accounts (email, platform, username, password) VALUES ('dvmedia@gmail.com', 'yt_shorts', 'deepfri', 'hehe');
+
+
+--media table
+INSERT INTO media (account_id, title, type, location)
+VALUES (1,'Peter_cums','video','/data/1/video');
+
+--the storage directory is called /data/
+--The full path is /var/lib/mysql/data/
+--Format: /data/<account_id>/<type>/<id>.<extension>
+-- DECLARE @variable_name to define session variables
+
+
+--export table
+INSERT INTO export (account_id, title, location)
+VALUES (<id_to_account>,<'title'>,<'location'>)
+
+--Format for location: /data/<id_to_account>/<archive || to-upload>/<id>.<extension>
+--You will need to read the primary key when you insert a row and then update the location variable in the python script
+
+
+--Getting values from these tables:
+
+
+SELECT <column> ... FROM <table>;
+
+--Showing column values
+SHOW COLUMNS FROM accounts FROM automateDB;
+
+
+--You can select database with the USE keyword
+
