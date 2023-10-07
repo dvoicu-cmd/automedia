@@ -1,12 +1,42 @@
-## project-automatic
+#Project-Automatic
 A system to autogenerate and upload short form content
 
-## node roles
-# scraper
-Visit source websites and scrape data from the internet.
+## Tree file structure 
+'''bash
+.
+├── deployments
+│   ├── environments
+│   └── mariadb
+│       └── db_setup
+├── doc
+└── scripts
+    ├── creator
+    ├── lib
+    ├── publisher
+    └── scraper
 
-# creator
-Take from a repository of source files and construct procedurally generated content.
+'''
 
-# publisher
-Take saved video content and publish the content.
+###deployments:
+infrastructure documentation, constraints and set up for the project
+
+###doc:
+project documentation.
+
+###scripts:
+contains the script files to deploy
+| scraper |
+Visit predetermined source websites and media from the internet.
+| creator |
+Take from database server media files and construct procedurally generated content.
+| publisher |
+Take saved video content from database server and publish the content.
+
+## account pipeline
+![diagram](/doc/system_diagram.png)
+- abstract diagram of system
+
+An account to publish to is established. A scraper is then created to pull specific content for the account. Raw media is stored in a designated storage server. Raw media for the desired account is then pulled and processed. Processed videos are then stored in designated storage server. Publisher then takes processed videos, uploades and archives the content.
+
+Further documentation on system is in the doc directory.
+
