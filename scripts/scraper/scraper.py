@@ -1,6 +1,5 @@
 from bs4 import BeautifulSoup
 import requests
-import db_call.py
 import os
 
 class scraper:
