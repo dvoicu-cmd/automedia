@@ -96,7 +96,6 @@ class dbConnection:
         self.__makeConnection()
         
         #Write querry
-        table = 'accounts'
         
         #querry = f'INSERT INTO {table} (email, platform, username, password) VALUES (\'{email}\', \'{platform}\', \'{username}\', \'{password}\');'
         querry = 'INSERT INTO accounts (email, platform, username, password) VALUES (\'dv@mediagmail.com\', \'yt_shorts\', \'deepfrii\', \'WHA\');'
@@ -127,7 +126,6 @@ class dbConnection:
         #Close the connection
         self.cursor.close()
         self.connection.close()
-        print("connection closed")
         
     def __saveToNFS(self, url, account_id):
         """
@@ -149,13 +147,16 @@ class dbConnection:
         #Load credentials here
         config = configparser.ConfigParser()
         
+        #Load the normalized file path
+        config_path = os.path.join(os.getcwd(), 'scripts/db/cred.cfg')
+        
         #Attempt file read
-        print(config.read('cred.cfg'))
+        file = config.read(config_path)
+        
+        if not file:
+            raise Exception('Failed to read config file')
         
         #Parse and then output
-        
-        varss = config.items('CREDENTIALS', 'ip')
-                
         outputDict = {
             "ip":config['CREDENTIALS']['ip'],
             "port":config['CREDENTIALS']['port'],
