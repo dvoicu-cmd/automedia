@@ -10,22 +10,9 @@ import os
 
 class dbConnection:
     
-    # constants
-    # platforms:
-    TIKTOK = "tiktok"
-    YOUTUBE_SHORT = "yt_shorts"
-    YOUTUBE_VIDEO = "yt_videos"
-    REELS = "instagram_reels"
-    
-    # media types:
-    VIDEO = "video"
-    AUDIO = "audio"
-    TEXT = "text"
-    IMAGE = "image"
-        
-    
-    # defines the mariadb connection.
+    # defines the mariadb connection and cursor.
     connection = None
+    cursor = None
     
     # dictionary that contains the credentials to log into the database.
     credentials = None
@@ -62,7 +49,7 @@ class dbConnection:
     
     def writeConnectionConfig(self, hostIp, port, user, password, database):
         """
-        Writes a cred.cfg file that configures how to connect to the database.
+        Writes a cred.cfg file that configures how to connect to the database and applies that connection to current object.
 
         Args:
             hostIp ([string]): [description]
@@ -81,7 +68,7 @@ class dbConnection:
         creds['database'] = database
         with open('cred.cfg', 'w') as configfile:
             config.write(configfile)
-        
+        self.credentials = self.__loadConnectionConfig()
     
     def writeMedia(self, content, type):
         """
@@ -95,7 +82,8 @@ class dbConnection:
         
     def writeAccount(self, email, platform, username, password):
         """
-        Writes a new account record in the accounts table
+        Writes a new account record in the accounts table.
+        NOTE: this function will not check the format of the platform input, ensure data integrity please.
 
         Args:
             email ([string]): [email of the account]
@@ -103,24 +91,41 @@ class dbConnection:
             username ([string]): [username of the account]
             password ([string]): [password of the account]
         """
-        print("written")
+        
+        #Open connections
+        self.__makeConnection()
+        
+        #Write querry
+        table = 'accounts'
+        
+        #querry = f'INSERT INTO {table} (email, platform, username, password) VALUES (\'{email}\', \'{platform}\', \'{username}\', \'{password}\');'
+        querry = 'INSERT INTO accounts (email, platform, username, password) VALUES (\'dv@mediagmail.com\', \'yt_shorts\', \'deepfrii\', \'WHA\');'
+        #querry.format(table, email, platform, username, password)
+        
+        print('writing querry: '+ querry)
+        self.cursor.execute(querry)
+        print('IT WORKS')
+        
+        #Close connection
+        self.__closeConnection()
     
     ### --private methods-- ###
     
-    def makeConnection(self):
+    def __makeConnection(self):
         """
-        private method to init db connection
+        private method to init db cursor and connection
         """
         #Make connection with credentials
         cred = self.credentials
         self.connection = mariadb.connect(host=cred.get('ip'), port=int(cred.get('port')), user=cred.get('user'), password=cred.get('password'), database=cred.get('database'))
-        print(self.connection)
-        
-    def closeConnection(self):
+        self.cursor = self.connection.cursor()
+ 
+    def __closeConnection(self):
         """
-        private method to close db connection
+        private method to close cursor and db connection
         """
         #Close the connection
+        self.cursor.close()
         self.connection.close()
         print("connection closed")
         
@@ -145,20 +150,18 @@ class dbConnection:
         config = configparser.ConfigParser()
         
         #Attempt file read
-        try:
-            config.read('cred.cfg')
-        except:
-            raise Exception("No config file found")
+        print(config.read('cred.cfg'))
         
         #Parse and then output
-        creds = config['CREDENTIALS']
         
+        varss = config.items('CREDENTIALS', 'ip')
+                
         outputDict = {
-            "ip":creds['ip'],
-            "port":creds['port'],
-            "user":creds['user'],
-            "password":creds['password'],
-            "database":creds['database']   
+            "ip":config['CREDENTIALS']['ip'],
+            "port":config['CREDENTIALS']['port'],
+            "user":config['CREDENTIALS']['user'],
+            "password":config['CREDENTIALS']['password'],
+            "database":config['CREDENTIALS']['database']   
         }
         
         return outputDict

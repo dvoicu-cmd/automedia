@@ -21,11 +21,24 @@ cur.close()
 conn.close() """
 from db_connection import dbConnection
 
+# constants
+# platforms:
+TIKTOK = "tiktok"
+YOUTUBE_SHORT = "yt_shorts"
+YOUTUBE_VIDEO = "yt_videos"
+REELS = "instagram_reels"
+    
+# media types:
+VIDEO = "video"
+AUDIO = "audio"
+TEXT = "text"
+IMAGE = "image"
+
+
 def main():
     print("he is him")
     dbObj = dbConnection()
-    dbObj.makeConnection()
-    dbObj.closeConnection()
+    dbObj.writeAccount('danny@thing.com', YOUTUBE_SHORT, 'jonnyTalks', 'ISHIT')
     
 
 main()
