@@ -11,8 +11,8 @@ import os
 class dbConnection:
     
     # defines the mariadb connection and cursor.
-    connection = None
-    cursor = None
+    conn = None
+    curr = None
     
     # dictionary that contains the credentials to log into the database.
     credentials = None
@@ -96,14 +96,12 @@ class dbConnection:
         self.__makeConnection()
         
         #Write querry
+        table = 'accounts'
+        querry = f'INSERT INTO {table} (email, platform, username, password) VALUES (\'{email}\', \'{platform}\', \'{username}\', \'{password}\');'
+        querry.format(table, email, platform, username, password)
         
-        #querry = f'INSERT INTO {table} (email, platform, username, password) VALUES (\'{email}\', \'{platform}\', \'{username}\', \'{password}\');'
-        querry = 'INSERT INTO accounts (email, platform, username, password) VALUES (\'dv@mediagmail.com\', \'yt_shorts\', \'deepfrii\', \'WHA\');'
-        #querry.format(table, email, platform, username, password)
-        
-        print('writing querry: '+ querry)
-        self.cursor.execute(querry)
-        print('IT WORKS')
+        #Execute the querry
+        self.curr.execute(querry)
         
         #Close connection
         self.__closeConnection()
@@ -116,16 +114,17 @@ class dbConnection:
         """
         #Make connection with credentials
         cred = self.credentials
-        self.connection = mariadb.connect(host=cred.get('ip'), port=int(cred.get('port')), user=cred.get('user'), password=cred.get('password'), database=cred.get('database'))
-        self.cursor = self.connection.cursor()
+        self.conn = mariadb.connect(host=cred.get('ip'), port=int(cred.get('port')), user=cred.get('user'), password=cred.get('password'), database=cred.get('database'))
+        self.conn.autocommit = True
+        self.curr = self.conn.cursor()
  
     def __closeConnection(self):
         """
-        private method to close cursor and db connection
+        private method to close db connection
         """
         #Close the connection
-        self.cursor.close()
-        self.connection.close()
+        self.curr.close()
+        self.conn.close()
         
     def __saveToNFS(self, url, account_id):
         """
@@ -147,11 +146,8 @@ class dbConnection:
         #Load credentials here
         config = configparser.ConfigParser()
         
-        #Load the normalized file path
-        config_path = os.path.join(os.getcwd(), 'scripts/db/cred.cfg')
-        
         #Attempt file read
-        file = config.read(config_path)
+        file = config.read('cred.cfg')
         
         if not file:
             raise Exception('Failed to read config file')

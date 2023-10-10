@@ -36,8 +36,8 @@ IMAGE = "image"
 
 
 def main():
-    print("he is him")
     dbObj = dbConnection()
+    print(dbObj.credentials)
     dbObj.writeAccount('danny@thing.com', YOUTUBE_SHORT, 'jonnyTalks', 'ISHIT')
     
 
