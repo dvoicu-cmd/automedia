@@ -8,34 +8,34 @@ import mariadb
 import configparser
 import os
 
+
 class dbConnection:
-    
     # defines the mariadb connection and cursor.
     conn = None
     curr = None
-    
+
     # dictionary that contains the credentials to log into the database.
     credentials = None
-    
+
     # defines the selected account id to reference from db.
     account = None
-    
+
     ### --Constructor-- ###
-    
+
     def __init__(self):
         """
         Constructor method
         """
-        #first load the db credentials
+        # first load the db credentials
         try:
-            self.credentials = self.__loadConnectionConfig()
+            self.credentials = self.__load_connection_config()
         except:
-            print("no cred.cfg file found. Call writeConnectionConfig() to create one")
-            print("credentials set to None")
-        
+            print("WARNING: no cred.cfg file found in db directory.")
+            print("Call writeConnectionConfig() to create one")
+
     ### --Read methods-- ###
-    
-    def findAccountId(self, email, username):
+
+    def find_account_id(self, email, username):
         """
         finds the account id given an email and username
 
@@ -44,12 +44,12 @@ class dbConnection:
             username ([type]): [description]
         """
         print("Pulls the account id")
-        
+
     ### --Write methods-- ###
-    
-    def writeConnectionConfig(self, hostIp, port, user, password, database):
+
+    def write_connection_config(self, hostIp, port, user, password, database):
         """
-        Writes a cred.cfg file that configures how to connect to the database and applies that connection to current object.
+        Writes a cred.cfg file that configures how to connect to the database and applies that connection to current connection obj.
 
         Args:
             hostIp ([string]): [description]
@@ -68,9 +68,9 @@ class dbConnection:
         creds['database'] = database
         with open('cred.cfg', 'w') as configfile:
             config.write(configfile)
-        self.credentials = self.__loadConnectionConfig()
-    
-    def writeMedia(self, content, type):
+        self.credentials = self.__load_connection_config()
+
+    def write_media(self, content, type):
         """
         Writes the media content into db and nfs on storage server
 
@@ -79,8 +79,8 @@ class dbConnection:
             type ([type]): [media type of the account in form:'video','audio','text','image']
         """
         print("writes the presented data to database sever")
-        
-    def writeAccount(self, email, platform, username, password):
+
+    def write_account(self, email, platform, username, password):
         """
         Writes a new account record in the accounts table.
         NOTE: this function will not check the format of the platform input, ensure data integrity please.
@@ -91,44 +91,44 @@ class dbConnection:
             username ([string]): [username of the account]
             password ([string]): [password of the account]
         """
-        
-        #Open connections
-        self.__makeConnection()
-        
-        #Write querry
+        # Open connections
+        self.__make_connection()
+
+        # Write querry
         table = 'accounts'
         querry = f'INSERT INTO {table} (email, platform, username, password) VALUES (\'{email}\', \'{platform}\', \'{username}\', \'{password}\');'
         querry.format(table, email, platform, username, password)
-        
-        #Execute the querry
+
+        # Execute the querry
         self.curr.execute(querry)
-        
-        #Close connection
-        self.__closeConnection()
-    
+
+        # Close connection
+        self.__close_connection()
+
     ### --private methods-- ###
-    
-    def __makeConnection(self):
+
+    def __make_connection(self):
         """
         private method to init db cursor and connection
         """
-        #Make connection with credentials
+        # Make connection with credentials, then set up autocommit and db cursor
         cred = self.credentials
-        self.conn = mariadb.connect(host=cred.get('ip'), port=int(cred.get('port')), user=cred.get('user'), password=cred.get('password'), database=cred.get('database'))
+        self.conn = mariadb.connect(host=cred.get('ip'), port=int(cred.get('port')), user=cred.get('user'),
+                                    password=cred.get('password'), database=cred.get('database'))
         self.conn.autocommit = True
         self.curr = self.conn.cursor()
- 
-    def __closeConnection(self):
+
+    def __close_connection(self):
         """
         private method to close db connection
         """
-        #Close the connection
+        # Close the connection
         self.curr.close()
         self.conn.close()
-        
-    def __saveToNFS(self, url, account_id):
+
+    def __save_to_nfs(self, url):
         """
-        downloads and writes the media content to the nfs server
+        downloads and writes the media content to the nfs component of the server.
 
         Args:
             url ([string]): [the url for the content to download]
@@ -136,30 +136,29 @@ class dbConnection:
         """
         # First 
         print("writes to network file system")
-        
-    def __loadConnectionConfig(self):
+
+    def __load_connection_config(self):
         """
         Reads the cred.cfg in the current directory to authentication to database
         Returns:
             (dict): [values for database authentication]
         """
-        #Load credentials here
+        # Load credentials here
         config = configparser.ConfigParser()
-        
-        #Attempt file read
+
+        # Attempt file read
         file = config.read('cred.cfg')
-        
+
         if not file:
             raise Exception('Failed to read config file')
-        
-        #Parse and then output
-        outputDict = {
-            "ip":config['CREDENTIALS']['ip'],
-            "port":config['CREDENTIALS']['port'],
-            "user":config['CREDENTIALS']['user'],
-            "password":config['CREDENTIALS']['password'],
-            "database":config['CREDENTIALS']['database']   
+
+        # Parse and then output
+        output_dict = {
+            "ip": config['CREDENTIALS']['ip'],
+            "port": config['CREDENTIALS']['port'],
+            "user": config['CREDENTIALS']['user'],
+            "password": config['CREDENTIALS']['password'],
+            "database": config['CREDENTIALS']['database']
         }
-        
-        return outputDict
-    
+
+        return output_dict
