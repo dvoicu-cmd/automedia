@@ -8,8 +8,10 @@ import mariadb
 import configparser
 import os
 
+from scripts.db.write_media_strategy.db_write_media import DbWriteMedia
 
-class dbConnection:
+
+class DbConnection:
     # defines the mariadb connection and cursor.
     conn = None
     curr = None
@@ -18,7 +20,7 @@ class dbConnection:
     credentials = None
 
     # defines the selected account id to reference from db.
-    account = None
+    account_id = None
 
     ### --Constructor-- ###
 
@@ -33,7 +35,7 @@ class dbConnection:
             print("WARNING: no cred.cfg file found in db directory.")
             print("Call writeConnectionConfig() to create one")
 
-    ### --Read methods-- ###
+    # --Read methods-- #
 
     def find_account_id(self, email, username):
         """
@@ -45,7 +47,7 @@ class dbConnection:
         """
         print("Pulls the account id")
 
-    ### --Write methods-- ###
+    # --Write methods-- #
 
     def write_connection_config(self, hostIp, port, user, password, database):
         """
@@ -70,21 +72,26 @@ class dbConnection:
             config.write(configfile)
         self.credentials = self.__load_connection_config()
 
-    def write_media(self, content, type):
+    def write_media(self, content, content_type):
         """
         Writes the media content into db and nfs on storage server
 
         Args:
             content ([type]): [the content to be written]
-            type ([type]): [media type of the account in form:'video','audio','text','image']
+            content_type ([type]): [media type of the account in form:'video','audio','text','image']
         """
-        print("writes the presented data to database sever")
+        self.__make_connection()
+
+        operation = DbWriteMedia()
+        # for now we will hard code the location (To be added to config file)
+        operation.execute(content, self.conn, self.curr, self.account_id, content_type, "/Users/dvoicu/Desktop/Local Editing Projects/bottomtextmedia/project-automatic/scripts/db/")
+
+        self.__close_connection()
 
     def write_account(self, email, platform, username, password):
         """
         Writes a new account record in the accounts table.
         NOTE: this function will not check the format of the platform input, ensure data integrity please.
-
         Args:
             email ([string]): [email of the account]
             platform ([string]): [platform of the account in form: 'tiktok','yt_shorts','instagram_reels','yt_videos']
@@ -93,19 +100,16 @@ class dbConnection:
         """
         # Open connections
         self.__make_connection()
-
-        # Write querry
+        # Write query
         table = 'accounts'
-        querry = f'INSERT INTO {table} (email, platform, username, password) VALUES (\'{email}\', \'{platform}\', \'{username}\', \'{password}\');'
-        querry.format(table, email, platform, username, password)
-
-        # Execute the querry
-        self.curr.execute(querry)
-
+        query = f'INSERT INTO {table} (email, platform, username, password) VALUES (\'{email}\', \'{platform}\', \'{username}\', \'{password}\');'
+        query.format(table, email, platform, username, password)
+        # Execute the query
+        self.curr.execute(query)
         # Close connection
         self.__close_connection()
 
-    ### --private methods-- ###
+    # --private methods-- #
 
     def __make_connection(self):
         """
@@ -113,8 +117,12 @@ class dbConnection:
         """
         # Make connection with credentials, then set up autocommit and db cursor
         cred = self.credentials
-        self.conn = mariadb.connect(host=cred.get('ip'), port=int(cred.get('port')), user=cred.get('user'),
-                                    password=cred.get('password'), database=cred.get('database'))
+        self.conn = mariadb.connect(host=cred.get('ip'),
+                                    port=int(cred.get('port')),
+                                    user=cred.get('user'),
+                                    password=cred.get('password'),
+                                    database=cred.get('database')
+                                    )
         self.conn.autocommit = True
         self.curr = self.conn.cursor()
 
@@ -126,18 +134,8 @@ class dbConnection:
         self.curr.close()
         self.conn.close()
 
-    def __save_to_nfs(self, url):
-        """
-        downloads and writes the media content to the nfs component of the server.
-
-        Args:
-            url ([string]): [the url for the content to download]
-            account_id ([int]): [account that the media content is assoicated with]
-        """
-        # First 
-        print("writes to network file system")
-
-    def __load_connection_config(self):
+    @staticmethod
+    def __load_connection_config():
         """
         Reads the cred.cfg in the current directory to authentication to database
         Returns:
