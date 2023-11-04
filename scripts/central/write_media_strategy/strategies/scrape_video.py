@@ -1,5 +1,3 @@
-
-
 class ScrapeVideo:
 
     def __init__(self):
