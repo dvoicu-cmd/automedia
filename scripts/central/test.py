@@ -19,7 +19,8 @@ print("Query Executed on remote")
 # Close the cursor and connection
 cur.close()
 conn.close() """
-from db_connection import dbConnection
+
+from db_connection import DbConnection
 
 # constants
 # platforms:
@@ -36,7 +37,7 @@ IMAGE = "image"
 
 
 def main():
-    dbObj = dbConnection()
+    dbObj = DbConnection()
     print(dbObj.credentials)
     dbObj.write_account('danny@thing.com', YOUTUBE_SHORT, 'jonnyTalks', 'ISHIT')
     
