@@ -123,15 +123,18 @@ class DbNasConnection:
         """
         Reads and returns the record of a random scraped video of a specific account and type
         Args:
-            account_id (int): The specific account id
-            scrape_type (str): The type of content the scraped media is (audio, video, text, image)
+            account_id (int): The specific account id.
+            scrape_type (str): The type of content the scraped media is (audio, video, text, image).
         """
         return
 
     # TODO implement
     def read_specific_scrape(self, account_id, scrape_id):
         """
-
+        Reads and returns the record of a specific scraped video of a specific account
+        Args:
+            account_id (int): The specific account id.
+            scrape_id (int): The specific
         """
         return
 
