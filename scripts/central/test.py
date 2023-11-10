@@ -20,7 +20,7 @@ print("Query Executed on remote")
 cur.close()
 conn.close() """
 
-from db_connection import DbConnection
+from db_nas_connection import DbNasConnection
 
 # constants
 # platforms:

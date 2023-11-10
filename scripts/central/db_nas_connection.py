@@ -37,7 +37,7 @@ class DbNasConnection:
     # ------------ Create Methods ------------ #
 
     # TODO implement
-    def create_scrapes(self, account_id, content, content_type):
+    def create_media_files(self, account_id, content, content_type):
         """
         Writes the media content into db and nfs on the storage server
 
@@ -49,16 +49,6 @@ class DbNasConnection:
         self.__make_connection()
         print("sql code to write media")
         self.__close_connection()
-        return
-
-    # TODO implement
-    def create_produced_content(self, account_id, title):
-        """
-        Writes the produced content from the creator into db and nfs on the storage server
-        Args:
-            account_id (int): The account id for the created content
-            title
-        """
         return
 
     def create_account(self, email, username, platform, password):
@@ -82,15 +72,69 @@ class DbNasConnection:
         # Close connection
         self.__close_connection()
 
+    # TODO implement
+    def create_media_pool(self):
+        """
+        Creates a media pool record
+        """
+        return
+
+    def create_media_file(self):
+        """
+        Creates a media file
+        """
+        return
+
+    # TODO implement
+    def create_content(self, account_id, title):
+        """
+        Writes the produced content from the creator into db and nfs on the storage server
+        Args:
+            account_id (int): The account id for the created content
+            title (str): The title of the content
+        """
+        return
+
+    # --- Create Junction Record Methods --- #
+
+    # TODO uh combine these all into one method. Use a switch case.
+
+    def create_junction_account__media_pool(self, account_id, media_pool_id):
+        """
+        Creates a record in the junction table account__media_pool,
+        ie: makes the links to accounts and what media pools they use.
+        """
+        return
+
+    def create_junction_media_pool__media_files(self, media_pool_id, media_file_id):
+        """
+        Creates a record in the junction table media_pool__media_files,
+        ie: makes the link to a media pool and specific media files associated with the pool.
+        """
+        return
+
+    def create_junction_accounts__media_files(self, account_id, media_files_id):
+        """
+        Creates a record in the junction table accounts__media_files,
+        ie: makes a record on what media files have been used by a specific account
+        """
+        return
+
+    def create_junction_accounts__content_files(self):
+        """
+        ie: makes a record on what content file has been uploaded for a specific account.
+        """
+        return
+
+
     # ------------ Read Methods ------------ #
 
     # TODO implement
-    def read_account_id(self, email, username):
+    def read_account(self, account_id):
         """
-        Finds the account id given an email and username.
+        Returns the record for an account given the id
         Args:
-            email (str): The string email address for the account
-            username (str): The string username of the account
+            account_id (int) : the account id
         """
         self.__make_connection()
         print("sql code to find account")
@@ -101,72 +145,89 @@ class DbNasConnection:
     # TODO implement
     def read_rand_video(self, account_id):
         """
-        Reads and returns the record of a random produced video of a specific account.
+        Reads and returns the record of random content for a specific account.
+        Args:
+            account_id (int): The account id
         Return:
-            The record of the produced video
+            The record of the produced video.
         """
         return
 
     # TODO implement
-    def read_specific_video(self, account_id, video_id):
+    def read_specific_content(self, account_id, content_id):
         """
-        Reads and returns the record of a specific produced video for a specific account.
+        Reads and returns the record of the specific content for a specific account.
+        Args:
+            account_id (int): The account id as listed in the db.
+            content_id (int): The content id as listed in the db.
         Return:
-            The record of the produced video
+            The record of the produced video.
         """
         return
 
-    # --- Scraped Media from Scraper --- #
+    # --- Scraped Media pools from Scraper --- #
 
     # TODO implement
-    def read_rand_scrape(self, account_id, scrape_type):
+    def read_rand_media_pool(self, account_id, media_pool_id):
         """
         Reads and returns the record of a random scraped video of a specific account and type
         Args:
             account_id (int): The specific account id.
-            scrape_type (str): The type of content the scraped media is (audio, video, text, image).
+            media_pool_id (int): The specific media pool
         """
         return
 
     # TODO implement
-    def read_specific_scrape(self, account_id, scrape_id):
+    def read_specific_scrape(self, account_id, media_pool_id, media_file_id):
         """
         Reads and returns the record of a specific scraped video of a specific account
         Args:
             account_id (int): The specific account id.
-            scrape_id (int): The specific
+            media_pool_id (int): The specific media pool id to take from
+            media_file_id (int): The specific record of media
         """
         return
 
     # ------------ Update Methods ------------ #
 
-    def update_account_targets(self, account_id, new_targets):
+    # TODO implement
+    def update_add_account_pool(self, account_id, media_pool_id):
         """
-        Updates the scrape targets of a specific account.
+        Adds a scrape pool from an account
 
         Args:
             account_id (int): The specific account id.
-            new_targets (str): A string list of targets.
+            media_pool_id (int): A string list of targets.
+        """
+        return
+
+    def update_remove_account_pool(self, account_id, media_pool_id):
+        """
+        Removes a scrape pool from an account
+
+        Args:
+            account_id (int): The specific account id.
+            media_pool_id (int): A string list of targets.
         """
         return
 
     # TODO implement
-    def update_produced_to_archived(self, account_id, media_id):
+    def update_content_to_archived(self, account_id, content_id):
         """
-        Sets a specific produced video record's archive property to 1
+        Sets a specific content record's archive property to 1
         Arg:
-            account_id (int): The account id for the content
-            media_id (int): The media id for the content
+            account_id (int): The account id the content
+            media_id (int): The content id for the record
         """
         return
 
     # TODO implement
-    def update_scrape_to_archived(self, account_id, scrape_id):
+    def update_media_to_archived(self, account_id, media_id):
         """
-        Sets a specific scrape item record's archive property to 1
+        Sets a specific scrape media record's archive property to 1
         Arg:
             account_id (int): The account id for the content
-            scrape_id (int): The scrape id for the content
+            scrape_id (int): The media id for the file
         """
         return
 
@@ -180,13 +241,6 @@ class DbNasConnection:
 
         Args:
             account_id (int): The account id.
-        """
-        return
-
-    # TODO implement
-    def delete_media(self, account_id, media_id):
-        """
-        Deletes the specific
         """
         return
 
