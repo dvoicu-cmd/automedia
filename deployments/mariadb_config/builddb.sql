@@ -10,24 +10,28 @@ CREATE TABLE j_accounts__media_files (id INT AUTO_INCREMENT PRIMARY KEY);
 
 -- Alter tables and add the cols --
 ALTER TABLE accounts
+ADD COLUMN username VARCHAR(255),
 ADD COLUMN email BLOB(255),
 ADD COLUMN password BLOB(255),
-ADD COLUMN platform VARCHAR(255);
+ADD COLUMN platform VARCHAR(255),
+ADD COLUMN description TEXT;
 
 ALTER TABLE media_pools
-ADD COLUMN media_pool_name VARCHAR(255);
+ADD COLUMN media_pool_name VARCHAR(255),
+ADD COLUMN description TEXT;
 
 ALTER TABLE media_files
 ADD COLUMN file_location VARCHAR(255),
-ADD COLUMN to_archive TINYINT(1),
-ADD COLUMN name VARCHAR(255),
-ADD COLUMN extension VARCHAR(255);
+ADD COLUMN media_type VARCHAR(255),
+ADD COLUMN title VARCHAR(255),
+ADD COLUMN description TEXT,
+ADD COLUMN to_archive TINYINT(1);
 
 ALTER TABLE content_files
 ADD COLUMN file_location VARCHAR(255),
-ADD COLUMN to_archive TINYINT(1),
 ADD COLUMN title VARCHAR(255),
-ADD COLUMN description TEXT;
+ADD COLUMN description TEXT,
+ADD COLUMN to_archive TINYINT(1);
 
 ALTER TABLE j_accounts__content_files
 ADD COLUMN account_id INT,

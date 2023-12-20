@@ -206,28 +206,72 @@ class DbNasConnection:
     # ------------ Read Methods ------------ #
 
     # TODO implement
-    def read_account(self, account_id):
+    def read_account_by_id(self, account_id):
         """
         Returns the record for an account given the id
         Args:
             account_id (int) : the account id
+        Returns:
+            A tuple containing the record for the account
         """
         self.__make_connection()
-        print("sql code to find account")
+
+        # Write the query
+        table = "accounts"
+        query = f"SELECT * FROM {table} WHERE account_id=1;"
+
+        # Get the record
+        self.curr.execute(query)
+        record = self.curr.fetchone()
+
         self.__close_connection()
-        return
+        return record
+
+    def read_account_by_username(self, username):
+        """
+        Returns the record(s) for an account (or accounts) given a username
+        Args:
+            username (str): the username for the account
+        Returns:
+            A tuple or array of tuples containing the record(s) for an account (or accounts).
+        """
+        self.__make_connection()
+
+        # Write query
+        table = "accounts"
+        query = f"SELECT * FROM {table} WHERE username=\'{username}\';"
+
+        # Get the record
+        self.curr.execute(query)
+        record = self.curr.fetchall()  # Or records
+
+        self.__close_connection()
+        return record
 
     # --- Produced Videos from Creator --- #
     # TODO implement
-    def read_rand_video(self, account_id):
+    def read_rand_content_file(self, account_id):
         """
-        Reads and returns the record of random content for a specific account.
+        Reads and returns the record of a random content file for a specific account.
         Args:
             account_id (int): The account id
         Return:
             The record of the produced video.
         """
-        return
+        self.__make_connection()
+
+        query = (f"SELECT * FROM content_files "
+                 f"JOIN j_accounts__content_files jt ON content_files.content_id = jt.content_id "
+                 f"WHERE jt.account_id = {account_id} AND content_files.to_archive = 0 "
+                 f"ORDER BY RAND() "
+                 f"LIMIT 1; ")
+
+        self.curr.execute(query)
+        record = self.curr.fetchone()
+
+        self.__close_connection()
+
+        return record
 
     # TODO implement
     def read_specific_content(self, account_id, content_id):
