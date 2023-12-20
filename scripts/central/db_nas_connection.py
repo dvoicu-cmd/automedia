@@ -124,32 +124,83 @@ class DbNasConnection:
 
         return
 
-    # TODO implement
-    def create_content(self, account_id, title):
+    def create_content(self, file_location, title, description):
         """
         Writes the produced content from the creator into db and nfs on the storage server
         Args:
-            account_id (int): The account id for the created content
+            file_location (str): the location of the content file on the nas
             title (str): The title of the content
+            description (str): The description for the content
         """
+        # Make connection to database
+        self.__make_connection()
+
+        # Write query
+        table = 'content_files'
+
+        query = (f'INSERT INTO {table} (file_location, title, description, to_archive) '
+                 f'VALUES (\'{file_location}\', \'{title}\', \'{description}\', 0);')
+
+        query.format(table, file_location, title, description)
+
+        # Execute the query
+        self.curr.execute(query)
+
+        # Close the connection to database
+        self.__close_connection()
+
         return
 
     # --- Create Junction Record Methods --- #
-
-    # TODO implement
     def create_junction_entry(self, junction_table, id1, id2):
         """
         Creates a record in the specified junction table.
+        Junction tables in this database are formatted as follows: j_<id1 table>__<id2 table>
         As of writing, the known tables in the database are:
-        - account__media_pool: Makes the links to accounts and what media pools they use.
-        - accounts__media_files: Makes a record on what media files have been used by a specific account
-        - media_pool__media_files: Makes the link to a media pool and specific media files associated with the pool.
-        - accounts__content_files: Makes a record on what content file has been uploaded for a specific account.
+        - j_account__media_pool: Makes the links to accounts and what media pools they use.
+        - j_accounts__media_files: Makes a record on what media files have been used by a specific account
+        - j_media_pool__media_files: Makes the link to a media pool and specific media files associated with the pool.
+        - j_accounts__content_files: Makes a record on what content file has been uploaded for a specific account.
         Args:
-            junction_table (str) : The string that identifies the junction table
+            junction_table (str) : The string that identifies the junction table to insert entry into
             id1 (int): id of the first row in the junction table
             id2 (int): id of the second row in the junction table
         """
+        # Make connection to database
+        self.__make_connection()
+
+        # Write query
+
+        # First check if the inputted table exists
+        query = 'SHOW TABLES;'
+        self.curr.execute(query)
+        list_of_tables = self.curr.fetchall()
+        list_of_table_names = [table[0] for table in list_of_tables if table[0].startswith('j_')]  # wtf is this gpt?
+
+        # Check if you inputted a valid table
+        if junction_table not in list_of_table_names:
+            print("Existing junction tables:")
+            print(list_of_table_names)
+            raise ValueError("Inputted junction tables does not exists in db")
+
+        # The input is valid, now get the two specific column names we need to insert a value.
+        query = f"DESC {junction_table}"
+        self.curr.execute(query)
+        columns = self.curr.fetchall()
+        column_names = [column[0] for column in columns]
+
+        # With the column names, now write the query with the specified columns.
+        query = (f'INSERT INTO {junction_table} ({column_names[1]}, {column_names[2]})'
+                 f'VALUES (\'{id1}\', \'{id2}\');')
+
+        query.format(junction_table, id1, id2)
+
+        # Execute the query
+        self.curr.execute(query)
+
+        # Close the connection to database
+        self.__close_connection()
+
         return
 
     # ------------ Read Methods ------------ #
