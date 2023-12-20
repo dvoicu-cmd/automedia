@@ -32,7 +32,7 @@ class DbNasConnection:
     # ------------------------ CRUD MODEL ------------------------ #
 
     # ------------ Create Methods ------------ #
-    def create_account(self, email, username, platform, password):
+    def create_account(self, username, email, password, platform, description):
         """
         Writes a new account record in the accounts table.
         NOTE: This function will not check the format of the platform input, ensure data integrity please.
@@ -41,38 +41,87 @@ class DbNasConnection:
             username (str): Username of the account
             platform (str): Platform of the account in form: 'tiktok','yt_shorts','instagram_reels','yt_videos'
             password (str): Password of the account
+            description (str): A long description of the account and what kind of content it posts
         """
         # Open connections
         self.__make_connection()
         # Write query
         table = 'accounts'
-        query = f'INSERT INTO {table} (email, platform, username, password) VALUES (\'{email}\', \'{platform}\', \'{username}\', \'{password}\');'
-        query.format(table, email, platform, username, password)
+
+        acceptable_platforms = ['tiktok', 'yt_shorts', 'instagram_reels', 'yt_videos']
+        if platform not in acceptable_platforms:
+            raise ValueError("Invalid platform. To ensure data integrity use one of the following:"
+                             " 'tiktok', 'yt_shorts', 'instagram_reels', 'yt_videos'")
+
+
+        query = (f'INSERT INTO {table} (username, email, password, platform, description) '
+                 f'VALUES (\'{username}\', \'{email}\', \'{password}\', \'{platform}\', \'{description}\');')
+
+        query.format(table, email, platform, username, password, description)
         # Execute the query
         self.curr.execute(query)
         # Close connection
         self.__close_connection()
 
-    # TODO implement
-    def create_media_file(self, account_id, content, content_type):
+    def create_media_file(self, file_location, media_type, title, description):
         """
         Writes the media content into db and nfs on the storage server
 
         Args:
-            account_id (int): The account id for the scraped items
-            content (str): The content to be written
-            content_type (str): Media type of the account in form:'video','audio','text','image'
+            file_location (str): The location in the files system where the is content to be written.
+            media_type (str): The type of media.
+                Expected types include: 'text', 'audio', 'image', 'video'.
+                text files: '.txt', 'rtf'
+                audio files: '.mp3', '.wav'
+                image files: '.png', '.jpeg'
+                video files: '.mp4'
+            title (str): title of the media file
+            description (str): description of media file
         """
         self.__make_connection()
-        print("sql code to write media")
+
+        # Write query
+        table = 'media_files'
+
+        acceptable_media_types = ['text', 'audio', 'image', 'video']
+        if media_type not in acceptable_media_types:
+            raise ValueError("Invalid media_type. To ensure data integrity use one of the following:"
+                             " 'text', 'audio', 'image', 'video'")
+
+        # For now, maybe just hard code the location of the media in mnt on the nas.
+        query = (f'INSERT INTO {table} (file_location, media_type, title, description, to_archive) '
+                 f'VALUES (\'{file_location}\', \'{media_type}\', \'{title}\', \'{description}\', 0);')
+
+        query.format(table, file_location, media_type, title, description)
+        # Execute the query
+        self.curr.execute(query)
+
         self.__close_connection()
         return
 
-    # TODO implement
-    def create_media_pool(self):
+    def create_media_pool(self, media_pool_name, description):
         """
         Creates a media pool record
+        media_pool_name (str): The name of the media pool
+        description (str): A simple description on what is contained in the pool.
         """
+        # Make connection to database
+        self.__make_connection()
+
+        # Write query
+        table = 'media_pools'
+
+        query = (f'INSERT INTO {table} (media_pool_name, description) '
+                 f'VALUES (\'{media_pool_name}\', \'{description}\');')
+
+        query.format(table, media_pool_name, description)
+
+        # Execute the query
+        self.curr.execute(query)
+
+        # Close the connection to database
+        self.__close_connection()
+
         return
 
     # TODO implement
