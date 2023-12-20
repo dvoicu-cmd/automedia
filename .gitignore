@@ -3,4 +3,4 @@
 **/cred.cfg
 **/__pycache__
 **/.idea
-scripts/creator/openAI/.env
+scripts/scraper/openAI/.env

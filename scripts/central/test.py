@@ -1,26 +1,5 @@
-""" import mariadb
-
-# Create a connection to the remote MariaDB database
-conn = mariadb.connect(host='10.10.2.3', port=3306, user='py_interface', password='sshDB#532', database='')
-
-# Create a cursor object
-cur = conn.cursor()
-
-print("Writing query")
-
-# Write the query
-query = "INSERT INTO emails (email, password) VALUES (danATsampletext.com, passwd)"
-
-# Execute the query
-cur.execute(query)
-
-print("Query Executed on remote")
-
-# Close the cursor and connection
-cur.close()
-conn.close() """
-
 from db_nas_connection import DbNasConnection
+import unittest
 
 # constants
 # platforms:
@@ -35,11 +14,29 @@ AUDIO = "audio"
 TEXT = "text"
 IMAGE = "image"
 
+# db connection
+db_nas_conn = DbNasConnection()
 
-def main():
-    dbObj = DbConnection()
-    print(dbObj.credentials)
-    dbObj.write_account('danny@thing.com', YOUTUBE_SHORT, 'jonnyTalks', 'ISHIT')
-    
 
-main()
+# TEST CASES #
+class DbNasConnectionTESTS(unittest.TestCase):
+    # assertEqual()
+    # assertTrue()
+    # assertFalse()
+    # assertRaises()
+
+    @staticmethod
+    def test_create_account():
+        """
+        tests if a record for a media file is created
+        """
+        email = "danny@com.com"
+        username = "deepfri"
+        platform = YOUTUBE_SHORT
+        password = "HeheheHa"
+        db_nas_conn.create_account(email, username, platform, password)
+
+# Some of the tests gotta check the database yourself to see if the test ran.
+# Better to run tests individually
+if __name__ == '__main__':
+    unittest.main()

@@ -21,4 +21,4 @@ soup = BeautifulSoup(html, "html.parser")
 # Quit driver
 driver.quit()
 
-soup.get()
+print(soup.getText())

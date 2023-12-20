@@ -16,9 +16,6 @@ class DbNasConnection:
     # dictionary that contains the credentials to log into the database.
     credentials = None
 
-    # defines the selected account id to reference from db.
-    account_id = None
-
     # ------------ Constructor ------------ #
 
     def __init__(self):
@@ -35,22 +32,6 @@ class DbNasConnection:
     # ------------------------ CRUD MODEL ------------------------ #
 
     # ------------ Create Methods ------------ #
-
-    # TODO implement
-    def create_media_files(self, account_id, content, content_type):
-        """
-        Writes the media content into db and nfs on the storage server
-
-        Args:
-            account_id (int): The account id for the scraped items
-            content (str): The content to be written
-            content_type (str): Media type of the account in form:'video','audio','text','image'
-        """
-        self.__make_connection()
-        print("sql code to write media")
-        self.__close_connection()
-        return
-
     def create_account(self, email, username, platform, password):
         """
         Writes a new account record in the accounts table.
@@ -73,15 +54,24 @@ class DbNasConnection:
         self.__close_connection()
 
     # TODO implement
+    def create_media_file(self, account_id, content, content_type):
+        """
+        Writes the media content into db and nfs on the storage server
+
+        Args:
+            account_id (int): The account id for the scraped items
+            content (str): The content to be written
+            content_type (str): Media type of the account in form:'video','audio','text','image'
+        """
+        self.__make_connection()
+        print("sql code to write media")
+        self.__close_connection()
+        return
+
+    # TODO implement
     def create_media_pool(self):
         """
         Creates a media pool record
-        """
-        return
-
-    def create_media_file(self):
-        """
-        Creates a media file
         """
         return
 
@@ -97,35 +87,21 @@ class DbNasConnection:
 
     # --- Create Junction Record Methods --- #
 
-    # TODO uh combine these all into one method. Use a switch case.
-
-    def create_junction_account__media_pool(self, account_id, media_pool_id):
+    # TODO implement
+    def create_junction_entry(self, junction_table, id1, id2):
         """
-        Creates a record in the junction table account__media_pool,
-        ie: makes the links to accounts and what media pools they use.
-        """
-        return
-
-    def create_junction_media_pool__media_files(self, media_pool_id, media_file_id):
-        """
-        Creates a record in the junction table media_pool__media_files,
-        ie: makes the link to a media pool and specific media files associated with the pool.
-        """
-        return
-
-    def create_junction_accounts__media_files(self, account_id, media_files_id):
-        """
-        Creates a record in the junction table accounts__media_files,
-        ie: makes a record on what media files have been used by a specific account
+        Creates a record in the specified junction table.
+        As of writing, the known tables in the database are:
+        - account__media_pool: Makes the links to accounts and what media pools they use.
+        - accounts__media_files: Makes a record on what media files have been used by a specific account
+        - media_pool__media_files: Makes the link to a media pool and specific media files associated with the pool.
+        - accounts__content_files: Makes a record on what content file has been uploaded for a specific account.
+        Args:
+            junction_table (str) : The string that identifies the junction table
+            id1 (int): id of the first row in the junction table
+            id2 (int): id of the second row in the junction table
         """
         return
-
-    def create_junction_accounts__content_files(self):
-        """
-        ie: makes a record on what content file has been uploaded for a specific account.
-        """
-        return
-
 
     # ------------ Read Methods ------------ #
 
