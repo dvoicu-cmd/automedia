@@ -7,8 +7,15 @@ def main():
     #update_to_archived_on_accounts()
     #update_to_archived_on_invalid_table()
     #update_to_archived_on_invalid_id()
-    update_to_unarchive()
+    #update_to_unarchive()
+    #config_parser_test()
+
     return
+# --------- NAS Integration ---------
+def config_parser_test():
+    db = DbNasConnection()
+    print(db.make_connection_config("10.10.2.3","3306","test_user","password","test","/Users/dvoicu/mnt"))
+
 
 # --------- UPDATE ---------
 def update_to_unarchive():

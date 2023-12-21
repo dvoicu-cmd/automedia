@@ -25,9 +25,9 @@ class DbNasConnection:
         # first load the db credentials
         try:
             self.credentials = self.__load_connection_config()
-        except:
+        except FileNotFoundError:
             print("WARNING: no cred.cfg file found in db directory.")
-            print("Call writeConnectionConfig() to create one")
+            print("Call make_connection_config() to create one")
 
     # ------------------------ CRUD MODEL ------------------------ #
 
@@ -426,7 +426,10 @@ class DbNasConnection:
     
     def update_to_unarchived(self, table_name, content_id):
         """
-        
+        Given a table, updates the to_archive column (if it exists) from 1 to 0.
+        Arg:
+            account_id (int): The account id the content
+            media_id (int): The content id for the record
         """
         self.__make_connection()
 
@@ -439,16 +442,6 @@ class DbNasConnection:
 
         self.__close_connection()
 
-        return
-
-    # TODO implement
-    def update_media_to_archived(self, account_id, media_id):
-        """
-        Sets a specific scrape media record's archive property to 1
-        Arg:
-            account_id (int): The account id for the content
-            scrape_id (int): The media id for the file
-        """
         return
 
     # ------------ Delete Methods ------------ #
@@ -465,8 +458,35 @@ class DbNasConnection:
         return
 
     # ------------ Auxiliary Methods ------------ #
+    @staticmethod
+    def __load_connection_config():
+        """
+        Reads the cred.cfg in the current directory to authentication to database
+        Returns:
+            A dictionary containing the values for database authentication
+        """
+        # Load credentials here
+        config = configparser.ConfigParser()
 
-    def make_connection_config(self, host_ip, port, user, password, database):
+        # Attempt file read
+        file = config.read('cred.cfg')
+
+        if not file:
+            raise FileNotFoundError('Failed to read config file')
+
+        # Parse and then output
+        output_dict = {
+            "ip": config['CREDENTIALS']['ip'],
+            "port": config['CREDENTIALS']['port'],
+            "user": config['CREDENTIALS']['user'],
+            "password": config['CREDENTIALS']['password'],
+            "database": config['CREDENTIALS']['database'],
+            "nas_root": config['CREDENTIALS']['nas_root']
+        }
+
+        return output_dict
+
+    def make_connection_config(self, host_ip, port, user, password, database, nas_root):
         """
         Writes a cred.cfg file that configures how to connect to the database
         and applies that connection to current connection obj.
@@ -477,6 +497,7 @@ class DbNasConnection:
             user (string): The username of the database authentication account.
             password (string): The password of the database authentication account.
             database (string): The name of the database being accessed.
+            nas_root (string): The root location of where the nas file system is mounted on this deployment
         """
         config = configparser.ConfigParser()
         config['CREDENTIALS'] = {}
@@ -486,6 +507,7 @@ class DbNasConnection:
         creds['user'] = user
         creds['password'] = password
         creds['database'] = database
+        creds['nas_root'] = nas_root
         with open('cred.cfg', 'w') as configfile:
             config.write(configfile)
         self.credentials = self.__load_connection_config()
@@ -567,30 +589,3 @@ class DbNasConnection:
         # Close the connection
         self.curr.close()
         self.conn.close()
-
-    @staticmethod
-    def __load_connection_config():
-        """
-        Reads the cred.cfg in the current directory to authentication to database
-        Returns:
-            A dictionary containing the values for database authentication
-        """
-        # Load credentials here
-        config = configparser.ConfigParser()
-
-        # Attempt file read
-        file = config.read('cred.cfg')
-
-        if not file:
-            raise Exception('Failed to read config file')
-
-        # Parse and then output
-        output_dict = {
-            "ip": config['CREDENTIALS']['ip'],
-            "port": config['CREDENTIALS']['port'],
-            "user": config['CREDENTIALS']['user'],
-            "password": config['CREDENTIALS']['password'],
-            "database": config['CREDENTIALS']['database']
-        }
-
-        return output_dict
