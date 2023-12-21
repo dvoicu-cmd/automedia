@@ -2,13 +2,13 @@ from db_nas_connection import DbNasConnection
 
 def main():
     #create_media()
+    create_media()
     #create_junktion_entry()
     #update_to_archived_on_media_files()
     #update_to_archived_on_accounts()
     #update_to_archived_on_invalid_table()
     #update_to_archived_on_invalid_id()
     #update_to_unarchive()
-    #config_parser_test()
 
     return
 # --------- NAS Integration ---------
@@ -88,12 +88,12 @@ def create_account():
     db.create_account("dvocCreates","dvoc@test.com", "Do you know the way?", "yt_shorts",
                       "THIS is a long description of what will be created here on this database of a thing")
 
-    db.create_account("","", "", "yt_shorts",
-                      "")
+    #db.create_account("","", "", "yt_shorts",
+    #                  "")
 
 def create_media():
     db = DbNasConnection()
-    db.create_media_file("/location","video","He who goes out there2","a small description of what to put in here")
+    db.create_media_file("/Users/dvoicu/mnt/Goofy Aughhh Test Files/aughhh.txt","text","He who goes out there2122","a small description of what to put in here", "OpenAI api calls")
 
 def create_media_pool():
     db = DbNasConnection()

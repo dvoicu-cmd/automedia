@@ -1,11 +1,58 @@
 """
 Python class used to interface with the sql and the network filesystem ports on the central storage server.
 (ie: The DB and NAS Server)
+
+The class handles two components of the storage server:
+
+The Database:
+On the server, there is a dbms system running with multiple tables. The tables are structured as followed:
+
+    --------------------
+    |     accounts     |    Details the social media account details
+    --------------------
+
+    --------------------
+    |  content_files   |    Details the produced content to be uploaded to social media
+    --------------------
+
+    --------------------
+    |   media_files    |    Details specific source files used to create content
+    --------------------
+
+    --------------------
+    |   media_pools    |    Details on encapsulating sets of media_files into designated groups (or pools).
+    --------------------
+
+And the tables will have many-to-many relationships in the form of junction tables. The junction tables are of the form:
+
+    --------------------------
+    |  j_<table1>__<table2>  |
+    --------------------------
+
+
+The Nas:
+On the server, there are two nfs directories being exported: active and archive
+The nfs exports are mounted on the machine this code is deployed to.
+This interface is designed to uphold the following file system structure:
+
+                         Root
+                       /      \ _ _ _ _ _
+                 Active                  Archives
+                 /      \                    |   \
+      Media Pools         Created Videos     x    yyyy-mm-dd
+    /    |   |            /           \            /   |  \  \
+  x    x   Pool Names    x           Accounts     x   x   x  Archived Content
+            /   |    \                  /   |  \
+           x    x     media file       x    x   content files
+
+
+
 """
 
 import mariadb
 import configparser
 import os
+import shutil
 
 
 class DbNasConnection:
@@ -42,7 +89,28 @@ class DbNasConnection:
             platform (str): Platform of the account in form: 'tiktok','yt_shorts','instagram_reels','yt_videos'
             password (str): Password of the account
             description (str): A long description of the account and what kind of content it posts
+        Precondition:
+            Assumes there is a file path /self.__nas_root/active
         """
+
+        # ______ NAS component ______
+
+        path = self.__nas_root()
+        path = path + "/active/created_videos"
+
+        # First check if the path exists, if not, just make the directory.
+        if not os.path.exists(path):
+            os.mkdir(path)
+
+        # Create the account directory
+        try:
+            os.mkdir(f"{path}/{username}")
+        except OSError or FileExistsError:
+            raise ValueError(f"File path:{path}/{username} exists or is invalid. Aborting write to database")
+
+
+        # ______ DB component ______
+
         # Open connections
         self.__make_connection()
         # Write query
@@ -53,7 +121,6 @@ class DbNasConnection:
             raise ValueError("Invalid platform. To ensure data integrity use one of the following:"
                              " 'tiktok', 'yt_shorts', 'instagram_reels', 'yt_videos'")
 
-
         query = (f'INSERT INTO {table} (username, email, password, platform, description) '
                  f'VALUES (\'{username}\', \'{email}\', \'{password}\', \'{platform}\', \'{description}\');')
 
@@ -63,12 +130,14 @@ class DbNasConnection:
         # Close connection
         self.__close_connection()
 
-    def create_media_file(self, file_location, media_type, title, description):
+        return
+
+    def create_media_file(self, content, media_type, title, description, media_pool_parent):
         """
         Writes the media content into db and nfs on the storage server
 
         Args:
-            file_location (str): The location in the files system where the is content to be written.
+            content (str): The location of the file to be uploaded to the nas
             media_type (str): The type of media.
                 Expected types include: 'text', 'audio', 'image', 'video'.
                 text files: '.txt', 'rtf'
@@ -77,7 +146,40 @@ class DbNasConnection:
                 video files: '.mp4'
             title (str): title of the media file
             description (str): description of media file
+            media_pool_parent (str): The media pool the
+        Post-condition:
+        1) Creates a record on the media_files table
+        2) Creates a record on the junction table for media pools and media files
+        3) Creates moves the content to the nas
+        4) if not already done, creates a directory for the specific media pool and/or creates a directory for all media pools
         """
+
+        # ______ NAS component ______
+
+        # Attempt to get the record of the media pool
+        record_media_pool = self.read_media_pool_by_name(media_pool_parent)
+
+        if not record_media_pool:
+            raise ValueError(f"The record by the name: {media_pool_parent} does not exist")
+
+        # Asemble abs path of the media pool (ie the source destination of the final file)
+        path = self.__nas_root()
+        path = path + f"/active/media_pools/{record_media_pool[0][1]}"  # Even if there are multiple media pools with the same name, just use the first
+
+        # If, for some reason, the media file directory has never been created, create it.
+        if not os.path.exists(f"{self.__nas_root()}/active/media_pools"):
+            os.mkdir(f"{self.__nas_root()}/active/media_pools")
+
+        # If the pool dir does not exist, create it
+        if not os.path.exists(path):
+            os.mkdir(path)
+
+        # Create the file to the nas
+        shutil.move(content, path)
+
+
+        # ______ DB component ______
+
         self.__make_connection()
 
         # Write query
@@ -90,13 +192,18 @@ class DbNasConnection:
 
         # For now, maybe just hard code the location of the media in mnt on the nas.
         query = (f'INSERT INTO {table} (file_location, media_type, title, description, to_archive) '
-                 f'VALUES (\'{file_location}\', \'{media_type}\', \'{title}\', \'{description}\', 0);')
+                 f'VALUES (\'{path}\', \'{media_type}\', \'{title}\', \'{description}\', 0);')
 
-        query.format(table, file_location, media_type, title, description)
+        query.format(table, path, media_type, title, description)
         # Execute the query
         self.curr.execute(query)
 
         self.__close_connection()
+
+        # Finally, make that junction entry
+        media_file_record = self.read_specific_media_file_by_name(title)
+        self.create_junction_entry("j_media_pools__media_files", record_media_pool[0][0], media_file_record[0][0])
+
         return
 
     def create_media_pool(self, media_pool_name, description):
@@ -457,7 +564,7 @@ class DbNasConnection:
         """
         return
 
-    # ------------ Auxiliary Methods ------------ #
+    # ------------ Private Config Methods ------------ #
     @staticmethod
     def __load_connection_config():
         """
@@ -513,7 +620,7 @@ class DbNasConnection:
         self.credentials = self.__load_connection_config()
 
     # ------------ Private Methods ------------ #
-    
+
     def __table_exists(self, table_name):
         """
         Private method for checking if the given table name exists in database
@@ -565,6 +672,12 @@ class DbNasConnection:
         self.curr.execute(query)
 
         return
+
+    def __nas_root(self):
+        """
+        private method to quickly return the defined root location
+        """
+        return self.credentials.get('nas_root')
 
     # ------ Connection methods ------ #
     def __make_connection(self):
