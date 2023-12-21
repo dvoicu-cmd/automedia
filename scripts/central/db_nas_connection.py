@@ -226,7 +226,7 @@ class DbNasConnection:
         self.__close_connection()
         return record
 
-    def read_account_by_username(self, username):
+    def read_account_by_name(self, username):
         """
         Returns the record(s) for an account (or accounts) given a username
         Args:
@@ -335,44 +335,76 @@ class DbNasConnection:
 
         return record
 
-
-
-    #TODO implement
-    def read_specific_scrape(self, account_id, media_pool_id, media_file_id):
+    def read_rand_media_file_of_pool(self, media_pool_id):
         """
-        Reads and returns the record of a specific scraped video of a specific account
+        Reads and returns a random media file given a specific media pool id
         Args:
-            account_id (int): The specific account id.
-            media_pool_id (int): The specific media pool id to take from
-            media_file_id (int): The specific record of media
+            media_pool_id (int): The id for the media pool
+        Returns:
+            A tuple that contains the record for a media file.
         """
-        return
+        self.__make_connection()
+
+        query = (f"SELECT * FROM media_files "
+                 f"JOIN j_media_pools__media_files jt ON media_files.media_file_id = jt.media_file_id "
+                 f"WHERE jt.media_pool_id = {media_pool_id} AND media_files.to_archive = 0 "
+                 f"ORDER BY RAND() "
+                 f"LIMIT 1; ")
+
+        self.curr.execute(query)
+
+        record = self.curr.fetchone()
+
+        self.__close_connection()
+
+        return record
+
+    def read_all_media_files_of_pool(self, media_pool_id):
+        """
+        Reads and returns all media files in a given media pool
+        Args:
+            media_pool_id (int): The id for the media pool
+        Return:
+            a tuple or array of tuples that contains the relationship to the selected pool
+        """
+        self.__make_connection()
+
+        query = (f"SELECT * FROM media_files "
+                 f"JOIN j_media_pools__media_files jt ON media_files.media_file_id = jt.media_file_id "
+                 f"WHERE jt.media_pool_id = {media_pool_id} AND media_files.to_archive = 0 ")
+
+        self.curr.execute(query)
+
+        record = self.curr.fetchall()
+
+        self.__close_connection()
+
+        return record
+
+    def read_specific_media_file_by_name(self, title):
+        """
+        Reads and returns a record of a specific media_file by its title property
+        Args:
+            title (str): The string input of the title
+        Returns:
+            An array of tuples that contains the entries that match the query.
+        """
+        self.__make_connection()
+
+        table = "media_files"
+        query = f"SELECT * FROM {table} WHERE title=\'{title}\';"
+        self.curr.execute(query)
+
+        record = self.curr.fetchall()
+
+        self.__close_connection()
+
+        return record
 
     # ------------ Update Methods ------------ #
 
     # TODO implement
-    def update_add_account_pool(self, account_id, media_pool_id):
-        """
-        Adds a scrape pool from an account
-
-        Args:
-            account_id (int): The specific account id.
-            media_pool_id (int): A string list of targets.
-        """
-        return
-
-    def update_remove_account_pool(self, account_id, media_pool_id):
-        """
-        Removes a scrape pool from an account
-
-        Args:
-            account_id (int): The specific account id.
-            media_pool_id (int): A string list of targets.
-        """
-        return
-
-    # TODO implement
-    def update_content_to_archived(self, account_id, content_id):
+    def update_to_archived(self, account_id, content_id):
         """
         Sets a specific content record's archive property to 1
         Arg:

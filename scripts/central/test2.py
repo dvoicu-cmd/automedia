@@ -1,12 +1,24 @@
 from db_nas_connection import DbNasConnection
 
 def main():
+    #create_media()
     #create_junktion_entry()
-    read_media_pool_by_name()
-
+    read_specific_media_file_by_name()
     return
 
 # --------- READ ---------
+def read_specific_media_file_by_name():
+    db = DbNasConnection()
+    print(db.read_specific_media_file_by_name("He who goes out there"))
+
+def read_all_media_files_of_pool():
+    db = DbNasConnection()
+    print(db.read_all_media_files_of_pool(2))
+
+def read_rand_media_file_of_pool():
+    db = DbNasConnection()
+    print(db.read_rand_media_file_of_pool(2))
+
 def read_media_pool_by_name():
     db = DbNasConnection()
     print(db.read_media_pool_by_name("OpenAI api calls"))
@@ -48,7 +60,7 @@ def create_account():
 
 def create_media():
     db = DbNasConnection()
-    db.create_media_file("/location","text","He who goes out there","a small description of what to put in here")
+    db.create_media_file("/location","video","He who goes out there2","a small description of what to put in here")
 
 def create_media_pool():
     db = DbNasConnection()
@@ -66,7 +78,8 @@ def create_junktion_entry():
     # db.create_junction_entry("j_accounts__media_files","1","1")
     # db.create_junction_entry("j_aunts__media_files33", "1", "1")
     #db.create_junction_entry("j_accounts__content_files","2","3")
-    db.create_junction_entry("j_accounts__media_pools","1","1")
+    #db.create_junction_entry("j_accounts__media_pools","1","1")
+    db.create_junction_entry("j_media_pools__media_files",2,2)
 
 
 
