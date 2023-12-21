@@ -1,13 +1,20 @@
 from db_nas_connection import DbNasConnection
 
 def main():
-    #create_content_file()
     #create_junktion_entry()
-    read_specific_content()
+    read_media_pool_by_name()
 
     return
 
 # --------- READ ---------
+def read_media_pool_by_name():
+    db = DbNasConnection()
+    print(db.read_media_pool_by_name("OpenAI api calls"))
+
+def read_media_pools_of_account():
+    db = DbNasConnection()
+    print(db.read_media_pools_of_account(1))
+
 def read_specific_content():
     db = DbNasConnection()
     print(db.read_specific_content_file(2,2))
@@ -45,7 +52,8 @@ def create_media():
 
 def create_media_pool():
     db = DbNasConnection()
-    db.create_media_pool("OpenAI api calls", "Text files from open AI")
+    #db.create_media_pool("OpenAI api calls", "Text files from open AI")
+    db.create_media_pool("Reddit API","Text data from redit apis")
 
 def create_content_file():
     db = DbNasConnection()
@@ -57,7 +65,8 @@ def create_junktion_entry():
     # db.create_junction_entry("j_accounts__content_files","1","2") # This should be an error if there is no content file with id 2
     # db.create_junction_entry("j_accounts__media_files","1","1")
     # db.create_junction_entry("j_aunts__media_files33", "1", "1")
-    db.create_junction_entry("j_accounts__content_files","2","3")
+    #db.create_junction_entry("j_accounts__content_files","2","3")
+    db.create_junction_entry("j_accounts__media_pools","1","1")
 
 
 

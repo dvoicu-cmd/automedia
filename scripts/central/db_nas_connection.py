@@ -292,19 +292,52 @@ class DbNasConnection:
 
         return record
 
-    # --- Scraped Media pools from Scraper --- #
-
-    # TODO implement
-    def read_rand_media_pool(self, account_id, media_pool_id):
+    def read_media_pools_of_account(self, account_id):
         """
-        Reads and returns the record of a random scraped video of a specific account and type
+        Reads and returns the records of media pool that a specific account uses.
         Args:
             account_id (int): The specific account id.
-            media_pool_id (int): The specific media pool
+        Returns:
+            a tuple or array of tuples containing the media pools linked to the account
         """
-        return
+        self.__make_connection()
 
-    # TODO implement
+        query = (f"SELECT * FROM media_pools "
+                 f"JOIN j_accounts__media_pools jt ON media_pools.media_pool_id = jt.media_pool_id "
+                 f"WHERE jt.account_id = {account_id} "
+                 f"ORDER BY RAND() "
+                 f"LIMIT 20; ")
+
+        self.curr.execute(query)
+        record = self.curr.fetchall()
+
+        self.__close_connection()
+
+        return record
+
+    def read_media_pool_by_name(self, media_pool_name):
+        """
+        Reads and returns a record (or multiple records) of a media pool given a pool name
+        Args:
+            media_pool_name (str): String arg to search for the media pool record
+        Returns:
+            a tuple or array of tuples containing the records of the media pool(s)
+        """
+        self.__make_connection()
+
+        table = 'media_pools'
+        query = f"SELECT * FROM {table} WHERE media_pool_name=\'{media_pool_name}\';"
+
+        self.curr.execute(query)
+        record = self.curr.fetchall()
+
+        self.__close_connection()
+
+        return record
+
+
+
+    #TODO implement
     def read_specific_scrape(self, account_id, media_pool_id, media_file_id):
         """
         Reads and returns the record of a specific scraped video of a specific account
