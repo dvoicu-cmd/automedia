@@ -3,8 +3,34 @@ from db_nas_connection import DbNasConnection
 def main():
     #create_media()
     #create_junktion_entry()
-    read_specific_media_file_by_name()
+    #update_to_archived_on_media_files()
+    #update_to_archived_on_accounts()
+    #update_to_archived_on_invalid_table()
+    #update_to_archived_on_invalid_id()
+    update_to_unarchive()
     return
+
+# --------- UPDATE ---------
+def update_to_unarchive():
+    db = DbNasConnection()
+    print(db.update_to_unarchived('media_files',2))
+
+
+def update_to_archived_on_media_files():
+    db = DbNasConnection()
+    print(db.update_to_archived('media_files', 2))
+
+def update_to_archived_on_accounts():
+    db = DbNasConnection()
+    print(db.update_to_archived('accounts', 1))
+
+def update_to_archived_on_invalid_table():
+    db = DbNasConnection()
+    print(db.update_to_archived('heheheha',0))
+
+def update_to_archived_on_invalid_id():
+    db = DbNasConnection()
+    print(db.update_to_archived('media_files',0))
 
 # --------- READ ---------
 def read_specific_media_file_by_name():

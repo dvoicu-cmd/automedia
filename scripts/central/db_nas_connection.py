@@ -403,14 +403,42 @@ class DbNasConnection:
 
     # ------------ Update Methods ------------ #
 
-    # TODO implement
-    def update_to_archived(self, account_id, content_id):
+    def update_to_archived(self, table_name, content_id):
         """
-        Sets a specific content record's archive property to 1
+        Given a table, updates the to_archive column (if it exists) from 0 to 1.
         Arg:
             account_id (int): The account id the content
             media_id (int): The content id for the record
         """
+
+        self.__make_connection()
+
+        # Check if the table exists
+        if not self.__table_exists(table_name):
+            raise ValueError("Given table does not exist")
+
+        # The input is valid, now get the two specific column names we need to insert a value.
+        self.__update_query(table_name, content_id, 'to_archive', 1)
+
+        self.__close_connection()
+
+        return
+    
+    def update_to_unarchived(self, table_name, content_id):
+        """
+        
+        """
+        self.__make_connection()
+
+        # Check existence
+        if not self.__table_exists(table_name):
+            raise ValueError("Given table does not exist")
+
+        # Now update
+        self.__update_query(table_name, content_id, 'to_archive', 0)
+
+        self.__close_connection()
+
         return
 
     # TODO implement
@@ -463,6 +491,58 @@ class DbNasConnection:
         self.credentials = self.__load_connection_config()
 
     # ------------ Private Methods ------------ #
+    
+    def __table_exists(self, table_name):
+        """
+        Private method for checking if the given table name exists in database
+        Args:
+            table_name (str): The name of the table
+        Returns:
+            If table does exist, return true, else return false.
+        Precondition:
+            A valid connection is established (ie: self._make_connection() has been called)
+        """
+        # First check if the inputted table exists
+        query = 'SHOW TABLES;'
+        self.curr.execute(query)
+        list_of_tables = self.curr.fetchall()
+        list_of_table_names = [table[0] for table in list_of_tables]  # wtf is this gpt?
+
+        # Check if you inputted a valid table
+        if table_name in list_of_table_names:
+            return True
+        else:
+            return False
+
+    def __update_query(self, target_table_name, target_id, column_property, value):
+        """
+        private method for isolating and updating a specific value on a table.
+        Args:
+            target_table_name (str): The name of the target table.
+            target_id (int): The specific entry id that we modify on the target table.
+            column_property (str): The specific property we are modifying on the table.
+            value: The value we are updating the target with.
+        Preconditions:
+            1) A valid connection is already established.
+            2) The target table exists.
+        """
+        query = f"DESC {target_table_name}"
+        self.curr.execute(query)
+        columns = self.curr.fetchall()
+        column_names = [column[0] for column in columns]
+
+        # Attempt to find the index of the to_archive property
+        if column_property not in column_names:
+            raise ValueError("Property," + column_property + " is not in the table: " + target_table_name)
+
+        # With the column names, now write the query to update the value
+        query = (f'UPDATE {target_table_name} '
+                 f'SET {column_property} = \'{value}\''
+                 f'WHERE {column_names[0]} = {target_id};')
+
+        self.curr.execute(query)
+
+        return
 
     # ------ Connection methods ------ #
     def __make_connection(self):
