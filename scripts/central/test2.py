@@ -3,11 +3,15 @@ from db_nas_connection import DbNasConnection
 def main():
     #create_content_file()
     #create_junktion_entry()
-    read_rand_content()
+    read_specific_content()
 
     return
 
 # --------- READ ---------
+def read_specific_content():
+    db = DbNasConnection()
+    print(db.read_specific_content_file(2,2))
+
 def read_rand_content():
     db = DbNasConnection()
     print(db.read_rand_content_file(2))

@@ -205,7 +205,6 @@ class DbNasConnection:
 
     # ------------ Read Methods ------------ #
 
-    # TODO implement
     def read_account_by_id(self, account_id):
         """
         Returns the record for an account given the id
@@ -248,15 +247,13 @@ class DbNasConnection:
         self.__close_connection()
         return record
 
-    # --- Produced Videos from Creator --- #
-    # TODO implement
     def read_rand_content_file(self, account_id):
         """
         Reads and returns the record of a random content file for a specific account.
         Args:
             account_id (int): The account id
         Return:
-            The record of the produced video.
+            A random tuple record of a produced video related to the account.
         """
         self.__make_connection()
 
@@ -273,8 +270,7 @@ class DbNasConnection:
 
         return record
 
-    # TODO implement
-    def read_specific_content(self, account_id, content_id):
+    def read_specific_content_file(self, account_id, content_id):
         """
         Reads and returns the record of the specific content for a specific account.
         Args:
@@ -283,7 +279,18 @@ class DbNasConnection:
         Return:
             The record of the produced video.
         """
-        return
+        self.__make_connection()
+
+        query = (f"SELECT * FROM content_files "
+                 f"JOIN j_accounts__content_files jt ON content_files.content_id = jt.content_id "
+                 f"WHERE jt.account_id = {account_id} AND jt.content_id = {content_id} AND content_files.to_archive = 0;")
+
+        self.curr.execute(query)
+        record = self.curr.fetchone()
+
+        self.__close_connection()
+
+        return record
 
     # --- Scraped Media pools from Scraper --- #
 
