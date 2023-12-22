@@ -174,8 +174,12 @@ class DbNasConnection:
         if not os.path.exists(path):
             os.mkdir(path)
 
-        # Create the file to the nas
+        # Move the file to the nas
         shutil.move(content, path)
+
+        # Before moving to db component, append the base name to the path
+        file_name = os.path.basename(content)
+        path = path + '/' + file_name
 
 
         # ______ DB component ______
@@ -201,7 +205,7 @@ class DbNasConnection:
         self.__close_connection()
 
         # Finally, make that junction entry
-        media_file_record = self.read_specific_media_file_by_name(title)
+        media_file_record = self.read_specific_media_file_by_name(path)
         self.create_junction_entry("j_media_pools__media_files", record_media_pool[0][0], media_file_record[0][0])
 
         return
@@ -211,7 +215,28 @@ class DbNasConnection:
         Creates a media pool record
         media_pool_name (str): The name of the media pool
         description (str): A simple description on what is contained in the pool.
+        Args:
+            media_pool_name (str): The name of the media pool
+            description (str): A breef description of the media pool
         """
+
+        # ______ NAS component ______
+        path = self.__nas_root()
+        path = path + "/active/media_pools"
+
+        # First check if the media_pool dir exists, if not, just make the directory.
+        if not os.path.exists(path):
+            os.mkdir(path)
+
+        # Create the account directory
+        try:
+            os.mkdir(f"{path}/{media_pool_name}")
+        except OSError or FileExistsError:
+            raise ValueError(f"File path:{path}/{media_pool_name} exists or is invalid. Aborting write to database")
+
+
+        # ______ DB component ______
+
         # Make connection to database
         self.__make_connection()
 
@@ -231,14 +256,46 @@ class DbNasConnection:
 
         return
 
-    def create_content(self, file_location, title, description):
+    def create_content(self, file_location_init, title, description, account_parent):
         """
         Writes the produced content from the creator into db and nfs on the storage server
         Args:
-            file_location (str): the location of the content file on the nas
+            file_location_init (str): the location of the content file on the nas
             title (str): The title of the content
             description (str): The description for the content
+            account_parent (str): The related account for this content file
         """
+
+        # ______ NAS component ______
+
+        # Attempt to get the record of the account
+        record_account = self.read_account_by_name(account_parent)
+
+        if not record_account:
+            raise ValueError(f"The record by the name: {account_parent} does not exist")
+
+        # Asemble abs path of the account (ie the source destination of the final file)
+        path = self.__nas_root()
+        path = path + f"/active/created_videos/{record_account[0][1]}"
+
+        # If, for some reason, the created_videos directory has never been created, create it.
+        if not os.path.exists(f"{self.__nas_root()}/active/created_videos"):
+            os.mkdir(f"{self.__nas_root()}/active/created_videos")
+
+        # Make the account directory has not been created, create it.
+        if not os.path.exists(path):
+            os.mkdir(path)
+
+        # Move the file to the nas
+        shutil.move(file_location_init, path)
+
+        # Before moving to db component, append the base name to the path
+        file_name = os.path.basename(file_location_init)
+        path = path + '/' + file_name
+
+
+        # ______ DB component ______
+
         # Make connection to database
         self.__make_connection()
 
@@ -246,15 +303,20 @@ class DbNasConnection:
         table = 'content_files'
 
         query = (f'INSERT INTO {table} (file_location, title, description, to_archive) '
-                 f'VALUES (\'{file_location}\', \'{title}\', \'{description}\', 0);')
-
-        query.format(table, file_location, title, description)
+                 f'VALUES (\'{path}\', \'{title}\', \'{description}\', 0);')
 
         # Execute the query
         self.curr.execute(query)
 
         # Close the connection to database
         self.__close_connection()
+
+
+        # Finally, make that junction entry
+        content_file_record = self.read_specific_content_file(path)
+        print(path)
+        print(content_file_record)
+        self.create_junction_entry("j_accounts__content_files", record_account[0][0], content_file_record[0])
 
         return
 
@@ -377,20 +439,37 @@ class DbNasConnection:
 
         return record
 
-    def read_specific_content_file(self, account_id, content_id):
+    # def read_specific_content_file(self, account_id, content_id):
+    #     """
+    #     Reads and returns the record of the specific content for a specific account.
+    #     Args:
+    #         account_id (int): The account id as listed in the db.
+    #         content_id (int): The content id as listed in the db.
+    #     Return:
+    #         The record of the produced video.
+    #     """
+    #     self.__make_connection()
+    #
+    #     query = (f"SELECT * FROM content_files "
+    #              f"JOIN j_accounts__content_files jt ON content_files.content_id = jt.content_id "
+    #              f"WHERE jt.account_id = {account_id} AND jt.content_id = {content_id} AND content_files.to_archive = 0;")
+    #
+    #     self.curr.execute(query)
+    #     record = self.curr.fetchone()
+    #
+    #     self.__close_connection()
+    #
+    #     return record
+
+    def read_specific_content_file(self, file_location):
         """
-        Reads and returns the record of the specific content for a specific account.
-        Args:
-            account_id (int): The account id as listed in the db.
-            content_id (int): The content id as listed in the db.
-        Return:
-            The record of the produced video.
+        Reads the specific record of a content file given its file_location on the nas (as that is unique)
         """
         self.__make_connection()
 
         query = (f"SELECT * FROM content_files "
-                 f"JOIN j_accounts__content_files jt ON content_files.content_id = jt.content_id "
-                 f"WHERE jt.account_id = {account_id} AND jt.content_id = {content_id} AND content_files.to_archive = 0;")
+                 f"WHERE content_files.file_location = \'{file_location}\' "
+                 f"AND content_files.to_archive = 0;")
 
         self.curr.execute(query)
         record = self.curr.fetchone()
@@ -398,6 +477,7 @@ class DbNasConnection:
         self.__close_connection()
 
         return record
+
 
     def read_media_pools_of_account(self, account_id):
         """
@@ -488,18 +568,18 @@ class DbNasConnection:
 
         return record
 
-    def read_specific_media_file_by_name(self, title):
+    def read_specific_media_file_by_name(self, location):
         """
-        Reads and returns a record of a specific media_file by its title property
+        Reads and returns a record of a specific media_file by its file location
         Args:
-            title (str): The string input of the title
+            location (str): The string input of the title
         Returns:
             An array of tuples that contains the entries that match the query.
         """
         self.__make_connection()
 
         table = "media_files"
-        query = f"SELECT * FROM {table} WHERE title=\'{title}\';"
+        query = f"SELECT * FROM {table} WHERE file_location=\'{location}\';"
         self.curr.execute(query)
 
         record = self.curr.fetchall()
@@ -620,6 +700,33 @@ class DbNasConnection:
         self.credentials = self.__load_connection_config()
 
     # ------------ Private Methods ------------ #
+    def __largets_id(self, table_name):
+        """
+        Returns the value of the largest primary key in a table
+        """
+
+        self.__make_connection()
+
+        # Check if the table exists
+        if not self.__table_exists(table_name):
+            return ValueError(f"{table_name} does not exists")
+
+        query = f"DESC {table_name}"
+        self.curr.execute(query)
+        columns = self.curr.fetchall()
+        column_names = [column[0] for column in columns]
+
+        id_column = column_names[0]
+
+        self.curr.execute(f"SELECT MAX({id_column}) AS max_id FROM {table_name}")
+
+        result = self.curr.fetchone()
+
+        max_id = result[0] if result[0] is not None else 0  # Assuming 0 if no records are present
+
+        self.__close_connection()
+
+        return max_id
 
     def __table_exists(self, table_name):
         """

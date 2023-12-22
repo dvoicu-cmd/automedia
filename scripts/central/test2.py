@@ -1,14 +1,16 @@
 from db_nas_connection import DbNasConnection
 
 def main():
-    #create_media()
+    create_media_pool()
     create_media()
+    #create_media()
     #create_junktion_entry()
     #update_to_archived_on_media_files()
     #update_to_archived_on_accounts()
     #update_to_archived_on_invalid_table()
     #update_to_archived_on_invalid_id()
     #update_to_unarchive()
+    #create_content_file()
 
     return
 # --------- NAS Integration ---------
@@ -98,11 +100,11 @@ def create_media():
 def create_media_pool():
     db = DbNasConnection()
     #db.create_media_pool("OpenAI api calls", "Text files from open AI")
-    db.create_media_pool("Reddit API","Text data from redit apis")
+    db.create_media_pool("OpenAI api calls","Text data from redit apis")
 
 def create_content_file():
     db = DbNasConnection()
-    db.create_content("/location \here/Yeah/But deep","nice,part2, electric boogalo", "LIKE AND SUBSCRIBE HAHAHAHAHA")
+    db.create_content("/Users/dvoicu/mnt/Goofy Aughhh Test Files/Aughhhhh.png","The title of this content", "breef disc", "dvocCreatesPART2")
 
 def create_junktion_entry():
     db = DbNasConnection()
