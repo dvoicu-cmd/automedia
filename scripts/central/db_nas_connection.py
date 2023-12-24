@@ -439,28 +439,6 @@ class DbNasConnection:
 
         return record
 
-    # def read_specific_content_file(self, account_id, content_id):
-    #     """
-    #     Reads and returns the record of the specific content for a specific account.
-    #     Args:
-    #         account_id (int): The account id as listed in the db.
-    #         content_id (int): The content id as listed in the db.
-    #     Return:
-    #         The record of the produced video.
-    #     """
-    #     self.__make_connection()
-    #
-    #     query = (f"SELECT * FROM content_files "
-    #              f"JOIN j_accounts__content_files jt ON content_files.content_id = jt.content_id "
-    #              f"WHERE jt.account_id = {account_id} AND jt.content_id = {content_id} AND content_files.to_archive = 0;")
-    #
-    #     self.curr.execute(query)
-    #     record = self.curr.fetchone()
-    #
-    #     self.__close_connection()
-    #
-    #     return record
-
     def read_specific_content_file(self, file_location):
         """
         Reads the specific record of a content file given its file_location on the nas (as that is unique)
@@ -631,18 +609,50 @@ class DbNasConnection:
 
         return
 
+    # TODO implement FIRST
+    def delete_all_archived_records(self, table):
+        """
+        Deletes all records with the to_archive property set to 1
+        Post-condition:
+            Archive file on nas server with date name contain all the files removed.
+            Database is cleared of all the records that where archived.
+        """
+
+    def __delete_archived_record(self, table, record_id):
+        """
+        Deletes a specific record and moves its file to the archive folder
+        Private method for delete_all_archived_records
+        """
+
+
     # ------------ Delete Methods ------------ #
 
     # TODO implement
     def delete_account(self, account_id):
         """
-        NUCLEAR BE SURE ABOUT CALLING THIS FUNCTION.
         removes the account record and all associated record with the account id
-
         Args:
             account_id (int): The account id.
         """
         return
+
+    # TODO implement
+    def delete_media_pool(self, media_pool_id):
+        """
+
+        """
+
+    # TODO implement
+    def delete_media_file(self, media_file_id):
+        """
+
+        """
+
+    # TODO implement
+    def delete_content_files(self):
+        """
+
+        """
 
     # ------------ Private Config Methods ------------ #
     @staticmethod
