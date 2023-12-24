@@ -53,6 +53,7 @@ import mariadb
 import configparser
 import os
 import shutil
+import datetime
 
 
 class DbNasConnection:
@@ -206,7 +207,7 @@ class DbNasConnection:
 
         # Finally, make that junction entry
         media_file_record = self.read_specific_media_file(path)
-        self.create_junction_entry("j_media_pools__media_files", record_media_pool[0][0], media_file_record[0][0])
+        self.create_junction_entry("j_media_pools__media_files", record_media_pool[0][0], media_file_record[0])
 
         return
 
@@ -609,25 +610,33 @@ class DbNasConnection:
 
         return
 
-    # TODO implement before delete all archived
-    def __delete_archived_media_file(self, record_id):
+    def __delete_archived_media_file(self, record, to_archive_path):
         """
         Deletes a specific record and moves its file to the archive folder
         Private method for delete_all_archived_records
+        Precondition:
+            Assumes there is a valid connection
         """
         # ______ NAS Component ______
 
-
-
+        # Move the file to the archive
+        current_path = record[1]
+        shutil.move(current_path, to_archive_path)
 
         # ______ DB Component ______
 
-        self.__make_connection()
+        # Delete the record from database
+        media_file_id = record[0]
+        # Remove junction table entry
+        query = f"DELETE FROM j_media_pools__media_files WHERE media_file_id = \'{media_file_id}\'"
+        self.curr.execute(query)
 
-        self.__close_connection()
+        # Remove record from table
+        query = f"DELETE FROM media_files WHERE media_file_id = \'{media_file_id}\'"
+        self.curr.execute(query)
+
         return
 
-    # TODO implement
     def delete_all_archived_media_files(self):
         """
         Deletes all records with the to_archive property set to 1
@@ -636,19 +645,29 @@ class DbNasConnection:
             Database is cleared of all the records that where archived.
         """
         # ______ NAS Component ______
+        # Create a directory
+        current_date = datetime.date.today()
 
-
-
+        archive_path = self.__nas_root()
+        archive_path = f"{archive_path}/archive/media_files_archive_{current_date}"
+        os.mkdir(archive_path)
 
         # ______ DB Component ______
 
         self.__make_connection()
 
+        self.curr.execute("SELECT * FROM media_files WHERE to_archive = 1")
+
+        # Fetch all the records and one by one, move them to the archive dir
+        records_to_archive = self.curr.fetchall()
+        for record in records_to_archive:
+            self.__delete_archived_media_file(record, archive_path)
+
         self.__close_connection()
 
         return
 
-    def __delete_archived_content_files(self):
+    def __delete_archived_content_files(self, record, to_archive_path):
         # ______ NAS Component ______
 
 
@@ -662,7 +681,7 @@ class DbNasConnection:
 
         return
 
-    def delete_all_archived_content_file(self, record_id):
+    def delete_all_archived_content_file(self):
         # ______ NAS Component ______
 
 

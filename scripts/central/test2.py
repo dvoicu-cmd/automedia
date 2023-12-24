@@ -1,11 +1,23 @@
 from db_nas_connection import DbNasConnection
+import datetime
 
 def main():
-    create_media()
+    test_delete()
 
     return
 
-
+def test_delete():
+    db = DbNasConnection()
+    #db.create_media_pool("deep_fried_memes","A collection of deep fried memes")
+    # db.create_media_file("/Users/dvoicu/mnt/Goofy Aughhh Test Files/When2HrOfSleep.mp4","video",
+    #                      "WhenThat24HoursOfSleepKicksIn","A Man Has Fallen","deep_fried_memes")
+    # db.create_media_file("/Users/dvoicu/mnt/Goofy Aughhh Test Files/aughhh.txt","text",
+    #                      "Hi My Name is Auggh Text","Goofy Text","deep_fried_memes")
+    # record1 = db.read_specific_media_file("/Users/dvoicu/mnt/active/media_pools/deep_fried_memes/When2HrOfSleep.mp4")
+    # record2 = db.read_specific_media_file("/Users/dvoicu/mnt/active/media_pools/deep_fried_memes/aughhh.txt")
+    # db.update_to_archived("media_files", record1[0])
+    # db.update_to_archived("media_files", record2[0])
+    db.delete_all_archived_media_files()
 
 
 # --------- NAS Integration ---------
@@ -84,17 +96,6 @@ def create_account():
     db = DbNasConnection()
     db.create_account("dvocCreates","dvoc@test.com", "Do you know the way?", "yt_shorts",
                       "THIS is a long description of what will be created here on this database of a thing")
-
-    #db.create_account("","", "", "yt_shorts",
-    #                  "")
-
-def create_media():
-    db = DbNasConnection()
-    #db.create_media_pool("deep_fried_memes","A collection of deep fried memes")
-    #db.create_media_file("/Users/dvoicu/mnt/Goofy Aughhh Test Files/When2HrOfSleep.mp4","video",
-    #                     "WhenThat24HoursOfSleepKicksIn","A Man Has Fallen","deep_fried_memes")
-    record = db.read_specific_media_file("/Users/dvoicu/mnt/active/media_pools/deep_fried_memes/When2HrOfSleep.mp4")
-    db.update_to_archived("media_files", record[0])
 
 def create_media_pool():
     db = DbNasConnection()
