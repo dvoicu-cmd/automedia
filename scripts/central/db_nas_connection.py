@@ -46,7 +46,6 @@ This interface is designed to uphold the following file system structure:
            x    x     media file       x    x   content files
 
 
-
 """
 
 import mariadb
@@ -108,7 +107,6 @@ class DbNasConnection:
             os.mkdir(f"{path}/{username}")
         except OSError or FileExistsError:
             raise ValueError(f"File path:{path}/{username} exists or is invalid. Aborting write to database")
-
 
         # ______ DB component ______
 
@@ -182,7 +180,6 @@ class DbNasConnection:
         file_name = os.path.basename(content)
         path = path + '/' + file_name
 
-
         # ______ DB component ______
 
         self.__make_connection()
@@ -234,7 +231,6 @@ class DbNasConnection:
             os.mkdir(f"{path}/{media_pool_name}")
         except OSError or FileExistsError:
             raise ValueError(f"File path:{path}/{media_pool_name} exists or is invalid. Aborting write to database")
-
 
         # ______ DB component ______
 
@@ -294,7 +290,6 @@ class DbNasConnection:
         file_name = os.path.basename(file_location_init)
         path = path + '/' + file_name
 
-
         # ______ DB component ______
 
         # Make connection to database
@@ -311,7 +306,6 @@ class DbNasConnection:
 
         # Close the connection to database
         self.__close_connection()
-
 
         # Finally, make that junction entry
         content_file_record = self.read_specific_content_file(path)
@@ -457,7 +451,6 @@ class DbNasConnection:
 
         return record
 
-
     def read_media_pools_of_account(self, account_id):
         """
         Reads and returns the records of media pool that a specific account uses.
@@ -496,6 +489,22 @@ class DbNasConnection:
 
         self.curr.execute(query)
         record = self.curr.fetchall()
+
+        self.__close_connection()
+
+        return record
+
+    def read_media_pool_by_id(self, media_pool_id):
+        """
+
+        """
+        self.__make_connection()
+
+        table = 'media_pools'
+        query = f"SELECT * FROM {table} WHERE media_pool_id={media_pool_id};"
+
+        self.curr.execute(query)
+        record = self.curr.fetchone()
 
         self.__close_connection()
 
@@ -553,12 +562,29 @@ class DbNasConnection:
         Args:
             location (str): The string input of the title
         Returns:
-            An array of tuples that contains the entries that match the query.
+            A tuples that contains the entries that match the query.
         """
         self.__make_connection()
 
         table = "media_files"
         query = f"SELECT * FROM {table} WHERE file_location=\'{location}\';"
+        self.curr.execute(query)
+
+        record = self.curr.fetchone()
+
+        self.__close_connection()
+
+        return record
+
+    def read_specific_media_file_by_id(self, media_file_id):
+        """
+
+        """
+        self.__make_connection()
+
+        table = "media_files"
+        query = f"SELECT * FROM {table} WHERE media_file_id = \'{media_file_id}\'"
+
         self.curr.execute(query)
 
         record = self.curr.fetchone()
@@ -589,7 +615,7 @@ class DbNasConnection:
         self.__close_connection()
 
         return
-    
+
     def update_to_unarchived(self, table_name, content_id):
         """
         Given a table, updates the to_archive column (if it exists) from 1 to 0.
@@ -614,9 +640,22 @@ class DbNasConnection:
         """
 
         """
+        self.create_junction_entry("j_accounts__media_pools", account_id, media_pool_id)
+
         return
 
     # ------------ Delete Methods ------------ #
+
+    def delete_link_account_to_media_pool(self, account_id, media_pool_id):
+        """
+
+        """
+        self.__make_connection()
+
+        query = f"DELETE FROM j_accounts__media_pools WHERE account_id={account_id} AND media_pool_id={media_pool_id}"
+        self.curr.execute(query)
+
+        self.__close_connection()
 
     def __delete_archived_media_file(self, record, to_archive_path):
         """
@@ -663,7 +702,6 @@ class DbNasConnection:
         except FileExistsError:
             print(f"archive file exists:{archive_path}\n"
                   f"Continuing Algorithm")
-
 
         # ______ DB Component ______
 
@@ -743,6 +781,7 @@ class DbNasConnection:
         Args:
             account_id (int): The account id.
         """
+
         return
 
     # TODO implement before delete_account
@@ -751,18 +790,69 @@ class DbNasConnection:
 
         """
 
-
     # TODO implement
     def delete_media_pool(self, media_pool_id):
         """
 
         """
+        # Check existence of media pool
+        media_pool_record = self.read_media_pool_by_id(media_pool_id)
+        if not media_pool_record:
+            return ValueError(f"media_pool with id:{media_pool_id} does not exist")
+
+        # First delete all associated media_files
+        media_file_records = self.read_all_media_files_of_pool(media_pool_id)
+        for record in media_file_records:
+            self.delete_media_file(record[0])
+
+        # Then delete the media_pool itself
+
+        # ______ NAS Component ______
+        # First the directory
+        path = self.__nas_root()
+        path = f"{path}/active/media_pools/{media_pool_record[1]}"
+        os.rmdir(path)
+
+        # ______ DB Component ______
+        # Then the db records
+        self.__make_connection()
+
+        # Remove from junction tables first
+        query = f"DELETE FROM j_accounts__media_pools WHERE media_pool_id = {media_pool_id}"
+        self.curr.execute(query)
+
+        # Then remove from the media_pool table
+        query = f"DELETE from media_pools WHERE media_pool_id = {media_pool_id}"
+        self.curr.execute(query)
+
+        self.__close_connection()
+
+        return
 
     # TODO implement before delete_media_pool
     def delete_media_file(self, media_file_id):
         """
-
+        He
         """
+        # ______ NAS Component ______
+        # Remove file from nas
+        media_file_record = self.read_specific_media_file_by_id(media_file_id)
+        file_path = media_file_record[1]
+
+        # Delete the file
+        if os.path.exists(file_path):
+            os.remove(file_path)
+
+        # ______ DB Component ______
+        self.__make_connection()
+
+        query = f"DELETE FROM j_media_pools__media_files WHERE media_file_id = \'{media_file_id}\'"
+        self.curr.execute(query)
+
+        query = f"DELETE FROM media_files WHERE media_file_id = \'{media_file_id}\'"
+        self.curr.execute(query)
+
+        self.__close_connection()
 
     # ------------ Private Config Methods ------------ #
     @staticmethod

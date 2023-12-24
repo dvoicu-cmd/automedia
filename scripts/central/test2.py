@@ -2,9 +2,37 @@ from db_nas_connection import DbNasConnection
 import datetime
 
 def main():
-    test_archive_content()
+
+    delete_media_pool()
 
     return
+
+def delete_media_pool():
+    db = DbNasConnection()
+
+    db.create_media_pool("Cool Things", "Wow that was really cool")
+    db.create_media_file("/Users/dvoicu/mnt/Goofy Aughhh Test Files/bard_db_lecture.txt","text",
+                           "A lecture in databases","A lecture","Cool Things")
+    db.create_media_file("/Users/dvoicu/mnt/Goofy Aughhh Test Files/Lyra IV.png","image",
+                          "Lyra 42", "A far far far away planet","Cool Things")
+
+    record_pool = db.read_media_pool_by_name("Cool Things")
+
+    media_id = 5
+
+    db.update_link_account_to_media_pool(1, media_id)
+
+    db.delete_media_pool(record_pool[0][0])
+
+def delete_media_file():
+    db = DbNasConnection()
+    # db.create_media_pool("Lectures", "He who goes there must learn")
+    # db.create_media_file("/Users/dvoicu/mnt/Goofy Aughhh Test Files/bard_db_lecture.txt","text",
+    #                      "A lecture in databases","A lecture","Lectures")
+    record = db.read_specific_media_file("/Users/dvoicu/mnt/active/media_pools/Lectures/bard_db_lecture.txt")
+    # print(record)
+    db.delete_media_file(record[0])
+
 
 def test_archive_media():
     db = DbNasConnection()
