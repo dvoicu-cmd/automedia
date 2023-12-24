@@ -1,18 +1,13 @@
 from db_nas_connection import DbNasConnection
 
 def main():
-    create_media_pool()
     create_media()
-    #create_media()
-    #create_junktion_entry()
-    #update_to_archived_on_media_files()
-    #update_to_archived_on_accounts()
-    #update_to_archived_on_invalid_table()
-    #update_to_archived_on_invalid_id()
-    #update_to_unarchive()
-    #create_content_file()
 
     return
+
+
+
+
 # --------- NAS Integration ---------
 def config_parser_test():
     db = DbNasConnection()
@@ -44,7 +39,7 @@ def update_to_archived_on_invalid_id():
 # --------- READ ---------
 def read_specific_media_file_by_name():
     db = DbNasConnection()
-    print(db.read_specific_media_file_by_name("He who goes out there"))
+    print(db.read_specific_media_file("He who goes out there"))
 
 def read_all_media_files_of_pool():
     db = DbNasConnection()
@@ -95,7 +90,11 @@ def create_account():
 
 def create_media():
     db = DbNasConnection()
-    db.create_media_file("/Users/dvoicu/mnt/Goofy Aughhh Test Files/aughhh.txt","text","He who goes out there2122","a small description of what to put in here", "OpenAI api calls")
+    #db.create_media_pool("deep_fried_memes","A collection of deep fried memes")
+    #db.create_media_file("/Users/dvoicu/mnt/Goofy Aughhh Test Files/When2HrOfSleep.mp4","video",
+    #                     "WhenThat24HoursOfSleepKicksIn","A Man Has Fallen","deep_fried_memes")
+    record = db.read_specific_media_file("/Users/dvoicu/mnt/active/media_pools/deep_fried_memes/When2HrOfSleep.mp4")
+    db.update_to_archived("media_files", record[0])
 
 def create_media_pool():
     db = DbNasConnection()

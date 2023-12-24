@@ -205,7 +205,7 @@ class DbNasConnection:
         self.__close_connection()
 
         # Finally, make that junction entry
-        media_file_record = self.read_specific_media_file_by_name(path)
+        media_file_record = self.read_specific_media_file(path)
         self.create_junction_entry("j_media_pools__media_files", record_media_pool[0][0], media_file_record[0][0])
 
         return
@@ -546,7 +546,7 @@ class DbNasConnection:
 
         return record
 
-    def read_specific_media_file_by_name(self, location):
+    def read_specific_media_file(self, location):
         """
         Reads and returns a record of a specific media_file by its file location
         Args:
@@ -560,7 +560,7 @@ class DbNasConnection:
         query = f"SELECT * FROM {table} WHERE file_location=\'{location}\';"
         self.curr.execute(query)
 
-        record = self.curr.fetchall()
+        record = self.curr.fetchone()
 
         self.__close_connection()
 
@@ -609,32 +609,90 @@ class DbNasConnection:
 
         return
 
-    # TODO implement FIRST
-    def delete_all_archived_records(self, table):
+    # TODO implement before delete all archived
+    def __delete_archived_media_file(self, record_id):
+        """
+        Deletes a specific record and moves its file to the archive folder
+        Private method for delete_all_archived_records
+        """
+        # ______ NAS Component ______
+
+
+
+
+        # ______ DB Component ______
+
+        self.__make_connection()
+
+        self.__close_connection()
+        return
+
+    # TODO implement
+    def delete_all_archived_media_files(self):
         """
         Deletes all records with the to_archive property set to 1
         Post-condition:
             Archive file on nas server with date name contain all the files removed.
             Database is cleared of all the records that where archived.
         """
+        # ______ NAS Component ______
 
-    def __delete_archived_record(self, table, record_id):
-        """
-        Deletes a specific record and moves its file to the archive folder
-        Private method for delete_all_archived_records
-        """
 
+
+
+        # ______ DB Component ______
+
+        self.__make_connection()
+
+        self.__close_connection()
+
+        return
+
+    def __delete_archived_content_files(self):
+        # ______ NAS Component ______
+
+
+
+
+        # ______ DB Component ______
+
+        self.__make_connection()
+
+        self.__close_connection()
+
+        return
+
+    def delete_all_archived_content_file(self, record_id):
+        # ______ NAS Component ______
+
+
+
+
+        # ______ DB Component ______
+
+        self.__make_connection()
+
+        self.__close_connection()
+
+        return
 
     # ------------ Delete Methods ------------ #
 
     # TODO implement
     def delete_account(self, account_id):
         """
-        removes the account record and all associated record with the account id
+        removes the account record and all associated records with the account id
         Args:
             account_id (int): The account id.
         """
         return
+
+    # TODO implement before delete_account
+    def delete_content_files(self, account_id):
+        """
+
+        """
+
 
     # TODO implement
     def delete_media_pool(self, media_pool_id):
@@ -642,14 +700,8 @@ class DbNasConnection:
 
         """
 
-    # TODO implement
+    # TODO implement before delete_media_pool
     def delete_media_file(self, media_file_id):
-        """
-
-        """
-
-    # TODO implement
-    def delete_content_files(self):
         """
 
         """
@@ -772,10 +824,7 @@ class DbNasConnection:
             1) A valid connection is already established.
             2) The target table exists.
         """
-        query = f"DESC {target_table_name}"
-        self.curr.execute(query)
-        columns = self.curr.fetchall()
-        column_names = [column[0] for column in columns]
+        column_names = self.__table_properties(target_table_name)
 
         # Attempt to find the index of the to_archive property
         if column_property not in column_names:
@@ -783,12 +832,24 @@ class DbNasConnection:
 
         # With the column names, now write the query to update the value
         query = (f'UPDATE {target_table_name} '
-                 f'SET {column_property} = \'{value}\''
-                 f'WHERE {column_names[0]} = {target_id};')
+                 f'SET {column_property} = \'{value}\' '
+                 f'WHERE {column_names[0]} = \'{target_id}\';')
 
         self.curr.execute(query)
 
         return
+
+    def __table_properties(self, table_name):
+        """
+        Private method that fetches the column properties of a table
+        Precondition:
+            Assumes a connection is established
+        """
+        query = f"DESC {table_name}"
+        self.curr.execute(query)
+        columns = self.curr.fetchall()
+        column_names = [column[0] for column in columns]
+        return column_names
 
     def __nas_root(self):
         """
