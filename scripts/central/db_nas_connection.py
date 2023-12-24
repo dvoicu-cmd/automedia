@@ -176,9 +176,9 @@ class DbNasConnection:
         # Move the file to the nas
         shutil.move(content, path)
 
-        # Before moving to db component, append the base name to the path
+        # Before moving to db component, append the base name to the path on the server's file system root
         file_name = os.path.basename(content)
-        path = path + '/' + file_name
+        path = f"/active/media_pools/{media_pool_parent}/{file_name}"
 
         # ______ DB component ______
 
@@ -286,9 +286,9 @@ class DbNasConnection:
         # Move the file to the nas
         shutil.move(file_location_init, path)
 
-        # Before moving to db component, append the base name to the path
+        # Before moving to db component, append the base name to the path that would be on the server
         file_name = os.path.basename(file_location_init)
-        path = path + '/' + file_name
+        path = f"/active/created_videos/{account_parent}/{file_name}"
 
         # ______ DB component ______
 
@@ -667,8 +667,9 @@ class DbNasConnection:
         # ______ NAS Component ______
 
         # Move the file to the archive
-        current_path = record[1]
-        shutil.move(current_path, to_archive_path)
+        location_on_server = record[1]
+        local_path = f"{self.__nas_root()}/{location_on_server}"
+        shutil.move(local_path, to_archive_path)
 
         # ______ DB Component ______
 
@@ -725,8 +726,10 @@ class DbNasConnection:
         """
         # ______ NAS Component ______
 
-        current_path = record[1]
-        shutil.move(current_path, to_archive_path)
+
+        location_on_server = record[1]
+        local_path = f"{self.__nas_root()}/{location_on_server}"
+        shutil.move(local_path, to_archive_path)
 
         # ______ DB Component ______
 
@@ -789,8 +792,8 @@ class DbNasConnection:
         """
 
         """
+        # Check
 
-    # TODO implement
     def delete_media_pool(self, media_pool_id):
         """
 
@@ -829,7 +832,6 @@ class DbNasConnection:
 
         return
 
-    # TODO implement before delete_media_pool
     def delete_media_file(self, media_file_id):
         """
         He
@@ -878,7 +880,7 @@ class DbNasConnection:
             "user": config['CREDENTIALS']['user'],
             "password": config['CREDENTIALS']['password'],
             "database": config['CREDENTIALS']['database'],
-            "nas_root": config['CREDENTIALS']['nas_root']
+            "nas_root": config['MOUNTS']['nas_root'],
         }
 
         return output_dict
@@ -898,13 +900,16 @@ class DbNasConnection:
         """
         config = configparser.ConfigParser()
         config['CREDENTIALS'] = {}
+        config['MOUNTS'] = {}
         creds = config['CREDENTIALS']
+        mnt = config['MOUNTS']
+
         creds['ip'] = host_ip
         creds['port'] = port
         creds['user'] = user
         creds['password'] = password
         creds['database'] = database
-        creds['nas_root'] = nas_root
+        mnt['nas_root'] = nas_root
         with open('cred.cfg', 'w') as configfile:
             config.write(configfile)
         self.credentials = self.__load_connection_config()
@@ -1001,7 +1006,7 @@ class DbNasConnection:
 
     def __nas_root(self):
         """
-        private method to quickly return the defined root location
+        private method to quickly return the defined local root location
         """
         return self.credentials.get('nas_root')
 
