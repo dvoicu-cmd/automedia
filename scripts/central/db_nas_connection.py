@@ -402,7 +402,7 @@ class DbNasConnection:
         Args:
             username (str): the username for the account
         Returns:
-            A tuple or array of tuples containing the record(s) for an account (or accounts).
+            An array of tuples containing the record(s) for an account (or accounts).
         """
         self.__make_connection()
 
@@ -610,6 +610,14 @@ class DbNasConnection:
 
         return
 
+    def update_link_account_to_media_pool(self, account_id, media_pool_id):
+        """
+
+        """
+        return
+
+    # ------------ Delete Methods ------------ #
+
     def __delete_archived_media_file(self, record, to_archive_path):
         """
         Deletes a specific record and moves its file to the archive folder
@@ -650,7 +658,12 @@ class DbNasConnection:
 
         archive_path = self.__nas_root()
         archive_path = f"{archive_path}/archive/media_files_archive_{current_date}"
-        os.mkdir(archive_path)
+        try:
+            os.mkdir(archive_path)
+        except FileExistsError:
+            print(f"archive file exists:{archive_path}\n"
+                  f"Continuing Algorithm")
+
 
         # ______ DB Component ______
 
@@ -667,35 +680,61 @@ class DbNasConnection:
 
         return
 
-    def __delete_archived_content_files(self, record, to_archive_path):
+    # Look, the archive functions should have been one method. Not the best practice I know.
+    def __delete_archived_content_file(self, record, to_archive_path):
+        """
+
+        """
         # ______ NAS Component ______
 
+        current_path = record[1]
+        shutil.move(current_path, to_archive_path)
 
+        # ______ DB Component ______
 
+        # Delete
+        content_file_id = record[0]
+
+        # First from junction table
+        query = f"DELETE FROM j_accounts__content_files WHERE content_id = \'{content_file_id}\'"
+        self.curr.execute(query)
+
+        # Then from table
+        query = f"DELETE FROM content_files WHERE content_id = \'{content_file_id}\'"
+        self.curr.execute(query)
+
+        return
+
+    def delete_all_archived_content_files(self):
+        """
+
+        """
+
+        # ______ NAS Component ______
+        # Create the directory
+        current_date = datetime.date.today()
+        archive_path = self.__nas_root()
+        archive_path = f"{archive_path}/archive/content_files_archive_{current_date}"
+        try:
+            os.mkdir(archive_path)
+        except FileExistsError:
+            print(f"archive file exists:{archive_path}\n"
+                  f"Continuing Algorithm")
 
         # ______ DB Component ______
 
         self.__make_connection()
 
-        self.__close_connection()
+        self.curr.execute("SELECT * FROM content_files WHERE to_archive = 1")
 
-        return
-
-    def delete_all_archived_content_file(self):
-        # ______ NAS Component ______
-
-
-
-
-        # ______ DB Component ______
-
-        self.__make_connection()
+        # Fetch all the records, then archive
+        records_to_archive = self.curr.fetchall()
+        for record in records_to_archive:
+            self.__delete_archived_content_file(record, archive_path)
 
         self.__close_connection()
 
         return
-
-    # ------------ Delete Methods ------------ #
 
     # TODO implement
     def delete_account(self, account_id):

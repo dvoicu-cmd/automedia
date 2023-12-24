@@ -2,22 +2,40 @@ from db_nas_connection import DbNasConnection
 import datetime
 
 def main():
-    test_delete()
+    test_archive_content()
 
     return
 
-def test_delete():
+def test_archive_media():
     db = DbNasConnection()
-    #db.create_media_pool("deep_fried_memes","A collection of deep fried memes")
-    # db.create_media_file("/Users/dvoicu/mnt/Goofy Aughhh Test Files/When2HrOfSleep.mp4","video",
-    #                      "WhenThat24HoursOfSleepKicksIn","A Man Has Fallen","deep_fried_memes")
-    # db.create_media_file("/Users/dvoicu/mnt/Goofy Aughhh Test Files/aughhh.txt","text",
-    #                      "Hi My Name is Auggh Text","Goofy Text","deep_fried_memes")
-    # record1 = db.read_specific_media_file("/Users/dvoicu/mnt/active/media_pools/deep_fried_memes/When2HrOfSleep.mp4")
-    # record2 = db.read_specific_media_file("/Users/dvoicu/mnt/active/media_pools/deep_fried_memes/aughhh.txt")
-    # db.update_to_archived("media_files", record1[0])
-    # db.update_to_archived("media_files", record2[0])
+    db.create_media_pool("deep_fried_memes","A collection of deep fried memes")
+    db.create_media_file("/Users/dvoicu/mnt/Goofy Aughhh Test Files/When2HrOfSleep.mp4","video",
+                         "WhenThat24HoursOfSleepKicksIn","A Man Has Fallen","deep_fried_memes")
+    db.create_media_file("/Users/dvoicu/mnt/Goofy Aughhh Test Files/aughhh.txt","text",
+                         "Hi My Name is Auggh Text","Goofy Text","deep_fried_memes")
+    record1 = db.read_specific_media_file("/Users/dvoicu/mnt/active/media_pools/deep_fried_memes/When2HrOfSleep.mp4")
+    record2 = db.read_specific_media_file("/Users/dvoicu/mnt/active/media_pools/deep_fried_memes/aughhh.txt")
+    db.update_to_archived("media_files", record1[0])
+    db.update_to_archived("media_files", record2[0])
     db.delete_all_archived_media_files()
+
+
+def test_archive_content():
+    db = DbNasConnection()
+    # db.create_account("iphon","wowifon@gmail.com","thumbsUp","tiktok","burner account")
+    # db.create_content("/Users/dvoicu/mnt/Goofy Aughhh Test Files/AUUGHHH Tik Tok Sound Effect.mp3",
+    #                   "funny.mp4","A short and funny sound for all the viewers to see. Like and subscribe",
+    #                   "iphon")
+    # db.create_content("/Users/dvoicu/mnt/Goofy Aughhh Test Files/Aughhhhh.png",
+    #                   "spiderman dies", "He really did not want that",
+    #                   "iphon")
+    #id_account = db.read_account_by_name("iphon")
+
+    #record_content = db.read_rand_content_file(id_account[0][0])
+    #db.update_to_archived("content_files", record_content[0])
+
+    db.delete_all_archived_content_files()
+
 
 
 # --------- NAS Integration ---------
