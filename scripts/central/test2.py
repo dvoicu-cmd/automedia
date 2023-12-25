@@ -3,9 +3,42 @@ import datetime
 
 def main():
 
-    test_archive_content()
+    delete_account()
 
     return
+
+def delete_account():
+    db = DbNasConnection()
+    db.create_account("TheAccount", "myMail@co.com", "This is the password", "yt_shorts",
+                      "The final test account",)
+    db.create_content("/Users/dvoicu/mnt/Goofy Aughhh Test Files/When2HrOfSleep.mp4",
+                      "2hr sleep", "LIKE COMMENT SUBSCRIBE HE HE HE HA", "TheAccount")
+    db.create_content("/Users/dvoicu/mnt/Goofy Aughhh Test Files/Lyra IV.png",
+                      "Far away land", "Follow my twitch", "TheAccount")
+    db.create_media_pool("The asdf movie theft", "Stole asdf movie items")
+    db.create_media_file("/Users/dvoicu/mnt/Goofy Aughhh Test Files/aughhh.txt", "text", "Hi",
+                         "Stolen from tom", "The asdf movie theft")
+
+    account = db.read_account_by_name("TheAccount")
+    media_pool = db.read_media_pool_by_name("The asdf movie theft")
+
+    db.create_link_account_to_media_pool(account[0][0], media_pool[0][0])
+
+    db.create_account("TheOTHER", "myMail@HEHEHEHA.net", "This is the beginning of the song",
+                      "yt_videos", "Men")
+
+    db.create_content("/Users/dvoicu/mnt/Goofy Aughhh Test Files/Aughhhhh.png", "Spider",
+                      "Spider but human", "TheOTHER")
+
+    # db.delete_account(account[0][0])
+
+    return
+
+
+
+def delete_content_file():
+    db = DbNasConnection()
+    db.delete_content_file(2)
 
 def delete_media_pool_empty():
     db = DbNasConnection()
@@ -26,7 +59,7 @@ def delete_media_pool():
 
     media_id = 5
 
-    db.update_link_account_to_media_pool(1, media_id)
+    db.create_link_account_to_media_pool(1, media_id)
 
     db.delete_media_pool(record_pool[0][0])
 

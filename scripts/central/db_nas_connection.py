@@ -215,7 +215,7 @@ class DbNasConnection:
         description (str): A simple description on what is contained in the pool.
         Args:
             media_pool_name (str): The name of the media pool
-            description (str): A breef description of the media pool
+            description (str): A brief description of the media pool
         """
 
         # ______ NAS component ______
@@ -309,9 +309,15 @@ class DbNasConnection:
 
         # Finally, make that junction entry
         content_file_record = self.read_specific_content_file(path)
-        print(path)
-        print(content_file_record)
         self.create_junction_entry("j_accounts__content_files", record_account[0][0], content_file_record[0])
+
+        return
+
+    def create_link_account_to_media_pool(self, account_id, media_pool_id):
+        """
+
+        """
+        self.create_junction_entry("j_accounts__media_pools", account_id, media_pool_id)
 
         return
 
@@ -381,7 +387,7 @@ class DbNasConnection:
 
         # Write the query
         table = "accounts"
-        query = f"SELECT * FROM {table} WHERE account_id=1;"
+        query = f"SELECT * FROM {table} WHERE account_id={account_id};"
 
         # Get the record
         self.curr.execute(query)
@@ -450,6 +456,41 @@ class DbNasConnection:
         self.__close_connection()
 
         return record
+
+    def read_specific_content_file_by_id(self, content_id):
+        """
+
+        """
+        self.__make_connection()
+        query = (f"SELECT * FROM content_files "
+                 f"WHERE content_files.content_id = {content_id} "
+                 f"AND content_files.to_archive = 0;")
+
+        self.curr.execute(query)
+
+        record = self.curr.fetchone()
+
+        self.__close_connection()
+
+        return record
+
+    def read_all_content_files_of_account(self, account_id):
+        """
+
+        """
+        self.__make_connection()
+
+        query = (f"SELECT * FROM content_files "
+                 f"JOIN j_accounts__content_files jt ON content_files.content_id = jt.content_id "
+                 f"WHERE jt.account_id = {account_id};")
+
+        self.curr.execute(query)
+
+        records = self.curr.fetchall()
+
+        self.__close_connection()
+
+        return records
 
     def read_media_pools_of_account(self, account_id):
         """
@@ -636,14 +677,6 @@ class DbNasConnection:
 
         return
 
-    def update_link_account_to_media_pool(self, account_id, media_pool_id):
-        """
-
-        """
-        self.create_junction_entry("j_accounts__media_pools", account_id, media_pool_id)
-
-        return
-
     # ------------ Delete Methods ------------ #
 
     def delete_link_account_to_media_pool(self, account_id, media_pool_id):
@@ -785,14 +818,73 @@ class DbNasConnection:
             account_id (int): The account id.
         """
 
+        # ______ NAS Component ______
+
+        # First check if the account record exists
+        account_record = self.read_account_by_id(account_id)
+        if not account_record:
+            raise ValueError(f"account with the id:{account_id} does not exists")
+
+        # Now delete all associated files:
+        all_content_file_records = self.read_all_content_files_of_account(account_id)
+        for record in all_content_file_records:
+            self.delete_content_file(record[0])
+
+        # Finally, delete the directory
+        local_path = self.__nas_root()
+        local_path = f"{local_path}/active/created_videos/{account_record[1]}"
+        os.rmdir(local_path)
+
+        # ______ DB Component ______
+
+        self.__make_connection()
+
+        # First the junction tables
+        query = f"DELETE FROM j_accounts__content_files WHERE account_id = {account_id}"
+        self.curr.execute(query)
+
+        query = f"DELETE FROM j_accounts__media_pools WHERE account_id = {account_id}"
+        self.curr.execute(query)
+
+        query = f"DELETE FROM accounts WHERE account_id = {account_id}"
+        self.curr.execute(query)
+
+        self.__close_connection()
+
         return
 
     # TODO implement before delete_account
-    def delete_content_files(self, account_id):
+    def delete_content_file(self, content_id):
         """
 
         """
-        # Check
+
+        # ______ NAS Component ______
+
+        # Check the existence of the content pool
+        content_record = self.read_specific_content_file_by_id(content_id)
+        file_path = content_record[1]
+        file_path_local = f"{self.__nas_root()}/{file_path}"
+
+        # Delete the file
+        if os.path.exists(file_path_local):
+            os.remove(file_path_local)
+
+        # ______ DB Component ______
+        self.__make_connection()
+
+        # First delete junction table entry
+        query = f"DELETE FROM j_accounts__content_files WHERE content_id = {content_id}"
+        self.curr.execute(query)
+
+        # Then delete content from table
+        query = f"DELETE FROM content_files WHERE content_id = {content_id}"
+        self.curr.execute(query)
+
+        self.__close_connection()
+
+        return
+
 
     def delete_media_pool(self, media_pool_id):
         """
@@ -801,7 +893,7 @@ class DbNasConnection:
         # Check existence of media pool
         media_pool_record = self.read_media_pool_by_id(media_pool_id)
         if not media_pool_record:
-            return ValueError(f"media_pool with id:{media_pool_id} does not exist")
+            raise ValueError(f"media_pool with id:{media_pool_id} does not exist")
 
         # First delete all associated media_files
         media_file_records = self.read_all_media_files_of_pool(media_pool_id)
@@ -840,10 +932,11 @@ class DbNasConnection:
         # Remove file from nas
         media_file_record = self.read_specific_media_file_by_id(media_file_id)
         file_path = media_file_record[1]
+        file_path_local = f"{self.__nas_root()}/{file_path}"
 
         # Delete the file
-        if os.path.exists(file_path):
-            os.remove(file_path)
+        if os.path.exists(file_path_local):
+            os.remove(file_path_local)
 
         # ______ DB Component ______
         self.__make_connection()

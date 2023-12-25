@@ -6,7 +6,6 @@ CREATE TABLE content_files (content_id INT AUTO_INCREMENT PRIMARY KEY);
 CREATE TABLE j_accounts__content_files (id INT AUTO_INCREMENT PRIMARY KEY);
 CREATE TABLE j_accounts__media_pools (id INT AUTO_INCREMENT PRIMARY KEY);
 CREATE TABLE j_media_pools__media_files (id INT AUTO_INCREMENT PRIMARY KEY);
-CREATE TABLE j_accounts__media_files (id INT AUTO_INCREMENT PRIMARY KEY);
 
 -- Alter tables and add the cols --
 ALTER TABLE accounts
@@ -38,12 +37,6 @@ ADD COLUMN account_id INT,
 ADD COLUMN content_id INT,
 ADD CONSTRAINT fk_account_a_c FOREIGN KEY (account_id) REFERENCES accounts(account_id),
 ADD CONSTRAINT fk_content_a_c FOREIGN KEY (content_id) REFERENCES content_files(content_id);
-
-ALTER TABLE j_accounts__media_files
-ADD COLUMN account_id INT,
-ADD COLUMN media_file_id INT,
-ADD CONSTRAINT fk_account_a_mf FOREIGN KEY (account_id) REFERENCES accounts (account_id),
-ADD CONSTRAINT fk_media_files_a_mf FOREIGN KEY (media_file_id) REFERENCES media_files (media_file_id);
 
 ALTER TABLE j_accounts__media_pools
 ADD COLUMN account_id INT,
