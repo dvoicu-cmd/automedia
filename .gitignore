@@ -1,6 +1,13 @@
+# DS_Store
 **/.DS_Store
+
+# IDE configurations
 **/.vscode
-**/cred.cfg
-**/__pycache__
 **/.idea
+
+# Python Ignore
+**/__pycache__
+
+# Sensitive Files
+**/cred.cfg
 scripts/scraper/openAI/.env
