@@ -9,5 +9,6 @@
 **/__pycache__
 
 # Sensitive Files
+**/paths.cfg
 **/cred.cfg
 scripts/scraper/openAI/.env
