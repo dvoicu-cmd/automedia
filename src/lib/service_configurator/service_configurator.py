@@ -11,6 +11,9 @@ Further reading on systemd timers: https://opensource.com/article/20/7/systemd-t
 
 paths.cfg should look like so:
 
+
+[ABS_FILE_PATH]
+Path={absolute file path location}
 [PATHS]
 ExecStart=/{path of python3} /{file path of main.py}
 WorkingDirectory=/{repository working directory file path}
@@ -43,20 +46,23 @@ class ServiceConfigurator:
             "working_directory": self.config['WorkingDirectory'],
             "on_boot_sec": self.config['OnBootSec'],
             "on_unit_active_sec": self.config['OnUnitActiveSec'],
-            "on_calendar": self.config['OnCalendar']
+            "on_calendar": self.config['OnCalendar'],
+            "abs_path": self.config['Path']
         }
 
         return output_dict
 
-    def write(self, exec_start, working_directory, on_boot_sec, on_unit_active_sec, on_calendar):
+    def write(self, exec_start, working_directory, on_boot_sec, on_unit_active_sec, on_calendar, abs_file_path):
         """
         Writes the paths.cfg file
         """
         # Set up the file
         self.config['PATHS'] = {}
         self.config['TIMERS'] = {}
+        self.config['ABS_FILE_PATH'] = {}
         paths = self.config['PATHS']
         timers = self.config['TIMERS']
+        abs_path = self.config['ABS_FILE_PATH']
 
         # Write contents to obj
         # write path params
@@ -67,6 +73,9 @@ class ServiceConfigurator:
         timers['OnBootSec'] = on_boot_sec
         timers['OnUnitActiveSec'] = on_unit_active_sec
         timers['OnCalendar'] = on_calendar
+
+        # write configuration on where the location of service files will be
+        abs_path['Path'] = abs_file_path
 
         # Write the file
         with open('paths.cfg', 'w') as configfile:
