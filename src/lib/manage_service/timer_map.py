@@ -10,6 +10,7 @@ class TimerMap:
     def serialize(self):
         with open('timer_map.pickle', 'wb') as f:
             pickle.dump(data, f)
+        self.data = {}
 
     def deserialize(self):
         with open('timer_map.pickle', 'rb') as f:

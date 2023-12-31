@@ -4,7 +4,6 @@ Note on timers: Timing needs to be done in a specific format
 For OnUnitActiveSec:
 s -> seconds, min -> minutes, d -> days, w -> weeks, M -> months, y -> years
 ex: OnUnitActiveSec=5min activates the script every five minutes
-
 """
 
 import subprocess
@@ -23,6 +22,8 @@ class ManageService:
         self.service_config = ServiceConfigurator()
         self.timer_map = TimerMap()
 
+    # --------- Public Methods --------- #
+
     def create(self, python_file, on_calendar_list):
         # Load the saved timer map
         self.timer_map.deserialize()
@@ -38,26 +39,29 @@ class ManageService:
         if exec_times is None:
             raise ValueError(f"The provided list: {on_calendar_list} conflicts with all the currently scheduled timers")
 
-        # Write the service file
+        # Write the service and timer files
         self.__write_service_file(python_file)
-
-        # Write the timer file
         self.__write_timer_file(python_file, exec_times)
 
         # Activate the service with subsystem
         self.__activate_service(python_file)
 
         # Save serialize the timer map
-        return
+        self.timer_map.serialize()
 
     def delete(self, python_file):
         # Load the saved timer map
+        self.timer_map.deserialize()
 
-        # Identify service file and timer file
+        # Delete the key on the map
+        self.timer_map.delete_timer_key(python_file)
 
         # Stop services with subsystem
+        self.__stop_service(python_file)
 
-        # Delete file
+        # Delete files
+        self.__delete_timer_file(python_file)
+        self.__delete_service_file(python_file)
 
         return
 
@@ -71,32 +75,51 @@ class ManageService:
         """
         self.service_config.write(service_dir_path, python_runtime_path, python_scripts_path)
 
+    # --------- Service Control --------- #
+
     def __activate_service(self, py_file):
         """
         Activates the service on the host computer
         :return:
         """
-        # Enable the service file
 
-        # Enable the timer file
+        wd = os.getcwd()  # working directory
+        self.__cd_to_desired_root(wd, 'src')  # cd until the src directory
 
-        # Then start the timer file
+        # Change to dir with the bash files
+        os.chdir('lib')
+        os.chdir('manage_service')
 
-        return
+        # Get that file location to the service files for the script
+        d = self.service_config.read()
+
+        r = subprocess.run(['./start_service.sh', d.get('service_dir_path'), f"{py_file}.timer", f"{py_file}.service"])
+        self.__verify_subprocess(r)
+
+        # Change back working directory
+        os.chdir(wd)
 
     def __stop_service(self, py_file):
         """
-
+        Stops the service on the host computer
         :return:
         """
-        # Stop the timer file
+        wd = os.getcwd()  # working directory
+        self.__cd_to_desired_root(wd, 'src')  # cd until the src directory
 
-        # Disable the timer file
+        # Change to dir with the bash files
+        os.chdir('lib')
+        os.chdir('manage_service')
 
-        # Disable the service file
+        # Get that file location to the service files for the script
+        d = self.service_config.read()
+        r = subprocess.run(['./stop_service.sh', d.get('service_dir_path'), f"{py_file}.timer", f"{py_file}.service"])
+        self.__verify_subprocess(r)
 
+        # Change back working directory
+        os.chdir(wd)
 
-        return
+    # --------- Writing Files --------- #
 
     def __write_service_file(self, py_file):
         """
@@ -151,6 +174,8 @@ class ManageService:
         with open(f"{path_dict.get('service_dir_path')}/{py_file}.timer", 'w') as f:
             f.write(file_content)
 
+    # --------- Deleting Files --------- #
+
     def __delete_service_file(self, py_file):
         path_dict = self.service_config.read()
         os.remove(f"{path_dict.get('service_dir_path')}/{py_file}.service")
@@ -158,6 +183,37 @@ class ManageService:
     def __delete_timer_file(self, py_file):
         path_dict = self.service_config.read()
         os.remove(f"{path_dict.get('service_dir_path')}/{py_file}.timer")
+
+    # --------- Helper Methods --------- #
+
+    def __cd_to_desired_root(self, current_dir, desired_root):
+        """
+        Changes directories up the file system tree until you reach the desired directory
+        :param current_dir:
+        :param desired_root:
+        :return:
+        """
+        not_at_root = True
+        while not_at_root:
+            # Check if this is the current directory tree
+            if desired_root in os.listdir(current_dir):
+                not_at_root = False
+
+            # Move up a level in directory tree
+            parent_dir = os.path.dirname(current_dir)
+
+            # If you reach the fs root somehow
+            if parent_dir == current_dir:
+                print(f"ERR: reached the top most directory with out finding {desired_root}")
+                not_at_root = False
+
+            # Update for next iteration
+            current_dir = parent_dir
+
+    def __verify_subprocess(self, r):
+        if r.returncode == 1:
+            raise BrokenPipeError("Something went wrong with the bash script")
+
 
 
 """
