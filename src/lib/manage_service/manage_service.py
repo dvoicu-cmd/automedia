@@ -32,7 +32,7 @@ class ManageService:
         self.timer_map.new_timer_key(python_file)
 
         # Add on_calendar_list to the mapping
-        self.timer_map.new_exec_times(python_file, on_calendar_list)
+        self.timer_map.new_exec_time_value(python_file, on_calendar_list)
 
         # If the exec times are empty after adding
         exec_times = self.timer_map.get_exec_times(python_file)
@@ -186,7 +186,8 @@ class ManageService:
 
     # --------- Helper Methods --------- #
 
-    def __cd_to_desired_root(self, current_dir, desired_root):
+    @staticmethod
+    def __cd_to_desired_root(current_dir, desired_root):
         """
         Changes directories up the file system tree until you reach the desired directory
         :param current_dir:
@@ -210,6 +211,7 @@ class ManageService:
             # Update for next iteration
             current_dir = parent_dir
 
+    @staticmethod
     def __verify_subprocess(self, r):
         if r.returncode == 1:
             raise BrokenPipeError("Something went wrong with the bash script")

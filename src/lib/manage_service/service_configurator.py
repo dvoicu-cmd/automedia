@@ -29,9 +29,9 @@ class ServiceConfigurator:
             raise FileNotFoundError(f'Failed to read paths.cfg file for obj: {self}')
 
         output_dict = {
-            "service_dir_path": self.config['PATHS']['ServiceDirectoryPath'],
-            "python_runtime_path": self.config['PATHS']['PythonRuntimePath'],
-            "python_scripts_path": self.config['PATHS']['PythonScriptsPath']
+            "service_dir_path": self.config['PATHS']['service_directory_path'],
+            "python_runtime_path": self.config['PATHS']['python_runtime_path'],
+            "python_scripts_path": self.config['PATHS']['python_scripts_path']
         }
 
         return output_dict
@@ -45,9 +45,9 @@ class ServiceConfigurator:
         paths = self.config['PATHS']
 
         # write path params
-        paths['ServiceDirectoryPath'] = service_dir_path
-        paths['PythonRuntimePath'] = python_runtime_path
-        paths['PythonScriptsPath'] = python_scripts_path
+        paths['service_directory_path'] = service_dir_path
+        paths['python_runtime_path'] = python_runtime_path
+        paths['python_scripts_path'] = python_scripts_path
 
         # Write the file
         with open('paths.cfg', 'w') as configfile:
