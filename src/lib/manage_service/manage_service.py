@@ -82,16 +82,17 @@ class ManageService:
         Activates the service on the host computer
         :return:
         """
+        # Get that file location to the service files for the script before changing dirs for subprocess
+        d = self.service_config.read()
 
         wd = os.getcwd()  # working directory
         self.__cd_to_desired_root(wd, 'src')  # cd until the src directory
 
+        print(os.getcwd())
+
         # Change to dir with the bash files
         os.chdir('lib')
         os.chdir('manage_service')
-
-        # Get that file location to the service files for the script
-        d = self.service_config.read()
 
         r = subprocess.run(['./start_service.sh', d.get('service_dir_path'), f"{py_file}.timer", f"{py_file}.service"])
         self.__verify_subprocess(r)
@@ -194,22 +195,26 @@ class ManageService:
         :param desired_root:
         :return:
         """
-        not_at_root = True
-        while not_at_root:
+        while True:
             # Check if this is the current directory tree
+            all = os.listdir(current_dir)
             if desired_root in os.listdir(current_dir):
-                not_at_root = False
+                # You have reached the dir containing the desired directory. Append the desired dir to the current dir.
+                current_dir = f"{current_dir}/{desired_root}"
+                break
 
             # Move up a level in directory tree
             parent_dir = os.path.dirname(current_dir)
 
             # If you reach the fs root somehow
             if parent_dir == current_dir:
-                print(f"ERR: reached the top most directory with out finding {desired_root}")
-                not_at_root = False
+                raise ValueError(f"Reached the top most directory with out finding {desired_root}")
 
             # Update for next iteration
             current_dir = parent_dir
+
+        # Update the current working directory of this file
+        os.chdir(current_dir)
 
     @staticmethod
     def __verify_subprocess(self, r):

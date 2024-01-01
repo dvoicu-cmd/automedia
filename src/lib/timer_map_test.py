@@ -1,4 +1,4 @@
-from src.lib.manage_service.timer_map import TimerMap
+from manage_service.timer_map import TimerMap
 
 def test_deserialize():
     tm = TimerMap()
