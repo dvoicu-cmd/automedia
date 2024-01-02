@@ -1,6 +1,5 @@
-"""
-main method for systemd to run
-"""
+if __name__ == '__main__':
+    print("hello publisher")
 
 
 def main():
@@ -26,7 +25,3 @@ def main():
     # 6) Put account to the bottom of the queue, repeat for all queue items
 
     return 0
-
-
-# Call MAIN
-main()

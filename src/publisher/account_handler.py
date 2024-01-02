@@ -3,7 +3,6 @@ account_handler.py
 
 handles account data as it goes to the central database on the publisher.
 """
-from ..central.db_nas_connection import DbNasConnection
 
 
 class AccountEncryptionHandler:
