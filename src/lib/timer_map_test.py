@@ -24,6 +24,4 @@ def test_add_exec_time_value():
 
     tm.serialize()
 
-test_add_key()
-test_add_exec_time_value()
 test_deserialize()

@@ -1,14 +1,12 @@
 """
 Class for that configures the location paths of the service files
 
-Further reading on systemd timers: https://opensource.com/article/20/7/systemd-timers
-
 paths.cfg should look like so:
 
 [PATHS]
-ServiceDirectoryPath=/{path that points to where all the service and timer files are located on machine}
-PythonRuntimePath=/{path that points towards where the python runtime is located. Typically, in the bin}
-PythonScriptsPath=/{path that points to all the specific execution scripts}
+service_directory_path=/{path that points to where all the service and timer files are located on machine}
+python_runtime_path=/{path that points towards where the python runtime is located. Typically, in the bin}
+python_scripts_path=/{path that points to all the specific execution scripts}
 """
 
 import configparser
@@ -39,6 +37,12 @@ class ServiceConfigurator:
     def write(self, service_dir_path='/', python_runtime_path='/', python_scripts_path='/'):
         """
         Writes the paths.cfg file
+
+        Args:
+            service_dir_path: The path pointing towards the directory for loading systemd .service and .timer files.
+            Typically located on linux machines in /etc/systemd/system
+            python_runtime_path: The path that points towards the python binary file. Typically located in /bin/python3
+            python_scripts_path: The path that points to the python scripts that you wish to run schedule
         """
         # Set up the file
         self.config['PATHS'] = {}

@@ -15,16 +15,32 @@ from .timer_map import TimerMap
 class ManageService:
     def __init__(self):
         """
-        Constructor
-        Args:
-            python_file (str): The file name of the python script that will be run as a service
+        Constructor for ManageService class
         """
+        # class that abstractions the writing and loading params in the paths.cfg file
         self.service_config = ServiceConfigurator()
+        # class that reads, writes, and deletes the mapping of python files to their execution times
         self.timer_map = TimerMap()
 
     # --------- Public Methods --------- #
 
     def create(self, python_file, on_calendar_list):
+        """
+        Creates a systemd service that executes the inputted python script on the given onCalendar schedules.
+        OnCalendar formatting: systemd timers use the format: {day of the week} {year}-{month}-{day} {hr}:{min}:{sec}.
+        You can use the wild card * to signify every option for the calendar.
+        ex1: execute script every day at 9 pm *-*-* 21:00:00
+        ex2: execute script every monday at 9 am Mon *-*-* 09:00:00
+        More documentation and specific can be found at:
+        https://www.freedesktop.org/software/systemd/man/latest/systemd.time.html#
+        and
+        https://opensource.com/article/20/7/systemd-timers
+
+        Args:
+            python_file (str): The string that contains the name of the python file excluding the .py extension in the current directory
+            on_calendar_list (list): A list of strings in the appropriate on calendar format. ex: ["*-*-* 21:00:00", "*-*-* 09:00:00"]
+        """
+
         # Load the saved timer map
         self.timer_map.deserialize()
 
@@ -34,7 +50,7 @@ class ManageService:
         # Add on_calendar_list to the mapping
         self.timer_map.new_exec_time_value(python_file, on_calendar_list)
 
-        # Impliment way to check duplicates, not really important
+        # Implement way to check duplicates, not really important
         # exec_times = self.timer_map.get_exec_times(python_file)
         # if exec_times is None:
         #     raise ValueError(f"The provided list: {on_calendar_list} conflicts with all the currently scheduled timers")
@@ -50,6 +66,12 @@ class ManageService:
         self.timer_map.serialize()
 
     def delete(self, python_file):
+        """
+        Deletes the systemd service and associated files for a python script given that the script it has a service.
+
+        Args:
+            python_file (str): The string that contains the name of the python file excluding the .py extension in the current directory
+        """
         # Load the saved timer map
         self.timer_map.deserialize()
 
@@ -63,15 +85,15 @@ class ManageService:
         self.__delete_timer_file(python_file)
         self.__delete_service_file(python_file)
 
-        return
-
     def create_paths_config(self, service_dir_path, python_runtime_path, python_scripts_path):
         """
+        Creates a paths.cfg file in the current directory that contains the needed absolute file paths to create services
 
-        :param service_dir_path:
-        :param python_runtime_path:
-        :param python_scripts_path:
-        :return:
+        Args:
+            service_dir_path: The path pointing towards the directory for loading systemd .service and .timer files.
+            Typically located on linux machines in /etc/systemd/system
+            python_runtime_path: The path that points towards the python binary file. Typically located in /bin/python3
+            python_scripts_path: The path that points to the python scripts that you wish to run schedule
         """
         self.service_config.write(service_dir_path, python_runtime_path, python_scripts_path)
 
@@ -79,8 +101,10 @@ class ManageService:
 
     def __activate_service(self, py_file):
         """
-        Activates the service on the host computer
-        :return:
+        Helper method that runs the bash scripts that enable and start the .service and .timer files for the python script
+
+        Args:
+            py_file (str): The string that contains the name of the python file excluding the .py extension in the current directory
         """
         # Get that file location to the service files for the script before changing dirs for subprocess
         d = self.service_config.read()
@@ -101,8 +125,10 @@ class ManageService:
 
     def __stop_service(self, py_file):
         """
-        Stops the service on the host computer
-        :return:
+        Helper method that runs the bash scripts that stop and disable the .service and .timer files for the python script
+
+        Args:
+            py_file (str): The string that contains the name of the python file excluding the .py extension in the current directory
         """
         # Get that file location to the service files for the script before changing dirs
         d = self.service_config.read()
@@ -125,8 +151,10 @@ class ManageService:
 
     def __write_service_file(self, py_file):
         """
-        Writes the .service file at the specified location
-        :return:
+        Writes the .service file given the location found in the paths.cfg file
+
+        Args:
+            py_file (str): The string that contains the name of the python file excluding the .py extension in the current directory
         """
         path_dict = self.service_config.read()
 
@@ -152,8 +180,12 @@ class ManageService:
 
     def __write_timer_file(self, py_file, on_calendar_list):
         """
-        Writes the .timer file at the specified location
-        :return:
+        Writes the .timer file given the location found in the paths.cfg file
+
+        Args:
+            py_file (str): The string that contains the name of the python file excluding the .py extension in the current directory
+            on_calendar_list (list): on_calendar_list (list): A list of strings in the appropriate on calendar format. ex: ["*-*-* 21:00:00", "*-*-* 09:00:00"]
+
         """
         path_dict = self.service_config.read()
 
@@ -180,10 +212,24 @@ class ManageService:
     # --------- Deleting Files --------- #
 
     def __delete_service_file(self, py_file):
+        """
+        Deletes the .service file given the location found in the paths.cfg file
+
+        Args:
+            py_file (str): The string that contains the name of the python file excluding the .py extension in the current directory
+        """
+
         path_dict = self.service_config.read()
         os.remove(f"{path_dict.get('service_dir_path')}/{py_file}.service")
 
     def __delete_timer_file(self, py_file):
+        """
+        Deletes the .timer file given the location found in the paths.cfg file
+
+        Args:
+            py_file (str): The string that contains the name of the python file excluding the .py extension in the current directory
+        """
+
         path_dict = self.service_config.read()
         os.remove(f"{path_dict.get('service_dir_path')}/{py_file}.timer")
 
@@ -192,14 +238,14 @@ class ManageService:
     @staticmethod
     def __cd_to_desired_root(current_dir, desired_root):
         """
-        Changes directories up the file system tree until you reach the desired directory
-        :param current_dir:
-        :param desired_root:
-        :return:
+        Changes directories of the python runtime up the file system tree until you reach the desired directory
+
+        Args:
+            current_dir (str): The current working directory path.
+            desired_root (str): The string name of the directory to cd up the file system to.
         """
         while True:
             # Check if this is the current directory tree
-            all = os.listdir(current_dir)
             if desired_root in os.listdir(current_dir):
                 # You have reached the dir containing the desired directory. Append the desired dir to the current dir.
                 current_dir = f"{current_dir}/{desired_root}"
@@ -217,47 +263,3 @@ class ManageService:
 
         # Update the current working directory of this file
         os.chdir(current_dir)
-
-    @staticmethod
-    def __verify_subprocess(self, r):
-        if r.returncode == 1:
-            raise BrokenPipeError("Something went wrong with the bash script")
-
-
-
-"""
------ This is the format of the service file ----
-
-[Unit]
-Description={description_service}
-After=multi-user.target
-Conflicts=getty@tty1.service
-Wants={service_name}.timer
-
-# Specify the file paths below
-[Service]
-Type=simple
-User=root
-ExecStart=/{path of python3} /{file path of main.py}
-WorkingDirectory=/{repository working directory file path}
-KillMode=process
-
-[Install]
-WantedBy=multi-user.target
-
-
----- This is the format of the timer file ----
-
-[Unit]
-Description={description_timer}
-Requires={service_name}.service
-
-[Timer]
-Unit={service_name}.service
-<OnCalendar=*-*-* *:*:00>
-
-[Install]
-WantedBy=timers.target
-
-
-"""
