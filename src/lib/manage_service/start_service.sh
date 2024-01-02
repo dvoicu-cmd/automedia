@@ -7,6 +7,9 @@
 echo "navigating to service dir"
 cd $1
 
+# Refresh the dameons
+systemctl daemon-reload
+
 # Enable the timer file
 systemctl enable $2
 

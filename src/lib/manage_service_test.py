@@ -6,6 +6,11 @@ def test_create_paths_config():
 
 def test_create_service():
     ms = ManageService()
-    ms.create("the", ["*-*-* *:*0/3:00"])
+    ms.create("the", ["*-*-* 18:00:00", "*-*-* 18:10:00"])
 
-test_create_service()
+def test_delete_service():
+    ms = ManageService()
+    ms.delete("the")
+
+# test_create_service()
+test_delete_service()

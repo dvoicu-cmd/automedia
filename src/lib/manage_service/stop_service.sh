@@ -14,4 +14,8 @@ systemctl stop $2
 systemctl disable $3
 
 # Then disable the timer file
-systemctl disabble $2
+systemctl disable $2
+
+# Refresh the dameons
+systemctl daemon-reload
+

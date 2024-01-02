@@ -34,14 +34,14 @@ class ManageService:
         # Add on_calendar_list to the mapping
         self.timer_map.new_exec_time_value(python_file, on_calendar_list)
 
-        # If the exec times are empty after adding
-        exec_times = self.timer_map.get_exec_times(python_file)
-        if exec_times is None:
-            raise ValueError(f"The provided list: {on_calendar_list} conflicts with all the currently scheduled timers")
+        # Impliment way to check duplicates, not really important
+        # exec_times = self.timer_map.get_exec_times(python_file)
+        # if exec_times is None:
+        #     raise ValueError(f"The provided list: {on_calendar_list} conflicts with all the currently scheduled timers")
 
         # Write the service and timer files
         self.__write_service_file(python_file)
-        self.__write_timer_file(python_file, exec_times)
+        self.__write_timer_file(python_file, on_calendar_list)
 
         # Activate the service with subsystem
         self.__activate_service(python_file)
@@ -94,8 +94,7 @@ class ManageService:
         os.chdir('lib')
         os.chdir('manage_service')
 
-        r = subprocess.run(['./start_service.sh', d.get('service_dir_path'), f"{py_file}.timer", f"{py_file}.service"])
-        self.__verify_subprocess(r)
+        subprocess.run(['./start_service.sh', d.get('service_dir_path'), f"{py_file}.timer", f"{py_file}.service"])
 
         # Change back working directory
         os.chdir(wd)
@@ -105,17 +104,19 @@ class ManageService:
         Stops the service on the host computer
         :return:
         """
+        # Get that file location to the service files for the script before changing dirs
+        d = self.service_config.read()
+
         wd = os.getcwd()  # working directory
         self.__cd_to_desired_root(wd, 'src')  # cd until the src directory
 
         # Change to dir with the bash files
         os.chdir('lib')
         os.chdir('manage_service')
-
-        # Get that file location to the service files for the script
-        d = self.service_config.read()
+        
+        # Run the bash files
         r = subprocess.run(['./stop_service.sh', d.get('service_dir_path'), f"{py_file}.timer", f"{py_file}.service"])
-        self.__verify_subprocess(r)
+        # self.__verify_subprocess(r)
 
         # Change back working directory
         os.chdir(wd)
@@ -158,17 +159,18 @@ class ManageService:
 
         file_content = (f"[Unit]\n"
                         f"Description=''\n"
-                        f"Requires{py_file}.service\n"
+                        f"Requires={py_file}.service\n"
                         f"\n"
                         f"[Timer]\n"
-                        f"Unit={py_file}.service")
+                        f"Unit={py_file}.service\n")
 
         # Append the on calendar elements
         for on_calendar_element in on_calendar_list:
-            file_content = f"{file_content}\nOnCalendar={on_calendar_element}\n"
+            file_content = f"{file_content}OnCalendar={on_calendar_element}\n"
 
         # Add remaining items to file
         file_content = (f"{file_content}"
+                        f"\n"
                         f"[Install]\n"
                         f"WantedBy=timers.target")
 
