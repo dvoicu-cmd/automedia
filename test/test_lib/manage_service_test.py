@@ -1,4 +1,4 @@
-from manage_service.manage_service import ManageService
+from lib.manage_service.manage_service import ManageService
 
 def test_create_paths_config():
     ms = ManageService()
@@ -12,5 +12,3 @@ def test_delete_service():
     ms = ManageService()
     ms.delete("the")
 
-# test_create_service()
-test_delete_service()

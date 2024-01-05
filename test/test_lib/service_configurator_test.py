@@ -1,5 +1,4 @@
-# from ..manage_service.service_configurator import ServiceConfigurator
-from src.lib.manage_service.service_configurator import ServiceConfigurator
+from lib.manage_service.service_configurator import ServiceConfigurator
 
 
 def test_load():
