@@ -1,9 +1,9 @@
 import configparser
 from selenium import webdriver
 from selenium.webdriver.chrome.options import Options
-from selenium.webdriver.support.ui import WebDriverWait
-from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.common.by import By
+
+import pdb
 
 
 class YtUpload:
@@ -12,10 +12,6 @@ class YtUpload:
     obj variables
     """
     # --- Upload details ---
-    content_path = None  # Location of the content on nfs server on central
-    title = None  # Title of the content
-    description = None  # The description
-    config = None
 
     # ---
 
@@ -24,7 +20,23 @@ class YtUpload:
         """
         Constructor
         """
-        print("init youtube uploader")
+        options = Options()
+        # options.add_argument('--headless')
+        self.driver = webdriver.Chrome(options=options)
+
+        # Create yt_studio login
+        self.driver.get("https://studio.youtube.com/")
+        self.driver.implicitly_wait(time_to_wait=2)
+        usr_in = self.driver.find_element(By.TAG_NAME, 'input')
+        usr_in.send_keys(account)
+        next_btn = self.driver.find_element(By.XPATH, '//*[@id="identifierNext"]/div/button')
+        next_btn.click()
+
+
+        pdb.set_trace()
+
+
+
 
     def load_config(self):
         """
