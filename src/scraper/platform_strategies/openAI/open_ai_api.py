@@ -85,6 +85,3 @@ class OpenAiAPI:
             os.mkdir(name)
         except FileExistsError:
             pass
-
-
-

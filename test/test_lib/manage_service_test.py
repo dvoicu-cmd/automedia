@@ -1,3 +1,4 @@
+from context import lib
 from lib.manage_service.manage_service import ManageService
 
 def test_create_paths_config():

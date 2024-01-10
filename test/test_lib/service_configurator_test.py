@@ -1,3 +1,4 @@
+from context import lib
 from lib.manage_service.service_configurator import ServiceConfigurator
 
 
