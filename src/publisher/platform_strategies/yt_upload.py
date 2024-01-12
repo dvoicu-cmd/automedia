@@ -16,11 +16,13 @@ class YtUpload:
     # ---
 
 
-    def __init__(self, account, password):
+    def __init__(self, account, password, chrome_binary_path):
         """
         Constructor
         """
         options = Options()
+        options.binary_location = chrome_binary_path
+        options.add_argument("user-data-dir=$HOME/.config/google-chrome")
         # options.add_argument('--headless')
         self.driver = webdriver.Chrome(options=options)
 

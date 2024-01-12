@@ -58,6 +58,7 @@ ADD CONSTRAINT fk_media_file_mp_mf FOREIGN KEY (media_file_id) REFERENCES media_
 -- Replace the remote host with your subnetwork. ex: 192.168.1.%
 -- Update password to be more secure
 -- When granting privileges, you want to specify the database name
-CREATE USER 'py_interface'@'10.10.2.%' IDENTIFIED BY 'password';
-GRANT SELECT, INSERT, UPDATE, DELETE ON *.* TO 'py_interface'@'10.10.2.%';
-FLUSH PRIVILEGES;
+
+-- CREATE USER 'py_interface'@'10.10.2.%' IDENTIFIED BY 'password';
+-- GRANT SELECT, INSERT, UPDATE, DELETE ON *.* TO 'py_interface'@'10.10.2.%';
+-- FLUSH PRIVILEGES;
