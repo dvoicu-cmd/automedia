@@ -10,6 +10,7 @@ CREATE TABLE j_media_pools__media_files (id INT AUTO_INCREMENT PRIMARY KEY);
 -- Alter tables and add the cols --
 ALTER TABLE accounts
 ADD COLUMN username VARCHAR(255),
+ADD CONSTRAINT unique_username UNIQUE (username),
 ADD COLUMN email BLOB(255),
 ADD COLUMN password BLOB(255),
 ADD COLUMN platform VARCHAR(255),
@@ -17,10 +18,12 @@ ADD COLUMN description TEXT;
 
 ALTER TABLE media_pools
 ADD COLUMN media_pool_name VARCHAR(255),
+ADD CONSTRAINT unique_media_pool_name UNIQUE (media_pool_name),
 ADD COLUMN description TEXT;
 
 ALTER TABLE media_files
 ADD COLUMN file_location VARCHAR(255),
+ADD CONSTRAINT unique_media_location UNIQUE (file_location),
 ADD COLUMN media_type VARCHAR(255),
 ADD COLUMN title VARCHAR(255),
 ADD COLUMN description TEXT,
@@ -28,6 +31,7 @@ ADD COLUMN to_archive TINYINT(1);
 
 ALTER TABLE content_files
 ADD COLUMN file_location VARCHAR(255),
+ADD CONSTRAINT unique_content_location UNIQUE (file_location),
 ADD COLUMN title VARCHAR(255),
 ADD COLUMN description TEXT,
 ADD COLUMN to_archive TINYINT(1);

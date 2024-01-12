@@ -91,6 +91,9 @@ class DbNasConnection:
             description (str): A long description of the account and what kind of content it posts
         Precondition:
             Assumes there is a file path /self.__nas_root/active
+
+        Raises:
+            ValueError: If the account already exists
         """
 
         # ______ NAS component ______
@@ -105,8 +108,8 @@ class DbNasConnection:
         # Create the account directory
         try:
             os.mkdir(f"{path}/{username}")
-        except OSError or FileExistsError:
-            raise ValueError(f"File path:{path}/{username} exists or is invalid. Aborting write to database")
+        except FileExistsError or OSError:
+            raise ValueError(f"File path:{path}/{username} exists.")
 
         # ______ DB component ______
 
@@ -145,7 +148,7 @@ class DbNasConnection:
                 video files: '.mp4'
             title (str): title of the media file
             description (str): description of media file
-            media_pool_parent (str): The media pool the
+            media_pool_parent (str): The media pool the media file is associated with.
         Post-condition:
         1) Creates a record on the media_files table
         2) Creates a record on the junction table for media pools and media files
@@ -174,7 +177,10 @@ class DbNasConnection:
             os.mkdir(path)
 
         # Move the file to the nas
-        shutil.move(content, path)
+        try:
+            shutil.move(content, path)
+        except shutil.Error:
+            raise FileExistsError(f"The path exists on NAS: {path}")
 
         # Before moving to db component, append the base name to the path on the server's file system root
         file_name = os.path.basename(content)
@@ -211,11 +217,12 @@ class DbNasConnection:
     def create_media_pool(self, media_pool_name, description):
         """
         Creates a media pool record
-        media_pool_name (str): The name of the media pool
-        description (str): A simple description on what is contained in the pool.
         Args:
             media_pool_name (str): The name of the media pool
             description (str): A brief description of the media pool
+
+        Raises:
+            ValueError: If the media pool exists
         """
 
         # ______ NAS component ______
@@ -229,8 +236,8 @@ class DbNasConnection:
         # Create the account directory
         try:
             os.mkdir(f"{path}/{media_pool_name}")
-        except OSError or FileExistsError:
-            raise ValueError(f"File path:{path}/{media_pool_name} exists or is invalid. Aborting write to database")
+        except FileExistsError or OSError:
+            raise ValueError(f"File path:{path}/{media_pool_name} exists.")
 
         # ______ DB component ______
 
@@ -284,7 +291,10 @@ class DbNasConnection:
             os.mkdir(path)
 
         # Move the file to the nas
-        shutil.move(file_location_init, path)
+        try:
+            shutil.move(file_location_init, path)
+        except shutil.Error:
+            raise FileExistsError(f"The path exists on NAS: {path}")
 
         # Before moving to db component, append the base name to the path that would be on the server
         file_name = os.path.basename(file_location_init)
@@ -1003,7 +1013,7 @@ class DbNasConnection:
         creds['password'] = password
         creds['database'] = database
         mnt['nas_root'] = nas_root
-        with open('cred.cfg', 'w') as configfile:
+        with open('../../test/test_lib/cred.cfg', 'w') as configfile:
             config.write(configfile)
         self.credentials = self.__load_connection_config()
 

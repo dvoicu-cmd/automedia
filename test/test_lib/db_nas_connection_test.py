@@ -1,10 +1,10 @@
-from db_nas_connection import DbNasConnection
+from context import lib
+from lib.central_connector.db_nas_connection import DbNasConnection
 import datetime
 
+
 def main():
-
-    delete_account()
-
+    upload_media_file_duplicate()
     return
 
 def delete_account():
@@ -202,6 +202,16 @@ def create_junktion_entry():
     db.create_junction_entry("j_media_pools__media_files",2,2)
 
 
+def upload_media_file_duplicate():
+    db = DbNasConnection()
+    db.create_media_pool("copy.txt", "Test for copy entries")
+    db.create_media_file("/Users/dvoicu/mnt/Goofy Aughhh Test Files/bard_db_lecture.txt", "text", "The title of this", "A description of the content", "copy.txt")
+    db.create_media_file("/Users/dvoicu/mnt/bard_db_lecture.txt", "text", "This is the beginning of the song", "Really descriptive", "copy.txt")
 
+
+def upload_dupe_content():
+    db = DbNasConnection()
+    db.create_content("/Users/dvoicu/mnt/Goofy Aughhh Test Files/AUUGHHH Tik Tok Sound Effect.mp3","tiktok funny", "This is a discription of the video","TheOTHER")
+    db.create_content("/Users/dvoicu/mnt/AUUGHHH Tik Tok Sound Effect.mp3", "HE he he ha", "This is the end of the song","TheOTHER")
 
 main()
