@@ -1,5 +1,7 @@
 import configparser
 from selenium import webdriver
+from selenium.webdriver.chrome.service import Service as ChromeService
+from webdriver_manager.chrome import ChromeDriverManager
 from selenium.webdriver.chrome.options import Options
 from selenium.webdriver.common.by import By
 
@@ -16,24 +18,20 @@ class YtUpload:
     # ---
 
 
-    def __init__(self, account, password, chrome_binary_path):
+    def __init__(self, account, password):
         """
         Constructor
         """
         options = Options()
-        options.binary_location = chrome_binary_path
-        options.add_argument("user-data-dir=$HOME/.config/google-chrome")
+        # This kinda sorta almost works...
+        options.add_argument("user-data-dir=/home/dv/.config/google-chrome")
+        options.add_argument("profile-directory=Default")
         # options.add_argument('--headless')
-        self.driver = webdriver.Chrome(options=options)
+        self.driver = webdriver.Chrome(options=options, service=ChromeService(ChromeDriverManager().install()))
 
         # Create yt_studio login
         self.driver.get("https://studio.youtube.com/")
         self.driver.implicitly_wait(time_to_wait=2)
-        usr_in = self.driver.find_element(By.TAG_NAME, 'input')
-        usr_in.send_keys(account)
-        next_btn = self.driver.find_element(By.XPATH, '//*[@id="identifierNext"]/div/button')
-        next_btn.click()
-
 
         pdb.set_trace()
 
