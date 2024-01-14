@@ -4,6 +4,7 @@ from src.publisher.platform_strategies.yt_upload import YtUpload
 
 def test_login():
     yt = YtUpload("dvmedia00@gmail.com", "")
+    yt.select_account("arghhh")
 
 
 test_login()
