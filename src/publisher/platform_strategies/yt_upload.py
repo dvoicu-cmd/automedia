@@ -4,6 +4,7 @@ from selenium.webdriver.chrome.service import Service as ChromeService
 from webdriver_manager.chrome import ChromeDriverManager
 from selenium.webdriver.chrome.options import Options
 from selenium.webdriver.common.by import By
+import undetected_chromedriver as uc
 
 import pdb
 
@@ -25,13 +26,16 @@ class YtUpload:
         options = Options()
         # This kinda sorta almost works...
         options.add_argument("user-data-dir=/home/dv/.config/google-chrome")
-        options.add_argument("profile-directory=Default")
+        options.add_argument("profile-directory=Profile 1")
+        # options.add_argument("--remote-debugging-pipe")
         # options.add_argument('--headless')
-        self.driver = webdriver.Chrome(options=options, service=ChromeService(ChromeDriverManager().install()))
+        # self.driver = webdriver.Chrome(options=options, service=ChromeService(ChromeDriverManager().install()))
+        self.driver = uc.Chrome()
 
         # Create yt_studio login
         self.driver.get("https://studio.youtube.com/")
         self.driver.implicitly_wait(time_to_wait=2)
+
 
         pdb.set_trace()
 
