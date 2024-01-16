@@ -1,21 +1,22 @@
 import os
+import time
 
 import selenium.common.exceptions
-import urllib3.exceptions
-from selenium.webdriver.support import expected_conditions as EC
-from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.common.by import By
 import undetected_chromedriver as uc
+from pyotp.totp import TOTP
+
+import pdb
 
 
 class YtUpload:
 
-    def __init__(self, email, password):
+    def __init__(self, email, password, auth_secret):
         """
         Constructor
         """
         self.driver = uc.Chrome()
-        self.__login_google(email, password)
+        self.__login_google(email, password, auth_secret)
         self.title = "default"
         self.description = "default"
         self.tags = "default1,default2,default3"
@@ -83,6 +84,7 @@ class YtUpload:
             # Convert bytes to megabytes
             file_size_in_mb = file_size_in_bytes / (1024 * 1024)
 
+            # Only set true if the file size is less than 2mb
             if file_size_in_mb <= 2:
                 self.thumbnail_config["set_thumbnail"] = True
                 self.thumbnail_config["path"] = img_path
@@ -101,7 +103,7 @@ class YtUpload:
         if not os.path.exists(file_path):
             raise ValueError(f"Video path does not exists: {file_path}")
 
-        self.driver.implicitly_wait(time_to_wait=1)
+        time.sleep(1)
 
         # Click create button
         self.driver.find_element(By.ID, 'create-icon').click()
@@ -115,9 +117,8 @@ class YtUpload:
         # Send file to upload button
         upload_button.send_keys(file_path)
 
-        # Wait for next button to be seen
-        # WebDriverWait(self.driver, 30).until(EC.presence_of_element_located((By.XPATH, '/html/body/ytcp-uploads-dialog/tp-yt-paper-dialog/div/ytcp-animatable[2]/div/div[2]/ytcp-button[2]')))
-        self.driver.implicitly_wait(time_to_wait=10)
+        # Wait for next button to be seen. I know EC exists, but damn does it not work with this.
+        time.sleep(3)
 
         # Set the title
         title_input = self.driver.find_element(By.XPATH, '/html/body/ytcp-uploads-dialog/tp-yt-paper-dialog/div/ytcp-animatable[1]/ytcp-ve/ytcp-video-metadata-editor/div/ytcp-video-metadata-editor-basics/div[1]/ytcp-video-title/ytcp-social-suggestions-textbox/ytcp-form-input-container/div[1]/div[2]/div/ytcp-social-suggestion-input/div')
@@ -159,26 +160,31 @@ class YtUpload:
         # get the next button and click it to move to next page.
         next_button = self.driver.find_element(By.XPATH, '/html/body/ytcp-uploads-dialog/tp-yt-paper-dialog/div/ytcp-animatable[2]/div/div[2]/ytcp-button[2]')
         next_button.click()
-        self.driver.implicitly_wait(time_to_wait=5)
+        time.sleep(3)
 
         # Skip video elements
         next_button.click()
-        self.driver.implicitly_wait(time_to_wait=5)
+        time.sleep(1)
         # Skip checks
         next_button.click()
-        self.driver.implicitly_wait(time_to_wait=5)
+        time.sleep(1)
 
         # Now click visibility to public
         public_button = self.driver.find_element(By.XPATH, '/html/body/ytcp-uploads-dialog/tp-yt-paper-dialog/div/ytcp-animatable[1]/ytcp-uploads-review/div[2]/div[1]/ytcp-video-visibility-select/div[2]/tp-yt-paper-radio-group/tp-yt-paper-radio-button[3]')
         public_button.click()
-        self.driver.implicitly_wait(time_to_wait=5)
+        time.sleep(1)
 
         # Click the publish button
         publish_button = self.driver.find_element(By.XPATH, '/html/body/ytcp-uploads-dialog/tp-yt-paper-dialog/div/ytcp-animatable[2]/div/div[2]/ytcp-button[3]')
         publish_button.click()
-        self.driver.implicitly_wait(time_to_wait=15)
+        time.sleep(6)
 
-        self.driver.find_element(By.XPATH, '/html/body/ytcp-uploads-still-processing-dialog/ytcp-dialog/tp-yt-paper-dialog/div[3]/ytcp-button').click()
+        self.driver.refresh()
+
+        try:
+            self.driver.switch_to.alert.accept()
+        except selenium.common.exceptions.NoAlertPresentException:
+            pass
 
     def select_account(self, account_name):
         # Get to the list of the associated accounts.
@@ -207,30 +213,52 @@ class YtUpload:
         account_to_switch_to.click()
 
 
-    def __login_google(self, account, password):
+    def __login_google(self, account, password, auto_secrete):
         """
-        Function for automating the google login
+        Function for automating the Google login
         """
         # Create yt_studio login
         self.driver.get("https://studio.youtube.com/")
-        self.driver.implicitly_wait(time_to_wait=1)
 
         # Login into google
+        # Get email button
         email_button = self.driver.find_element(By.XPATH, '/html/body/div[1]/div[1]/div[2]/div/c-wiz/div/div[2]/div/div[1]/div/form/span/section/div/div/div[1]/div/div[1]/div/div[1]/input')
         email_button.send_keys(account)
+        time.sleep(1)
 
+        # Next
         next_button = self.driver.find_element(By.XPATH, '/html/body/div[1]/div[1]/div[2]/div/c-wiz/div/div[2]/div/div[2]/div/div[1]/div/div/button')
         next_button.click()
+        time.sleep(1)
 
-        self.driver.implicitly_wait(time_to_wait=2)
-
+        # Input password
         password_input = self.driver.find_element(By.XPATH, '/html/body/div[1]/div[1]/div[2]/div/c-wiz/div/div[2]/div/div[1]/div/form/span/section[2]/div/div/div[1]/div[1]/div/div/div/div/div[1]/div/div[1]/input')
         password_input.send_keys(password)
+        time.sleep(1)
 
-        self.driver.implicitly_wait(time_to_wait=2)
+        # Next
+        password_button = self.driver.find_element(By.CSS_SELECTOR, '#passwordNext > div > button')
+        password_button.click()
+        time.sleep(3)
 
-        pswd_button = self.driver.find_element(By.CSS_SELECTOR, '#passwordNext > div > button')
-        pswd_button.click()
+        # Now input 2fa
 
-        self.driver.implicitly_wait(time_to_wait=3)
+        # Set up elements to select
+        totp = TOTP(auto_secrete)
+        two_fa = self.driver.find_element(By.XPATH, '/html/body/div[1]/div[1]/div[2]/div/c-wiz/div/div[2]/div/div[1]/div/form/span/section[3]/div/div/div[1]/div/div[1]/div/div[1]/input')
+        save_device = self.driver.find_element(By.XPATH, '/html/body/div[1]/div[1]/div[2]/div/c-wiz/div/div[2]/div/div[1]/div/form/span/section[3]/div/div/div[2]/div[1]/div/div/div[1]/div/input')
+        next_button = self.driver.find_element(By.XPATH, '/html/body/div[1]/div[1]/div[2]/div/c-wiz/div/div[2]/div/div[2]/div/div[1]/div/div/button')
+
+        # Toggle click, as you don't want the browser to remember the device as it messes with the alg
+        save_device.click()
+        # Send the 2fa code
+        two_fa.send_keys(totp.now())
+        # Click next ASAP
+        next_button.click()
+
+        # There is a rare chance that inbetween sending the keys and clicking the button that the totp keys could have changed.
+        # If that happens, god damn, call me unlucky for the upload for that day.
+
+
+
 

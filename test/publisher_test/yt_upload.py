@@ -3,11 +3,14 @@ from context import src
 from src.publisher.platform_strategies.yt_upload import YtUpload
 import pdb
 
-def test_login():
-    yt = YtUpload("dvmedia00@gmail.com", "")
-    yt.select_account("heeheehaw")
-    yt.enable_thumbnail("/Users/dvoicu/mnt/Goofy Aughhh Test Files copy/Lyra IV.png")
-    yt.set_title("Fake")
+def test_2fa():
+    yt = YtUpload("dvmedia00@gmail.com", "d", "")
+
+def test_upload():
+    yt = YtUpload("dvmedia00@gmail.com", "XXm7E81IVk")
+    yt.select_account("deepfried")
+    yt.enable_thumbnail("/Users/dvoicu/mnt/Goofy Aughhh Test Files copy/Aughhhhh.png")
+    yt.set_title("Real posting")
     yt.set_tags("Not,okay,delete,soon")
     yt.set_description("2mls of water will do the trick")
     yt.toggle_paid_promotions()
@@ -15,4 +18,4 @@ def test_login():
     pdb.set_trace()
 
 
-test_login()
+test_2fa()

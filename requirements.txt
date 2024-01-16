@@ -1,17 +1,46 @@
-
-# Mariadb package requires mariadb-connector-c
-# sudo apt-get install libmariadb3 libmariadb-dev
-mariadb~=1.1.8 
-
-selenium~=4.14.0
+# -- general purpose --
+python-dotenv~=1.0.0
 configparser~=6.0.0
+
+
+# -- central --
+mariadb~=1.1.8
+# Mariadb package requires mariadb-connector-c
+# Additional packages outside pip: nfs-kernel-server, libmariadb3 libmariadb-dev
+
+
+# -- scraping/publishing --
+selenium~=4.14.0
+undetected_chromedriver~=3.5.4
 bs4~=0.0.1
 beautifulsoup4~=4.12.2
 requests~=2.31.0
 openai~=1.1.1
-python-dotenv~=1.0.0
-undetected_chromedriver~=3.5.4
+pyotp~=2.9.0
 
 
-# Additional requirements:
-# nfs-kernel-server
+# -- creating --
+moviepy~=1.0.3
+numpy~=1.26.3
+imageio~=2.33.1
+pillow~=10.2.0
+
+# Additional packages outside of pip: ffmpeg (if not installed by imageio), ImageMagick
+
+# For previewing videos
+pygame~=2.5.2
+
+
+# -- fastapi --
+fastapi~=0.109.0
+starlette~=0.35.1
+
+# additional req
+typing-extensions>=4.8.0
+annotated-types>=0.4.0
+pydantic-core==2.10.1
+anyio<5,>=3.4.0
+idna>=2.8
+sniffio>=1.1
+
+
