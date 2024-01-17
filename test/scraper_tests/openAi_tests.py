@@ -14,4 +14,7 @@ def text():
     res = ai.text_llm("gpt-4", "You are gpt-4-turbo", "Tell me a the story about how you were made.", 80)
     print(res)
 
+
+speech()
+image()
 text()

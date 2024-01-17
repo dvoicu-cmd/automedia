@@ -1,8 +1,7 @@
 from openai import OpenAI
 from dotenv import load_dotenv
 import os
-import random
-import requests
+from src.scraper.downloader import DownloadManager
 
 
 class OpenAiAPI:
@@ -10,8 +9,7 @@ class OpenAiAPI:
         load_dotenv()
         key = os.getenv('OPENAI_API_KEY')
         self.client = OpenAI(api_key=key)
-        self.rand = random.randint(10000, 99999)
-        return
+        self.dm = DownloadManager()
 
     def text_llm(self, model, system_msg, user_msg, max_tokens=4096):
 
@@ -23,18 +21,8 @@ class OpenAiAPI:
             ],
             max_tokens=max_tokens
         )
-        print(response)
-
         str_response = response.choices[0].message.content
-
-        print(str_response)
-
-        self.__mkdir("openai_text")
-        wd = os.getcwd()
-
-        with open(f"{wd}/openai_text/{self.rand}_llm_txt_{user_msg[:10]}.txt", "w") as f:
-            f.write(str_response)
-
+        self.dm.dl_text(str_response, f"llm_txt_{user_msg[:10]}")
 
     def stable_diffusion(self, prompt):
         response = self.client.images.generate(
@@ -45,17 +33,8 @@ class OpenAiAPI:
             n=1,
         )
 
-        self.__mkdir("openai_image")
-        wd = os.getcwd()
-
         image_url = response.data[0].url
-        img_request = requests.get(image_url)
-
-        if img_request.status_code == 200:
-            with open(f"{wd}/openai_image/{self.rand}_sd_{prompt[:10]}.jpg", "wb") as f:
-                f.write(img_request.content)
-        else:
-            raise ProcessLookupError(f"Failed to read image at link:{image_url}")
+        self.dm.dl_via_link(image_url, "image", f"sd_{prompt[:10]}")
 
     def text_to_speech(self, voice, str_input):
         """
@@ -68,20 +47,5 @@ class OpenAiAPI:
             input=str_input
         )
 
-        self.__mkdir("openai_speech")
-        wd = os.getcwd()
-
-        response.stream_to_file(f"{wd}/openai_speech/{self.rand}_tts_{str_input[:10]}.mp3")
-
-    def new_rand_id(self):
-        self.rand = random.randint(100, 1000)
-
-    def get_rand_id(self):
-        return self.rand
-
-    @staticmethod
-    def __mkdir(name):
-        try:
-            os.mkdir(name)
-        except FileExistsError:
-            pass
+        wd = f"{self.dm.dl_root()}/audio"
+        response.stream_to_file(f"{wd}/{self.dm.get_rand_id()}_tts_{str_input[:10]}.mp3")

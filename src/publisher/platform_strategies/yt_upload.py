@@ -6,14 +6,19 @@ from selenium.webdriver.common.by import By
 import undetected_chromedriver as uc
 from pyotp.totp import TOTP
 
-import pdb
-
 
 class YtUpload:
+    """
+    Class for uploading content to YouTube via YouTube studio.
+    """
 
     def __init__(self, email, password, auth_secret):
         """
         Constructor
+        Args:
+            email (str): The email address for an account
+            password (str): The password for the account
+            auth_secret (str): The 32 character keys for the 2fa authentication code.
         """
         self.driver = uc.Chrome()
         self.__login_google(email, password, auth_secret)
@@ -75,7 +80,7 @@ class YtUpload:
 
     def enable_thumbnail(self, img_path):
         """
-        Configures to set a thumbnail. Thumbnail file can't be over 2mb
+        Configures to set a thumbnail. Thumbnail files over 2mb will not be accepted.
         """
         if os.path.exists(img_path):
             # Get the size of the file in bytes
@@ -98,7 +103,7 @@ class YtUpload:
 
     def exec_upload(self, file_path):
         """
-        Executes the upload process
+        Executes the upload process given a specific file
         """
         if not os.path.exists(file_path):
             raise ValueError(f"Video path does not exists: {file_path}")
@@ -258,6 +263,8 @@ class YtUpload:
 
         # There is a rare chance that inbetween sending the keys and clicking the button that the totp keys could have changed.
         # If that happens, god damn, call me unlucky for the upload for that day.
+
+        time.sleep(2)
 
 
 
