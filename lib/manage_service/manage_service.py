@@ -50,11 +50,6 @@ class ManageService:
         # Add on_calendar_list to the mapping
         self.timer_map.new_exec_time_value(python_file, on_calendar_list)
 
-        # Implement way to check duplicates, not really important
-        # exec_times = self.timer_map.get_exec_times(python_file)
-        # if exec_times is None:
-        #     raise ValueError(f"The provided list: {on_calendar_list} conflicts with all the currently scheduled timers")
-
         # Write the service and timer files
         self.__write_service_file(python_file)
         self.__write_timer_file(python_file, on_calendar_list)
@@ -85,6 +80,25 @@ class ManageService:
         self.__delete_timer_file(python_file)
         self.__delete_service_file(python_file)
 
+    def lock(self):
+        """
+        Creates creates the lock file that forces other python services to sleep
+        """
+        path_dict = self.service_config.read()
+        path_to_lock = f"{path_dict.get('service_dir_path')}/lock"
+        if not os.path.exists(path_to_lock):
+            with open(path_to_lock, 'w'):
+                pass
+
+    def unlock(self):
+        """
+        Deletes the lock file and allows for the next python services that awakes from sleep
+        """
+        path_dict = self.service_config.read()
+        path_to_lock = f"{path_dict.get('service_dir_path')}/lock"
+        if os.path.exists(path_to_lock):
+            os.remove(path_to_lock)
+
     def create_paths_config(self, service_dir_path, python_runtime_path, python_scripts_path):
         """
         Creates a paths.cfg file in the current directory that contains the needed absolute file paths to create services
@@ -110,12 +124,11 @@ class ManageService:
         d = self.service_config.read()
 
         wd = os.getcwd()  # working directory
-        self.__cd_to_desired_root(wd, 'src')  # cd until the src directory
+        self.__cd_to_desired_root(wd, 'lib')  # cd until the lib directory
 
         print(os.getcwd())
 
         # Change to dir with the bash files
-        os.chdir('lib')
         os.chdir('manage_service')
 
         subprocess.run(['./start_service.sh', d.get('service_dir_path'), f"{py_file}.timer", f"{py_file}.service"])
@@ -167,6 +180,7 @@ class ManageService:
                         f"[Service]\n"
                         f"Type=simple\n"
                         f"User=root\n"
+                        f"ExecStartPre=/bin/bash -c 'while [[ -e {path_dict.get('service_dir_path')}/lock ]]; do sleep 5; done'\n"  # Checks if the lock exists
                         f"ExecStart={path_dict.get('python_runtime_path')} {path_dict.get('python_scripts_path')}/{py_file}.py\n"
                         f"WorkingDirectory={path_dict.get('python_scripts_path')}\n"
                         f"KillMode=process\n"
