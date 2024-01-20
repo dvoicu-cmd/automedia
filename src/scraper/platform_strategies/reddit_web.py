@@ -13,7 +13,6 @@ class RedditScrape:
         """
 
         """
-
         # First do some syntax checks
         filter_types = ['hot', 'new', 'top', 'rising']
         top_time_ranges = ['hour', 'day', 'week', 'month', 'year', 'all']
