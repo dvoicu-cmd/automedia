@@ -43,7 +43,7 @@ this_dir = os.getcwd()
 cd_to_desired_root(this_dir, 'automedia_backend')
 
 # Append to path
-sys.path.insert(0, os.path.abspath(os.path.join(os.getcwd())))
+sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__))))
 
 # change dir back
 os.chdir(this_dir)
@@ -53,4 +53,3 @@ import src
 
 # Import lib
 import lib
-

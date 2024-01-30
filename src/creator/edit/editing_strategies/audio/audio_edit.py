@@ -1,5 +1,6 @@
-from moviepy.editor import CompositeVideoClip, AudioClip
+import os
 
+from moviepy.editor import CompositeVideoClip, AudioFileClip
 from src.creator.edit.edit import Edit
 
 
@@ -9,6 +10,6 @@ class AppendAudio(Edit):
         self.audio_location = audio_location
 
     def apply(self, composite_clip: CompositeVideoClip) -> CompositeVideoClip:
-        audio = AudioClip(self.audio_location)
+        audio = AudioFileClip(self.audio_location)
         output = CompositeVideoClip([composite_clip.set_audio(audio)])
         return output

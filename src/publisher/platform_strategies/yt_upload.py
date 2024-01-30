@@ -208,11 +208,11 @@ class YtUpload:
         # Iterate through all elements and find the one with the matching string value
         account_to_switch_to = None
         for account in list_accounts:
-            if account.text == account_name:
+            if account.__text == account_name:
                 account_to_switch_to = account
                 break
         if not account_to_switch_to:
-            raise ValueError(f"{account_name} is not a valid account name. Valid dir contents: \n\n{div_list_accounts.text}")
+            raise ValueError(f"{account_name} is not a valid account name. Valid dir contents: \n\n{div_list_accounts.__text}")
 
         # Then switch to that account
         account_to_switch_to.click()

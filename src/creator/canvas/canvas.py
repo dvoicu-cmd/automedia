@@ -1,9 +1,5 @@
-import os
-import sys
 from abc import ABC, abstractmethod
-from moviepy.editor import CompositeVideoClip, ImageClip
-
-# Don't forget to add a context file, run this on the command line
+from moviepy.editor import ImageClip
 
 
 class CanvasInit(ABC):

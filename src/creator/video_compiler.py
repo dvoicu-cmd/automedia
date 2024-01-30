@@ -24,7 +24,8 @@ class VideoCompiler:
         :return:
         """
         for edit in list_of_edits:
-            edit.apply(self.clip)
+            self.clip = edit.apply(self.clip)
 
     def render(self):
+        self.clip.duration = 1  # Don't remove this as it bricks the render process despite adding on edits
         self.clip.write_videofile("foo.mp4", codec='libx264', audio_codec='aac')

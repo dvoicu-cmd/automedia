@@ -3,7 +3,7 @@ class TextParam:
         self._font = 'times'
         self._size = 24
         self._color = 'white'
-        self._bg_color = None
+        self._bg_color = 'transparent'
         self._outline_color = 'black'
         self._outline_width = 12
 

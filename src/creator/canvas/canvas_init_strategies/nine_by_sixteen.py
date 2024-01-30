@@ -1,7 +1,5 @@
 import os
-
 from moviepy.editor import ImageClip
-
 from src.creator.canvas.canvas import CanvasInit
 
 
