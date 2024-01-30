@@ -9,7 +9,7 @@ import string
 
 class DownloadManager:
     """
-    Manages all the downloads from the various strategies
+    Manages all the downloads from the various strategies in the scraper unit
     """
 
     def __init__(self, rand_length=5):

@@ -1,5 +1,4 @@
-from context import src
-from src.scraper.platform_strategies.openAI.open_ai_api import OpenAiAPI
+from src.scraper.platform_strategies.open_ai_api import OpenAiAPI
 
 def speech():
     ai = OpenAiAPI()
