@@ -111,6 +111,12 @@ class ManageService:
         """
         self.service_config.write(service_dir_path, python_runtime_path, python_scripts_path)
 
+    def print_map(self):
+        """
+        returns the recorded timer map
+        """
+        return self.timer_map.data
+
     # --------- Service Control --------- #
 
     def __activate_service(self, py_file):

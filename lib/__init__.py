@@ -2,12 +2,16 @@
 package __init__: lib
 """
 
+# Classes
 from .central_connector.db_nas_connection import DbNasConnection
 from .manage_service.manage_service import ManageService
 from .queue_pickle.queue import Queue
 from .text_util.util import TextUtils
-from .cli_interface.cli import Cli
 from .cli_interface.input_pages import InputPage
 from .cli_interface.picker_pages import PickerPage
+from .manage_formula.manage_formula import ManageFormula
 
-__all__ = ['DbNasConnection', 'ManageService', 'Queue', 'TextUtils', 'Cli', 'InputPage', 'PickerPage']
+# Functions
+from .cli_interface import page_util_funcs as pg
+
+__all__ = ['DbNasConnection', 'ManageService', 'Queue', 'TextUtils', 'InputPage', 'PickerPage', 'ManageFormula', 'pg']

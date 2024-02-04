@@ -37,7 +37,8 @@ def cd_to_desired_root(current_dir, desired_root):
 
 
 # Get this dir path
-this_dir = os.getcwd()
+this_file = os.path.abspath(__file__)
+this_dir = os.path.dirname(this_file)
 
 # cd to project root
 cd_to_desired_root(this_dir, 'automedia_backend')
@@ -47,6 +48,7 @@ sys.path.insert(0, os.path.abspath(os.path.join(os.getcwd())))
 
 # change dir back
 os.chdir(this_dir)
+print(os.getcwd())
 
 # Import src
 import src

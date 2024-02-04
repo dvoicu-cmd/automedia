@@ -2,7 +2,12 @@ from typing import Union
 from fastapi import FastAPI
 from pydantic import BaseModel
 
+"""
+python script to host the api runtime environment
+"""
+
 app = FastAPI()
+
 
 class Item(BaseModel):
     name: str

@@ -48,11 +48,24 @@ This interface is designed to uphold the following file system structure:
 
 """
 
-import mariadb
+
+
 import configparser
 import os
 import shutil
 import datetime
+
+# Importing logic for mariadb connector
+# import platform
+# if platform.system() == "Darwin":
+#     import sys
+#     sys.path.insert(0, '/Library/Frameworks/Python.framework/Versions/3.11/lib/python3.11/site-packages/mariadb/_mariadb.cpython-311-darwin.so,')
+#     print(sys.path)
+#     import mariadb
+# else:
+#     import mariadb
+
+import mariadb
 
 
 class DbNasConnection:
@@ -820,7 +833,6 @@ class DbNasConnection:
 
         return
 
-    # TODO implement
     def delete_account(self, account_id):
         """
         removes the account record and all associated records with the account id
@@ -863,7 +875,7 @@ class DbNasConnection:
 
         return
 
-    # TODO implement before delete_account
+
     def delete_content_file(self, content_id):
         """
 
@@ -973,7 +985,7 @@ class DbNasConnection:
         # Attempt file read
         file = config.read('cred.cfg')
 
-        if not file:
+        if len(file) == 0:
             raise FileNotFoundError('Failed to read config file')
 
         # Parse and then output
@@ -1013,7 +1025,8 @@ class DbNasConnection:
         creds['password'] = password
         creds['database'] = database
         mnt['nas_root'] = nas_root
-        with open('../../test/test_lib/cred.cfg', 'w') as configfile:
+
+        with open('cred.cfg', 'w') as configfile:
             config.write(configfile)
         self.credentials = self.__load_connection_config()
 

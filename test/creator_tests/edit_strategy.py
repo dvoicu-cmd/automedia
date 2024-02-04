@@ -22,9 +22,4 @@ vd = VideoCompiler(canvas=canvas)
 list_of_edits = []
 
 
-
-
-
-
-
 vd.render()

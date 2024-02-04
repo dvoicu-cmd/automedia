@@ -9,8 +9,7 @@
 **/__pycache__
 
 # Sensitive Files
-test/test_lib/paths.cfg
-**/cred.cfg
-scripts/scraper/openAI/.env
-**/$HOME
 **/.env
+**/cred.cfg
+**/paths.cfg
+**/$HOME
