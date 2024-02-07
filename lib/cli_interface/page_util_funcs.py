@@ -55,7 +55,7 @@ def verify_cfg():
 
 def start_service():
     """
-    Wraps the start service with a cli input
+    grabs the cli input for starting a service
     :return:
     """
     page = InputPage("Input the service you wish to start. (Exclude the .py extension)")
@@ -70,7 +70,7 @@ def start_service():
 
         # prompt if user wishes to add more on_calendar values
         continue_loop = PickerPage([
-            "Add another on calendar time"
+            "Add another on calendar time",
             "Save file"
         ])
         result = continue_loop.prompt()
@@ -78,53 +78,26 @@ def start_service():
             contd = False
 
     # Call the on manager service method
-    ManageService().create(service_name, on_cal_list)
-    print(f"CREATED SERVICE FOR: {service_name}")
+    return [service_name, on_cal_list]
 
-
-def stop_service():
-    """
-    Wraps the end service with a cli input
-    """
-    page = InputPage("Input the service to stop")
-    name = page.prompt()
-    ManageService().delete(name)
-    print(f"DELETED SERVICE: {name}")
-
-
-def view_service_map():
-    """
-    prints the dictionary of the service map
-    :return:
-    """
-    print("SERVICE MAP: \n")
-    print(ManageService().print_map())
-
-
-
-def run_py_service():
-    """
-    Manually runs the py file in a py_services package
-    :return:
-    """
-    page = InputPage("Input the name of the py_service file you wish to run")
-    service_name = page.prompt()
-
-    paths = ServiceConfigurator().read()
-
-    # Get the python run time used by service files
-    python_runtime = paths.get('python_runtime_path')
-
-    # Get the specific script file to run
-    service_path = paths.get('python_scripts_path')
-    specific_service_script = service_path + "/" + service_name + ".py"
-
-    try:
-        subprocess.run([python_runtime, specific_service_script], check=True)
-        print("Script executed successfully")
-    except subprocess.CalledProcessError as e:
-        print(f"Error running the script: {e}")
+# Be honest, these two don't actually matter as much
+# def stop_service():
+#     """
+#     Wraps the end service with a cli input
+#     """
+#     page = InputPage("Input the service to stop")
+#     name = page.prompt()
+#     ManageService().delete(name)
+#     print(f"DELETED SERVICE: {name}")
+#
+#
+# def view_service_map():
+#     """
+#     prints the dictionary of the service map
+#     :return:
+#     """
+#     print("SERVICE MAP: \n")
+#     print(ManageService().print_map())
 
 
 #  ------------ formula functions ------------
-

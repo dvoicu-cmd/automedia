@@ -283,3 +283,25 @@ class ManageService:
 
         # Update the current working directory of this file
         os.chdir(current_dir)
+
+    def run_py_service(self, py_file):
+        """
+        Manually runs the py file in a py_services package
+        :return:
+        """
+        service_name = py_file
+
+        paths = self.service_config.read()
+
+        # Get the python run time used by service files
+        python_runtime = paths.get('python_runtime_path')
+
+        # Get the specific script file to run
+        service_path = paths.get('python_scripts_path')
+        specific_service_script = service_path + "/" + service_name + ".py"
+
+        try:
+            subprocess.run([python_runtime, specific_service_script], check=True)
+            print("Script executed successfully")
+        except subprocess.CalledProcessError as e:
+            print(f"Error running the script: {e}")
