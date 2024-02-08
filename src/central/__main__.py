@@ -104,20 +104,13 @@ def create_archiver_service(service_name, on_cal_list: list):
 
     try:
         # First create the python script
-        print("1")
         formula = ManageFormula()
         formula.append_code("db = DbNasConnection()")
         formula.append_code("db.delete_all_archived_media_files()")
 
-        print("2")
-        cwd = os.getcwd()
-        save_location = f"{cwd}/py_services/{service_name}.py"
-
-        print("3")
         # Save the script
-        formula.save_generated_script(save_location)
+        formula.save_generated_script(service_name)
 
-        print("4")
         # Then create the service
         ManageService().create(service_name, on_cal_list)
     except Exception as e:
@@ -129,6 +122,7 @@ def delete_archiver_service(service_name):
     # Action for "Delete Archiver Service"
     try:
         ManageService().delete(service_name)
+        ManageFormula().delete_generated_script(service_name)
     except Exception as e:
         return e
     return 200
@@ -255,6 +249,7 @@ if __name__ == '__main__':
         if v2 == 1:  # delete archiver service
             name = InputPage("Input service name to delete").prompt()
             ret = delete_archiver_service(name)
+            # raise ret
             print(f"return value {ret}")
 
         if v2 == 2:  # display service

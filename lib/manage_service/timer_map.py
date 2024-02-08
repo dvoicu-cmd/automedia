@@ -8,6 +8,8 @@ import re
 import json
 
 
+# TODO fix this dumb class.
+# The timer is having issues with printing the map.
 class TimerMap:
     def __init__(self):
         """

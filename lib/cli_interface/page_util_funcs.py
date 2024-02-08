@@ -2,6 +2,7 @@
 from lib.central_connector.db_nas_connection import DbNasConnection
 from lib.manage_service.manage_service import ManageService
 from lib.manage_service.service_configurator import ServiceConfigurator
+from lib.manage_formula.manage_formula import ManageFormula
 from .input_pages import InputPage
 from .picker_pages import PickerPage
 import os
@@ -10,7 +11,6 @@ import subprocess
 """
 General wrapper functions for the cli user input
 """
-
 
 
 def verify_cfg():
@@ -100,4 +100,48 @@ def start_service():
 #     print(ManageService().print_map())
 
 
-#  ------------ formula functions ------------
+def main_menu(node_name):
+    page = PickerPage(
+        [
+            f"Create {node_name} formula",
+            f"Delete {node_name} formula",
+            f"Display Service Map",
+            f"Display All formulas"
+            f"Start Service",
+            f"Stop Service"
+        ])
+
+    v = page.prompt()
+    if v == 0:  # Create formula
+        return 'custom'  # Do something custom in the __main__.py
+
+    if v == 1:  # Delete a formula
+        value = InputPage("Input the formula to delete").prompt()
+        try:
+            ManageFormula().delete_generated_script(value)
+        except Exception as e:
+            raise e
+
+    if v == 2:  # Display map
+        try:
+            print(ManageService().print_map())
+        except Exception as e:
+            raise e
+
+    if v == 3:  # Display all formulas
+        try:
+            print(f"All service files: \n {ManageFormula().print_script_names()}")
+        except Exception as e:
+            raise e
+
+    if v == 4:  # Start Service
+        try:
+            value = InputPage("NOT implemented  Input the name of the service you wish to start").prompt()
+        except Exception as e:
+            raise e
+
+    if v == 5:  # Stop service
+        try:
+            value = InputPage("NOT implemented  Input the name of the service you wish to stop").prompt()
+        except Exception as e:
+            raise e

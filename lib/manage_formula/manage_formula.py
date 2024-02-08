@@ -1,3 +1,4 @@
+import os
 
 
 class ManageFormula:
@@ -47,9 +48,29 @@ if __name__ == "__main__":
         self.template_top = self.template_top.format(f"        {code}\n")
         self.template_top += "{}"
 
-    def save_generated_script(self, output_file_location):
+    def save_generated_script(self, service_name):
         script_content = self.template_top.format("\n")
         script_content += self.template_bottom
 
-        with open(output_file_location, "w") as file:
+        cwd = os.getcwd()
+
+        if not os.path.exists(f"{cwd}/py_services"):
+            os.mkdir("py_services")
+
+        save_location = f"{cwd}/py_services/{service_name}.py"
+
+        with open(save_location, "w") as file:
             file.write(script_content)
+
+    @staticmethod
+    def delete_generated_script(service_name):
+        """Static method to shortcut delete the py service script"""
+        path = f"{os.getcwd()}/py_services/{service_name}.py"
+        os.remove(path)
+
+    @staticmethod
+    def print_script_names():
+        """Print all files in the py_service dir"""
+        d = f"{os.getcwd()}/py_services"  # Directory
+        return os.listdir(d)  # Return lmao
+

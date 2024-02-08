@@ -48,7 +48,7 @@ sys.path.insert(0, os.path.abspath(os.path.join(os.getcwd())))
 
 # change dir back
 os.chdir(this_dir)
-print(os.getcwd())
+print(f"CONTEXT: {os.getcwd()}")
 
 # Import src
 import src

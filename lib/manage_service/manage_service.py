@@ -153,10 +153,9 @@ class ManageService:
         d = self.service_config.read()
 
         wd = os.getcwd()  # working directory
-        self.__cd_to_desired_root(wd, 'src')  # cd until the src directory
+        self.__cd_to_desired_root(wd, 'lib')  # cd until the src directory
 
         # Change to dir with the bash files
-        os.chdir('lib')
         os.chdir('manage_service')
         
         # Run the bash files
