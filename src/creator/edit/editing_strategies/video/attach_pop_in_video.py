@@ -1,15 +1,12 @@
-from abc import abstractmethod
-from moviepy.editor import CompositeVideoClip, ImageClip
+from moviepy.editor import CompositeVideoClip, VideoFileClip
 from src.creator.edit.edit import Edit
 
 
-class AppendClip(Edit):
-    def __init__(self, image_path: str, location: tuple):
-        self.image_path = image_path
+class AttachPopInVideo(Edit):
+    def __init__(self, video_path: str, location: tuple):
+        self.video_path = video_path
         self.location = location
 
-
-    @abstractmethod
     def apply(self, composite_clip: CompositeVideoClip) -> CompositeVideoClip:
         pass
 
@@ -19,10 +16,8 @@ class AppendClip(Edit):
     # https://stackoverflow.com/questions/37580910/moviepy-zooming-effects-need-tweaking
     def __resize_func(self, t, start: int, end: int):
         if t < start:
-            return 1 + 0.2*t  # zoom in
+            return 1 + 0.2 * t  # zoom in
         elif end <= t <= 6:
-            return 1 + 0.2*4  # stay
+            return 1 + 0.2 * 4  # stay
         else:
-            return 1 + 0.2*()
-        pass
-
+            return 1 + 0.2 * -t  # zoom out

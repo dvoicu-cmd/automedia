@@ -1,10 +1,10 @@
-from moviepy.editor import VideoFileClip, CompositeVideoClip
+from moviepy.editor import CompositeVideoClip
 import cv2
 
 from src.creator.edit.edit import Edit
 
 
-class AppendBlur(Edit):
+class AttachBlur(Edit):
     def __init__(self):
         pass
 

@@ -2,10 +2,19 @@
 package __init__: creator.edit.editing_strategies
 """
 
-from .editing_strategies.blur.blur_edit import AppendBlur
-from .editing_strategies.subtitle.subs_edit import AppendSubtitles
-from .editing_strategies.subtitle.text_parameters import TextParam
-from .editing_strategies.audio.audio_edit import AppendAudio
-from .editing_strategies.attach_video_clip.attach_edit import AppendClip
+# Blur package
+from .editing_strategies.blur.attach_blur import AttachBlur
 
-__all__ = ['AppendBlur', 'AppendSubtitles', 'TextParam', 'AppendAudio', 'AppendClip']
+# Subtitle package
+from .editing_strategies.subtitle.attach_subs import AttachSubtitles
+from .editing_strategies.subtitle.text_parameters import TextParam
+
+# Audio package
+from .editing_strategies.audio.attach_audio import AttachAudio
+from .editing_strategies.audio.attach_video_audio import AttachVideoAudio
+
+# Video package
+from .editing_strategies.video.attach_video import AttachVideo
+from .editing_strategies.video.attach_image import AttachImage
+
+__all__ = ['AttachBlur', 'AttachSubtitles', 'TextParam', 'AttachAudio', 'AttachVideoAudio', 'AttachVideo']

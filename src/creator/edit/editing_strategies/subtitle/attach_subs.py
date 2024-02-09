@@ -16,7 +16,7 @@ from .text_parameters import TextParam
 from src.creator.edit.edit import Edit
 
 
-class AppendSubtitles(Edit):
+class AttachSubtitles(Edit):
     """
     Takes in the audio of the most recent current compound video and appends subtitles to it.
     """

@@ -17,12 +17,14 @@ class VideoCompiler:
         """
         self.clip = canvas.init_canvas()
 
-    def apply_edits(self, list_of_edits: [Edit]):
+    def apply_edits(self, list_of_edits: [Edit]):  # duration_edit: Edit
         """
         applies the list of edits to the clips
         :param list_of_edits:
+        :param duration_edit: The edit that determines the duration of the clip
         :return:
         """
+        # self.clip.duration = duration_edit.duration()
         for edit in list_of_edits:
             self.clip = edit.apply(self.clip)
 
