@@ -12,10 +12,10 @@ class Edit(ABC):
         """
         pass
 
-    # @abstractmethod
-    # def duration(self) -> int:
-    #     """
-    #     Returns the duration of a specific edit
-    #     :return:
-    #     """
-    #     pass
+    @abstractmethod
+    def duration(self) -> int:
+        """
+        Returns the duration of a specific edit
+        :return: integer value of the duration
+        """
+        pass

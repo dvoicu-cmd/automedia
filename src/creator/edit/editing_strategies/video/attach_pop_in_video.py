@@ -10,6 +10,9 @@ class AttachPopInVideo(Edit):
     def apply(self, composite_clip: CompositeVideoClip) -> CompositeVideoClip:
         pass
 
+    def duration(self) -> int:
+        pass
+
     def resize_over_time(self, composite_clip: CompositeVideoClip, t):
         pass
 

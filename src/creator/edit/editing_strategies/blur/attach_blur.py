@@ -12,6 +12,9 @@ class AttachBlur(Edit):
         output = composite_clip.fl_image(self.__blur)
         return output
 
+    def duration(self) -> int:
+        return 0  # Blurs don't add to the duration
+
     @staticmethod
     def __blur(image):
         """ Returns a blurred (radius=2 pixels) version of the image """

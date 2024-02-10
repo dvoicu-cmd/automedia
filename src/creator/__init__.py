@@ -11,6 +11,6 @@ from .canvas import *
 from .canvas import __all__ as canvas_all
 
 # Import the video compiler
-from .video_compiler import VideoCompiler
+from .video_section import VideoSection
 
-__all__ = edit_all + canvas_all + ['VideoCompiler']
+__all__ = edit_all + canvas_all + ['VideoSection']

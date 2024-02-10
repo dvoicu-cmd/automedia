@@ -6,7 +6,7 @@ import whisper
 from whisper.utils import get_writer
 
 # MoviePy imports
-from moviepy.editor import TextClip, CompositeVideoClip
+from moviepy.editor import TextClip, CompositeVideoClip, AudioFileClip
 from moviepy.video.tools.subtitles import SubtitlesClip
 
 # Text import
@@ -20,7 +20,7 @@ class AttachSubtitles(Edit):
     """
     Takes in the audio of the most recent current compound video and appends subtitles to it.
     """
-    def __init__(self):
+    def __init__(self, audio_path: str):
         """
         Initizlizes video to have subtitles
         """
@@ -28,10 +28,7 @@ class AttachSubtitles(Edit):
         self.__text_location = ('center', 'center')
         self.__whisper_model = 'base'
         self.__max_words_per_line = 1
-        self.__audio_to_transcribe_path = None
-
-    def set_audio_to_transcribe(self, path: str):
-        self.__audio_to_transcribe_path = path
+        self.__audio_to_transcribe_path = audio_path
 
     def set_text(self, text_param: TextParam):
         """
@@ -104,6 +101,11 @@ class AttachSubtitles(Edit):
         except OSError:
             shutil.rmtree(output_dir)
         return output
+
+    def duration(self) -> int:
+        # The duration of subtitles is the same duration as duration for the audio clip it transcribes
+        audio_duration = AudioFileClip(self.__audio_to_transcribe_path).duration
+        return audio_duration
 
     def __text_generator(self, string_txt):
         return TextClip(

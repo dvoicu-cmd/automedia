@@ -11,3 +11,6 @@ class AttachImage(Edit):
         img = ImageClip(self.image_path)
         output = CompositeVideoClip([composite_clip, img])
         return output
+
+    def duration(self) -> int:
+        pass
