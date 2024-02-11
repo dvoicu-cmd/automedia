@@ -29,8 +29,6 @@ def delete_creator_formula(py_service_name):
 
 
 
-
-
 if __name__ == '__main__':
     pg.verify_cfg()
     v1 = pg.main_menu("creator")

@@ -6,3 +6,6 @@ class CanvasInit(ABC):
     @abstractmethod
     def init_canvas(self) -> ImageClip:
         pass
+
+    def canvas_path(self) -> str:
+        pass

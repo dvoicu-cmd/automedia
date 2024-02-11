@@ -10,7 +10,11 @@ from .edit import __all__ as edit_all
 from .canvas import *
 from .canvas import __all__ as canvas_all
 
+# Import all from thumbnail package
+from .thumbnail import *
+from .thumbnail import __all__ as thumbnail_all
+
 # Import the video compiler
 from .video_section import VideoSection
 
-__all__ = edit_all + canvas_all + ['VideoSection']
+__all__ = edit_all + canvas_all + thumbnail_all + ['VideoSection']

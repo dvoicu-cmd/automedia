@@ -14,3 +14,6 @@ class NineBySixteen(CanvasInit):
         clip = ImageClip(img=self.image_path)
         clip.fps = 60
         return clip
+
+    def canvas_path(self) -> str:
+        return self.image_path

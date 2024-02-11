@@ -1,5 +1,7 @@
-from moviepy.editor import VideoClip, concatenate_videoclips
+# MoviePy
+from moviepy.editor import VideoClip, concatenate_videoclips, concatenate_audioclips
 
+# Custom
 from src.creator.edit.edit import Edit
 from src.creator.edit.end_start_edit import EndStartEdit
 from src.creator.canvas.canvas import CanvasInit
@@ -11,7 +13,7 @@ class VideoSection:
 
     def __init__(self, canvas: CanvasInit):
         """
-        Inits the canvas
+        Initialize the clip section with a set canvas size.
         :param canvas:
         """
         self.clip = canvas.init_canvas()
@@ -30,8 +32,7 @@ class VideoSection:
             self.clip = edit.apply(self.clip)
 
         # Now subclip and cut the duration
-        # The five is for test purposes, replace.
-        self.clip = self.clip.subclip(0, 5)  # duration_edit.duration()
+        self.clip = self.clip.subclip(0, duration_edit.duration())
 
     def concat(self, other: 'VideoSection'):
         """
@@ -40,7 +41,23 @@ class VideoSection:
         :return:
         """
         other_clip = other.clip
-        self.clip = concatenate_videoclips([self.clip, other_clip])
+        this_clip = self.clip
+
+        # handle video
+        concatenated_video = concatenate_videoclips([this_clip, other_clip])
+
+        # handle audio
+        if this_clip.audio is not None and other_clip.audio is not None:  # In case of mute sections to prevent err.
+            concatenated_audio = concatenate_audioclips([this_clip.audio, other_clip.audio])
+            concatenated_video = concatenated_video.set_audio(concatenated_audio)
+
+        # Set pointer
+        self.clip = concatenated_video
+
 
     def render(self):
+        """
+        Renders the video clip
+        :return:
+        """
         self.clip.write_videofile("foo.mp4", codec='libx264', audio_codec='aac')

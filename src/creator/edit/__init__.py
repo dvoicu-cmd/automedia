@@ -12,9 +12,17 @@ from .editing_strategies.subtitle.text_parameters import TextParam
 # Audio package
 from .editing_strategies.audio.attach_audio import AttachAudio
 from .editing_strategies.audio.attach_video_audio import AttachVideoAudio
+from .editing_strategies.audio.attach_looping_audio import AttachLoopingAudio
 
 # Video package
-from .editing_strategies.video.attach_video import AttachVideo
-from .editing_strategies.video.attach_image import AttachImage
 
-__all__ = ['AttachBlur', 'AttachSubtitles', 'TextParam', 'AttachAudio', 'AttachVideoAudio', 'AttachVideo']
+from .editing_strategies.video.attach_image import AttachImage
+from .editing_strategies.video.attach_looping_video import AttachLoopingVideo
+from .editing_strategies.video.attach_mute_video import AttachMuteVideo
+from .editing_strategies.video.attach_pop_in_video import AttachPopInVideo
+from .editing_strategies.video.attach_video import AttachVideo
+
+
+
+__all__ = ['AttachBlur', 'AttachSubtitles', 'TextParam', 'AttachAudio', 'AttachVideoAudio', 'AttachLoopingAudio',
+           'AttachImage', 'AttachLoopingVideo', 'AttachMuteVideo', 'AttachPopInVideo', 'AttachVideo']

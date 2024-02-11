@@ -1,8 +1,8 @@
 from moviepy.editor import CompositeVideoClip, CompositeAudioClip, AudioFileClip
-from src.creator.edit.edit import Edit
+from src.creator.edit.end_start_edit import EndStartEdit
 
 
-class AttachAudio(Edit):
+class AttachAudio(EndStartEdit):
     """
     Attaches audio to the composed video from an audio file.
     """
@@ -21,3 +21,7 @@ class AttachAudio(Edit):
 
     def duration(self) -> int:
         return self.attach_audio.duration
+
+    def set_start_and_end(self, start_time: int, end_time: int):
+        self.attach_audio = self.attach_audio.set_start(start_time)
+        self.attach_audio = self.attach_audio.set_end(end_time)
