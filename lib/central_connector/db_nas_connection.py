@@ -92,7 +92,7 @@ class DbNasConnection:
     # ------------------------ CRUD MODEL ------------------------ #
 
     # ------------ Create Methods ------------ #
-    def create_account(self, username, email, password, platform, description):
+    def create_account(self, username, email, password, platform, hash_2fa='', description=''):
         """
         Writes a new account record in the accounts table.
         NOTE: This function will not check the format of the platform input, ensure data integrity please.
@@ -100,6 +100,7 @@ class DbNasConnection:
             email (str): Email of the account
             username (str): Username of the account
             platform (str): Platform of the account in form: 'tiktok','yt_shorts','instagram_reels','yt_videos'
+            hash_2fa (str): a 32-bit hash for authenticator apps
             password (str): Password of the account
             description (str): A long description of the account and what kind of content it posts
         Precondition:
@@ -131,13 +132,13 @@ class DbNasConnection:
         # Write query
         table = 'accounts'
 
-        acceptable_platforms = ['tiktok', 'yt_shorts', 'instagram_reels', 'yt_videos']
+        acceptable_platforms = ['tiktok', 'yt_shorts', 'instagram_reels', 'yt_videos', 'other']
         if platform not in acceptable_platforms:
             raise ValueError("Invalid platform. To ensure data integrity use one of the following:"
-                             " 'tiktok', 'yt_shorts', 'instagram_reels', 'yt_videos'")
+                             " 'tiktok', 'yt_shorts', 'instagram_reels', 'yt_videos', 'other'")
 
-        query = (f'INSERT INTO {table} (username, email, password, platform, description) '
-                 f'VALUES (\'{username}\', \'{email}\', \'{password}\', \'{platform}\', \'{description}\');')
+        query = (f'INSERT INTO {table} (username, email, password, hash_2fa, platform, description) '
+                 f'VALUES (\'{username}\', \'{email}\', \'{password}\', \'{hash_2fa}\' \'{platform}\', \'{description}\');')
 
         query.format(table, email, platform, username, password, description)
         # Execute the query
@@ -338,7 +339,7 @@ class DbNasConnection:
 
     def create_link_account_to_media_pool(self, account_id, media_pool_id):
         """
-
+        Wrapper method for linking an account and media pool
         """
         self.create_junction_entry("j_accounts__media_pools", account_id, media_pool_id)
 
@@ -436,6 +437,19 @@ class DbNasConnection:
         # Get the record
         self.curr.execute(query)
         record = self.curr.fetchall()  # Or records
+
+        self.__close_connection()
+        return record
+
+    def read_all_accounts(self):
+        self.__make_connection()
+
+        # Write query
+        table = "accounts"
+        query = f"SELECT * FROM {table};"
+
+        self.curr.execute(query)
+        record = self.curr.fetchall()
 
         self.__close_connection()
         return record
@@ -574,6 +588,19 @@ class DbNasConnection:
 
         return record
 
+    def read_all_media_pools(self):
+        self.__make_connection()
+
+        # Write query
+        table = "media_pools"
+        query = f"SELECT * FROM {table};"
+
+        self.curr.execute(query)
+        record = self.curr.fetchall()
+
+        self.__close_connection()
+        return record
+
     def read_rand_media_file_of_pool(self, media_pool_id):
         """
         Reads and returns a random media file given a specific media pool id
@@ -642,7 +669,7 @@ class DbNasConnection:
 
     def read_specific_media_file_by_id(self, media_file_id):
         """
-
+        Reads a specific media file by id
         """
         self.__make_connection()
 

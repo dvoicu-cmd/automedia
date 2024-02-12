@@ -137,6 +137,43 @@ def display_services():
     return record
 
 
+def display_all_accounts_names():
+    """
+    Reads the list of all the account names
+    :return:
+    """
+    try:
+        str_output = ""
+        records = DbNasConnection().read_all_accounts()
+        for record in records:
+            str_output = f"{record}\n"
+    except Exception as e:
+        return e
+    return str_output
+
+
+def display_all_media_pool_names():
+    try:
+        str_output = ""
+        records = DbNasConnection().read_all_media_pools()
+        for record in records:
+            str_output = f"{record}\n"
+    except Exception as e:
+        return e
+    return str_output
+
+
+def accounts_linked_media_pools(acc_id: int):
+    try:
+        str_output = ""
+        records = DbNasConnection().read_media_pools_of_account(acc_id)
+        for record in records:
+            str_output = f"{record}\n"
+    except Exception as e:
+        return e
+    return str_output
+
+
 """
 MAIN
 """
@@ -156,7 +193,7 @@ if __name__ == '__main__':
         p2 = PickerPage(["create account",
                          "delete account",
                          "display account",
-                         "display all"])
+                         "display all accounts"])
 
         v2 = p2.prompt()
         if v2 == 0:  # create account
@@ -187,7 +224,7 @@ if __name__ == '__main__':
             print(f"ret value {ret}")
 
         if v2 == 3:  # display all accounts
-            pass  # TODO
+            print(display_all_accounts_names())
 
     elif v1 == 1:  # MEDIA POOLS
 
@@ -214,11 +251,11 @@ if __name__ == '__main__':
             print(f"return value\n {ret}")
 
         if v2 == 3:  # display all media pools
-            pass  # TODO
+            print(display_all_accounts_names())
 
     elif v1 == 2:  # MANAGE ACCOUNT & MEDIA POOL LINK
 
-        p2 = PickerPage(["link", "unlink"])
+        p2 = PickerPage(["link", "unlink", "show links of account"])
         v2 = p2.prompt()
 
         if v2 == 0:  # link
@@ -232,6 +269,11 @@ if __name__ == '__main__':
             pool_id = InputPage("Input media pool id").prompt()
             result = unlink_account_to_media_pool(acc_id, pool_id)  # And here
             print(f"return value\n {result}")
+
+        if v2 == 2:  # display links
+            acc_id = InputPage("Input account id").prompt()
+            val = accounts_linked_media_pools(acc_id)
+            print(val)
 
 
     elif v1 == 3:  # MANAGE SERVICE

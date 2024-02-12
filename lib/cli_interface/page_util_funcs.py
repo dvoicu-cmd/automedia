@@ -136,12 +136,14 @@ def main_menu(node_name):
 
     if v == 4:  # Start Service
         try:
-            value = InputPage("NOT implemented  Input the name of the service you wish to start").prompt()
+            out = start_service()
+            ManageService().create(out[0], out[1])
         except Exception as e:
             raise e
 
     if v == 5:  # Stop service
         try:
-            value = InputPage("NOT implemented  Input the name of the service you wish to stop").prompt()
+            value = InputPage("Input the name of the service you wish to stop").prompt()
+            ManageService().delete(value)
         except Exception as e:
             raise e

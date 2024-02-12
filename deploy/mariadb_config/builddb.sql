@@ -13,6 +13,7 @@ ADD COLUMN username VARCHAR(255),
 ADD CONSTRAINT unique_username UNIQUE (username),
 ADD COLUMN email BLOB(255),
 ADD COLUMN password BLOB(255),
+ADD COLUMN hash_2fa BLOB(255),
 ADD COLUMN platform VARCHAR(255),
 ADD COLUMN description TEXT;
 

@@ -8,7 +8,6 @@ import re
 import json
 
 
-# TODO fix this dumb class.
 # The timer is having issues with printing the map.
 class TimerMap:
     def __init__(self):
@@ -59,7 +58,7 @@ class TimerMap:
 
     def new_exec_time_value(self, timer_name, on_calendar_values):
         """
-        Append a new OnCalendar value to a timer key. Tries to ensure that there are no duplicate values to avoid conflicts
+        Append a new OnCalendar value to a timer key. I also don't care for conflicts.
 
         Args:
             timer_name (str): name of the timer
@@ -67,18 +66,7 @@ class TimerMap:
             (see ManageService.create() for more information)
         """
         self.__verify_key(timer_name)
-
-        all_values = list(self.data.values())
-
-        for on_calendar_entry in on_calendar_values:
-            # First verify format
-            if self.__is_on_calendar_format(on_calendar_entry):
-                # Add only if this does not conflict with any other scheduled times
-                for this_key_list in all_values:  # All values is a list of lists for each key
-                    if on_calendar_entry in this_key_list:
-                        break
-                    else:
-                        self.data[timer_name].append(on_calendar_entry)
+        self.data[timer_name] = on_calendar_values
 
     def get_exec_times(self, timer_name):
         """

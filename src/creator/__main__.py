@@ -32,7 +32,10 @@ def delete_creator_formula(py_service_name):
 if __name__ == '__main__':
     pg.verify_cfg()
     v1 = pg.main_menu("creator")
-    if v1 == 'custom':  # Custom creator method
+    if v1 == 'custom':
+
+        # CUSTOM CREATOR FORMULA CREATION
+
         lines = []
 
         # Pick the canvas
@@ -50,37 +53,8 @@ if __name__ == '__main__':
             else:
                 lines.append("canvas = SixteenByNine('720x1280')")
 
-        db = DbNasConnection()
+        # # Apply edits
+        # contd = True
+        # while contd:
+        #     PickerPage([''])
 
-
-        # Apply edits
-        contd = True
-        while contd:
-            PickerPage([''])
-
-
-    # Example code for rendering
-    # canvas = NineBySixteen('720x1280')
-    # video = VideoCompiler(canvas)
-    #
-    # edit1 = AppendAudio('/Users/dvoicu/mnt/AUUGHHH Tik Tok Sound Effect.mp3')
-    #
-    # param = TextParam()
-    # param.set_font('arial', 40)
-    # param.set_font_color('white', 'transparent')
-    # param.set_font_outline('black', 1)
-    #
-    # edit2 = AppendSubtitles()
-    # edit2.set_text(param)
-    # edit2.set_whisper_model('base')
-    # edit2.set_text_location(('center', 'center'))
-    # edit2.set_max_word_per_line(4)
-    # edit2.set_audio_to_transcribe('/Users/dvoicu/mnt/AUUGHHH Tik Tok Sound Effect.mp3')
-    #
-    # edit3 = AppendBlur()
-    #
-    # list_edits = [edit1, edit3, edit2]
-    #
-    # video.apply_edits(list_edits)
-    #
-    # video.render()
