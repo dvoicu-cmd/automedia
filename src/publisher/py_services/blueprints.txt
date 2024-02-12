@@ -1,0 +1,8 @@
+Writing publisher formulas:
+
+1) Lock other services from running
+2) Identify the account type you are pulling content from
+3) Based on the account type, load in the content file/files, likely at random, from the desired account
+3) Call the specific strategy for that account type and upload details. ex: yt_video: take description, title, thumbnail, and video.
+4) Set the pulled record to archived
+5) Unlock to allow other services to run

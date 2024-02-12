@@ -1,0 +1,8 @@
+Writing creator formulas:
+
+1) Lock other services from running
+2) Identify the account type you are uploading content to.
+3) Pull the media pools for the account.
+4) Set a canvas for the video formula.
+5) Apply your edits in whatever way you wish.
+6) Unlock to allow other services to run

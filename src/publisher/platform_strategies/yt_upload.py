@@ -6,8 +6,10 @@ from selenium.webdriver.common.by import By
 import undetected_chromedriver as uc
 from pyotp.totp import TOTP
 
+from .upload import Upload
 
-class YtUpload:
+
+class YtUpload(Upload):
     """
     Class for uploading content to YouTube via YouTube studio.
     """
@@ -249,7 +251,6 @@ class YtUpload:
         # Now input 2fa
 
         # Set up elements to select
-        totp = TOTP(auto_secrete)
         two_fa = self.driver.find_element(By.XPATH, '/html/body/div[1]/div[1]/div[2]/div/c-wiz/div/div[2]/div/div[1]/div/form/span/section[3]/div/div/div[1]/div/div[1]/div/div[1]/input')
         save_device = self.driver.find_element(By.XPATH, '/html/body/div[1]/div[1]/div[2]/div/c-wiz/div/div[2]/div/div[1]/div/form/span/section[3]/div/div/div[2]/div[1]/div/div/div[1]/div/input')
         next_button = self.driver.find_element(By.XPATH, '/html/body/div[1]/div[1]/div[2]/div/c-wiz/div/div[2]/div/div[2]/div/div[1]/div/div/button')
@@ -257,12 +258,13 @@ class YtUpload:
         # Toggle click, as you don't want the browser to remember the device as it messes with the alg
         save_device.click()
         # Send the 2fa code
+        totp = TOTP(auto_secrete)
         two_fa.send_keys(totp.now())
         # Click next ASAP
         next_button.click()
 
         # There is a rare chance that inbetween sending the keys and clicking the button that the totp keys could have changed.
-        # If that happens, god damn, call me unlucky for the upload for that day.
+        # If that happens, god-damn, call me unlucky for the upload for that day.
 
         time.sleep(2)
 
