@@ -55,9 +55,10 @@ class VideoSection:
         self.clip = concatenated_video
 
 
-    def render(self):
+    def render(self, output_path):
         """
         Renders the video clip
+        :param output_path: The absolute path for the output video.
         :return:
         """
-        self.clip.write_videofile("foo.mp4", codec='libx264', audio_codec='aac')
+        self.clip.write_videofile(output_path, codec='libx264', audio_codec='aac')

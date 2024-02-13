@@ -1,4 +1,4 @@
-from abc import ABC
+from abc import abstractmethod
 import string
 import random
 import os
@@ -97,10 +97,20 @@ class DirManager:
             # Cache will contain any left over dirs that have failed to be processed.
             os.mkdir(f"{wd}/cache")
 
-
-    def save_cache(self):
+    @abstractmethod
+    def save_cache(self, *args):
+        """
+        Saves information to the cache directory using shutil.copytree and pickle. To be overwritten.
+        :return:
+        """
         pass
 
-    def load_cache(self):
+    @abstractmethod
+    def load_cache(self, *args):
+        """
+        Loads the information from the cache directory. To be overwritten.
+        :param args:
+        :return:
+        """
         pass
 

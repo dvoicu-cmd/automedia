@@ -1,7 +1,7 @@
 Writing scraper formulas:
 
-1) Lock other services from running
-2) Pick a platform strategy to take content from
-3) Output file to output dir
-4) Init DbNasConnection and upload file to appropriate media_pool
-5) Unlock to allow other services to run
+1) Init CreatorDirManager
+2) Get the tmp dir file address from DirManager
+3) Pick a platform strategy to take content from
+4) Output file to tmp dir
+5) Init DbNasConnection and upload file to appropriate media_pool
