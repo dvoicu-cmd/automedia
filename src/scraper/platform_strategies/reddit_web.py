@@ -50,11 +50,6 @@ class RedditScrape:
         for post in shreddit_posts:
             pass
 
-
-
-
-
-
     def __scroll(self, wait_time):
         """
 

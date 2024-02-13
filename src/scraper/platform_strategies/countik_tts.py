@@ -2,7 +2,7 @@ from selenium.webdriver.common.by import By
 import undetected_chromedriver as uc
 
 
-class Countik_TTS:
+class CountikTTS:
     def __init__(self):
         self.driver = uc.Chrome()
         self.select_language = "English US"
