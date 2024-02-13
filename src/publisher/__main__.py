@@ -4,8 +4,7 @@ from src import *
 from lib import *
 
 
-
-if __name__ == '__main__':
+def main():
     pg.verify_cfg()
     v1 = pg.main_menu("publisher")
     if v1 == 'custom':
@@ -14,3 +13,7 @@ if __name__ == '__main__':
 
         pass
 
+
+
+if __name__ == '__main__':
+    main()

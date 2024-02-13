@@ -13,6 +13,11 @@ class TextUtils:
         pass
 
     @staticmethod
+    def write_txt(path, input_string: str):
+        with open(path, 'w') as file:
+            file.write(input_string)
+
+    @staticmethod
     def read_txt(path):
         if not os.path.exists(path):
             raise FileNotFoundError(f"File at path does not exist: {path}")
@@ -22,13 +27,8 @@ class TextUtils:
         return file_contents
 
     @staticmethod
-    def split_single_words():
-        pass
-
-    @staticmethod
-    def split_sentences():
-
-        pass
+    def split_single_words(input_string):
+        return input_string.split(' ')
 
     @staticmethod
     def split_partition_sentences(input_string, char_capacity):

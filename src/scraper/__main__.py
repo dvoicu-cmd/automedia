@@ -3,7 +3,8 @@ from context import lib
 from src import *
 from lib import *
 
-if __name__ == '__main__':
+
+def main():
     pg.verify_cfg()
     v1 = pg.main_menu("scraper")
     if v1 == 'custom':
@@ -25,4 +26,8 @@ if __name__ == '__main__':
 
             DbNasConnection().create_media_file(content, content_types[index], title, desc, pool_parent)
             print(200)
+
+
+if __name__ == '__main__':
+    main()
 

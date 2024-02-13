@@ -9,27 +9,7 @@ Wrapper functions
 """
 
 
-def create_creator_formula(py_service_name, code_lines: [str]):
-    try:
-        formula = ManageFormula()
-        for line in code_lines:
-            formula.append_code(line)
-        formula.save_generated_script(py_service_name)
-    except Exception as e:
-        return e
-    return 200
-
-
-def delete_creator_formula(py_service_name):
-    try:
-        ManageFormula().delete_generated_script(py_service_name)
-    except Exception as e:
-        return e
-    return 200
-
-
-
-if __name__ == '__main__':
+def main():
     pg.verify_cfg()
     v1 = pg.main_menu("creator")
     if v1 == 'custom':
@@ -57,4 +37,28 @@ if __name__ == '__main__':
         # contd = True
         # while contd:
         #     PickerPage([''])
+
+
+def create_creator_formula(py_service_name, code_lines: [str]):
+    try:
+        formula = ManageFormula()
+        for line in code_lines:
+            formula.append_code(line)
+        formula.save_generated_script(py_service_name)
+    except Exception as e:
+        return e
+    return 200
+
+
+def delete_creator_formula(py_service_name):
+    try:
+        ManageFormula().delete_generated_script(py_service_name)
+    except Exception as e:
+        return e
+    return 200
+
+
+
+if __name__ == '__main__':
+    main()
 

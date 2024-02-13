@@ -1,7 +1,5 @@
 from abc import abstractmethod
 
-from moviepy.video.compositing.CompositeVideoClip import CompositeVideoClip
-
 from .edit import Edit
 
 
