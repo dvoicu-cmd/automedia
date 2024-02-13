@@ -13,3 +13,7 @@
 **/cred.cfg
 **/paths.cfg
 **/$HOME
+
+# formula files should not be tracked in the repo.
+**/py_services
+
