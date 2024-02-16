@@ -4,6 +4,7 @@ from lib import *
 from src import *
 
 import os
+from pyotp import TOTP
 
 """
 Methods for interacting with central
@@ -24,7 +25,8 @@ def main():
         p2 = PickerPage(["create account",
                          "delete account",
                          "display account",
-                         "display all accounts"])
+                         "display all accounts",
+                         "totp now"])
 
         v2 = p2.prompt()
         if v2 == 0:  # create account
@@ -56,6 +58,11 @@ def main():
 
         if v2 == 3:  # display all accounts
             print(display_all_accounts_names())
+
+        if v2 == 4:  # totp now
+            acc_id = InputPage("Input the account id").prompt()
+            print(totp_for_account(acc_id))
+
 
     elif v1 == 1:  # MEDIA POOLS
 
@@ -294,6 +301,18 @@ def accounts_linked_media_pools(acc_id: int):
     except Exception as e:
         return e
     return str_output
+
+
+def totp_for_account(acc_id: int):
+    try:
+        db = DbNasConnection()
+        record = db.read_account_by_id(acc_id)
+        hash2fa = record[4]
+        tp = TOTP(hash2fa)
+        return tp.now()
+
+    except Exception as e:
+        return e
 
 
 """

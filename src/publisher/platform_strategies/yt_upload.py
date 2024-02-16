@@ -231,22 +231,22 @@ class YtUpload(Upload):
         # Get email button
         email_button = self.driver.find_element(By.XPATH, '/html/body/div[1]/div[1]/div[2]/div/c-wiz/div/div[2]/div/div[1]/div/form/span/section/div/div/div[1]/div/div[1]/div/div[1]/input')
         email_button.send_keys(account)
-        time.sleep(1)
+        time.sleep(5)
 
         # Next
         next_button = self.driver.find_element(By.XPATH, '/html/body/div[1]/div[1]/div[2]/div/c-wiz/div/div[2]/div/div[2]/div/div[1]/div/div/button')
         next_button.click()
-        time.sleep(1)
+        time.sleep(5)
 
         # Input password
         password_input = self.driver.find_element(By.XPATH, '/html/body/div[1]/div[1]/div[2]/div/c-wiz/div/div[2]/div/div[1]/div/form/span/section[2]/div/div/div[1]/div[1]/div/div/div/div/div[1]/div/div[1]/input')
         password_input.send_keys(password)
-        time.sleep(1)
+        time.sleep(5)
 
         # Next
         password_button = self.driver.find_element(By.CSS_SELECTOR, '#passwordNext > div > button')
         password_button.click()
-        time.sleep(3)
+        time.sleep(5)
 
         # Now input 2fa
 
@@ -266,7 +266,7 @@ class YtUpload(Upload):
         # There is a rare chance that inbetween sending the keys and clicking the button that the totp keys could have changed.
         # If that happens, god-damn, call me unlucky for the upload for that day.
 
-        time.sleep(2)
+        time.sleep(5)
 
 
 
