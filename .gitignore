@@ -8,11 +8,13 @@
 # Python Ignore
 **/__pycache__
 
-# Sensitive Files
+# Sensitive Files/Large Files
 **/.env
 **/cred.cfg
 **/paths.cfg
+**/config.ini
 **/$HOME
+**/.venv
 
 # formula files should not be tracked in the repo.
 **/py_services

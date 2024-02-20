@@ -20,12 +20,12 @@ def verify_cfg():
     """
     if not os.path.exists('cred.cfg'):
         in_list = [
-            InputPage("There is no \"cred.cfg\" file for database. Input host ip:"),
-            InputPage("Port"),
-            InputPage("User"),
-            InputPage("Password"),
-            InputPage("Database Name"),
-            InputPage("Nas root file location on this machine:")
+            InputPage("The credentials for the database have not been setup. \nInput the host ip of the database:"),
+            InputPage("Input the sql port of the database server:"),
+            InputPage("Input the database username this node will use:"),
+            InputPage("Input the password for the user:"),
+            InputPage("Input the name of the database:"),
+            InputPage("Input the root file mount location for the nas on this machine: \nTypically the default location is /mnt/nfs_nas ")
         ]
 
         result_list = []
@@ -37,16 +37,15 @@ def verify_cfg():
         cfg_db.make_connection_config(*result_list)
 
     if not os.path.exists('paths.cfg'):
-        in_list = [
-            InputPage("There is no \"paths.cfg\" file for managing services. \n Input the absolute path of the service directory"),
-            InputPage("absolute path of the python binary"),
-            InputPage("The absolute path of the scripts")
-        ]
-        paths_list = []
-        for page in in_list:
-            answer = page.prompt()
-            paths_list.append(answer)
+        service_path = InputPage("There is no configuration set up for managing services. \nInput the absolute path of the systemd service directory. Typically on debian systems this would be: /etc/systemd/system").prompt()
 
+        paths_list = [
+            service_path,  # append the service dir
+            os.getcwd()+'/.venv/automedia_venv/bin/python3',  # append the default expected location of the python virtual environment
+            os.getcwd()  # Input the current directory to read from the python scripts in py_services
+        ]
+
+        # Create paths.cfg file
         service = ManageService()
         service.create_paths_config(*paths_list)
 
@@ -65,7 +64,7 @@ def start_service():
     contd = True
     on_cal_list = []
     while contd:
-        page = InputPage("Input an on calendar value to schedule this service\nsystemd timers use the format: {day of the week} {year}-{month}-{day} {hr}:{min}:{sec}.")
+        page = InputPage("Input an on calendar value to schedule this service. \nsystemd timers use the format: {day of the week} {year}-{month}-{day} {hr}:{min}:{sec}.")
         on_cal_list.append(page.prompt())
 
         # prompt if user wishes to add more on_calendar values
@@ -79,25 +78,6 @@ def start_service():
 
     # Call the on manager service method
     return [service_name, on_cal_list]
-
-# Be honest, these two don't actually matter as much
-# def stop_service():
-#     """
-#     Wraps the end service with a cli input
-#     """
-#     page = InputPage("Input the service to stop")
-#     name = page.prompt()
-#     ManageService().delete(name)
-#     print(f"DELETED SERVICE: {name}")
-#
-#
-# def view_service_map():
-#     """
-#     prints the dictionary of the service map
-#     :return:
-#     """
-#     print("SERVICE MAP: \n")
-#     print(ManageService().print_map())
 
 
 def main_menu(node_name):

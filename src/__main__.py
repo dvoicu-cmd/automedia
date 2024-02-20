@@ -7,13 +7,32 @@ from src.scraper.__main__ import main as scraper_main
 from src.publisher.__main__ import main as publisher_main
 from src.central.__main__ import main as central_main
 
+from lib.cli_interface.picker_pages import PickerPage
+
 
 def main():
     # Read configuration
     config = configparser.ConfigParser()
     file = config.read('config.ini')
     if len(file) == 0:
-        raise FileExistsError('No config.ini file at project root')
+        a = PickerPage(['central', 'creator', 'publisher', 'scraper']).prompt("**** automedia ****\n\nThe node type has not been configured. \nSelect what node type this machine is:")
+        with open('config.ini', 'w') as configfile:
+            if a == 0:  # central
+                config['NODE_TYPE'] = {'type': 'central'}
+                config.write(configfile)
+            elif a == 1:  # creator
+                config['NODE_TYPE'] = {'type': 'creator'}
+                config.write(configfile)
+            elif a == 2:  # publisher
+                config['NODE_TYPE'] = {'type': 'publisher'}
+                config.write(configfile)
+            elif a == 3:  # scraper
+                config['NODE_TYPE'] = {'type': 'scraper'}
+                config.write(configfile)
+            else:
+                raise FileNotFoundError('Invalid config.ini file choice. Somehow...')
+        # Re-read the file now
+        config.read('config.ini')
     module = config['NODE_TYPE']['type']
 
     # Import and run the selected submodule

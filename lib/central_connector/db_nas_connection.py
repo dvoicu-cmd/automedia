@@ -138,9 +138,8 @@ class DbNasConnection:
                              " 'tiktok', 'yt_shorts', 'instagram_reels', 'yt_videos', 'other'")
 
         query = (f'INSERT INTO {table} (username, email, password, hash_2fa, platform, description) '
-                 f'VALUES (\'{username}\', \'{email}\', \'{password}\', \'{hash_2fa}\' \'{platform}\', \'{description}\');')
+                 f'VALUES (\'{username}\', \'{email}\', \'{password}\', \'{hash_2fa}\', \'{platform}\', \'{description}\');')
 
-        query.format(table, email, platform, username, password, description)
         # Execute the query
         self.curr.execute(query)
         # Close connection

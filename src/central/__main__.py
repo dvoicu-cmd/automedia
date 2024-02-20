@@ -13,29 +13,30 @@ Methods for interacting with central
 
 def main():
     pg.verify_cfg()
-    p1 = PickerPage(["ACCOUNT",
-                     "MEDIA POOLS",
-                     "LINK ACCOUNT & MEDIA POOL",
-                     "MANAGE SERVICE"])
+    p1 = PickerPage(["Account",
+                     "Media Pools",
+                     "Link Account & Media Pool",
+                     "Manage Archival Service"])
 
-    v1 = p1.prompt()  # This will determine what submenu to navigate to.
+    v1 = p1.prompt("Central Node: Pick a menu. \n(use the up or down arrow keys)")  # This will determine what submenu to navigate to.
 
     if v1 == 0:  # ACCOUNTS
 
-        p2 = PickerPage(["create account",
-                         "delete account",
-                         "display account",
-                         "display all accounts",
-                         "totp now"])
+        p2 = PickerPage(["Create Account",
+                         "Delete Account",
+                         "Display specific account record via username",
+                         "Display all accounts",
+                         "Display totp now code for account"])
 
-        v2 = p2.prompt()
+        v2 = p2.prompt("Select what to do with Accounts:")
         if v2 == 0:  # create account
             in_list = [
-                InputPage("Username"),
-                InputPage("Email"),
-                InputPage("Password"),
-                InputPage("Platform"),
-                InputPage("Description")
+                InputPage("Input details on the new entry:\nAccount Username:"),
+                InputPage("Account's Associated Email:"),
+                InputPage("Account's Password:"),
+                InputPage("Account Platform: \n(accepted values: 'tiktok', 'yt_shorts', 'instagram_reels', 'yt_videos', 'other')"),
+                InputPage("Input the 32-bit hash for the account's two factor authentication. \n(Leave blank if not applicable)"),
+                InputPage("Input a description describing the account's details:")
             ]
 
             result_list = []
@@ -44,15 +45,19 @@ def main():
                 result_list.append(answer)
 
             ret = create_account(*result_list)
-            print(f"ret value {ret}")
+            # Check if the execution was okay.
+            if isinstance(ret, BaseException):
+                raise ret
+            else:
+                print(f"ret value {ret}")
 
         if v2 == 1:  # delete account
-            acc_id = InputPage("Input account id to delete")
+            acc_id = InputPage("Input account id to delete:")
             ret = delete_account(acc_id)
             print(f"ret value {ret}")
 
         if v2 == 2:  # display account
-            acc_name = InputPage("Input account name")
+            acc_name = InputPage("Input account name:")
             ret = display_account(acc_name)
             print(f"ret value {ret}")
 
@@ -60,20 +65,20 @@ def main():
             print(display_all_accounts_names())
 
         if v2 == 4:  # totp now
-            acc_id = InputPage("Input the account id").prompt()
+            acc_id = InputPage("Input the account id:").prompt()
             print(totp_for_account(acc_id))
 
 
     elif v1 == 1:  # MEDIA POOLS
 
-        p2 = PickerPage(["create media pool",
-                         "delete media pool",
-                         "display media pool",
-                         "display all media pools"])
-        v2 = p2.prompt()
+        p2 = PickerPage(["Create Media Pool",
+                         "Delete Media Pool",
+                         "Display specific Media Pool record via name",
+                         "Display all Media Pools"])
+        v2 = p2.prompt("Select what to do with Media Pools:")
 
         if v2 == 0:  # create media pool
-            name = InputPage("Input media pool name").prompt()
+            name = InputPage("Input the media pool name").prompt()
             desc = InputPage("Input a description").prompt()
             ret = create_media_pool(name, desc)
             print(f"return value, {ret}")
@@ -93,8 +98,8 @@ def main():
 
     elif v1 == 2:  # MANAGE ACCOUNT & MEDIA POOL LINK
 
-        p2 = PickerPage(["link", "unlink", "show links of account"])
-        v2 = p2.prompt()
+        p2 = PickerPage(["Link", "Unlink", "Show links of a specific Account"])
+        v2 = p2.prompt("Select an action to take:")
 
         if v2 == 0:  # link
             acc_id = InputPage("Input account id").prompt()
@@ -120,14 +125,14 @@ def main():
                          "Delete Archiver Service",
                          "Display Services"])
 
-        v2 = p2.prompt()
+        v2 = p2.prompt("Select an action:")
         if v2 == 0:  # create archiver service
             prompt_values = pg.start_service()
             ret = create_archiver_service(prompt_values[0], prompt_values[1])
             print(f"return value {ret}")
 
         if v2 == 1:  # delete archiver service
-            name = InputPage("Input service name to delete").prompt()
+            name = InputPage("Input service name to delete:").prompt()
             ret = delete_archiver_service(name)
             # raise ret
             print(f"return value {ret}")
@@ -137,15 +142,13 @@ def main():
             print(f"return value\n {ret}")
 
 
-
-
 # --- Account methods ---
 
-def create_account(username, email, password, platform, description):
+def create_account(username, email, password, platform, hash2fa, description):
     # Action for "Create Account"
     try:
         db = DbNasConnection()
-        db.create_account(username, email, password, platform, description)
+        db.create_account(username, email, password, platform, hash2fa, description)
     except Exception as e:
         return e
     return 200

@@ -17,7 +17,7 @@ beautifulsoup4~=4.12.2
 requests~=2.31.0
 openai~=1.1.1
 pyotp~=2.9.0
-pyttsx3  # Additional dependencies: espeak ffmpeg libespeak1
+pyttsx3  # Additional dependencies needed: espeak ffmpeg libespeak1
 
 
 # -- creating --
@@ -27,8 +27,8 @@ imageio~=2.33.1
 opencv-python~=4.9.0.80
 openai-whisper  #v20231117, so unconventional pip gave up
 
-# Additional packages outside of pip: ffmpeg (if not installed by imageio), ImageMagick
-# ImgMagic Policy Issue: https://askubuntu.com/questions/873112/imagemagick-cannot-be-detected-by-moviepy 
+# Additional packages outside of pip: ffmpeg (if not installed by imageio), imagemagick
+# ImgMagick Policy Issue: https://askubuntu.com/questions/873112/imagemagick-cannot-be-detected-by-moviepy
 # Comment this line in the policy.xml: <policy domain="path" rights="none" pattern="@*" />
 
 
