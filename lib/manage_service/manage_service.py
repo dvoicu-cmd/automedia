@@ -115,7 +115,9 @@ class ManageService:
         """
         returns the recorded timer map
         """
-        return self.timer_map.data
+        # Load map from pickle file
+        self.timer_map.deserialize()
+        return self.timer_map.json_return()
 
     # --------- Service Control --------- #
 

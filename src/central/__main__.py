@@ -53,20 +53,31 @@ def main():
 
         if v2 == 1:  # delete account
             acc_id = InputPage("Input account id to delete:")
-            ret = delete_account(acc_id)
-            print(f"ret value {ret}")
+            ret = delete_account(acc_id.prompt())
+            if isinstance(ret, BaseException):
+                raise ret
+            else:
+                print(f"ret value {ret}")
 
         if v2 == 2:  # display account
             acc_name = InputPage("Input account name:")
-            ret = display_account(acc_name)
-            print(f"ret value {ret}")
+            ret = display_account(acc_name.prompt())
+            if isinstance(ret, BaseException):
+                raise ret
+            else:
+                print(f"ret value {ret}")
 
         if v2 == 3:  # display all accounts
-            print(display_all_accounts_names())
+            InputPage.clear()
+            ret = display_all_accounts_names()
+            if isinstance(ret, BaseException):
+                raise ret
+            else:
+                print(ret)
 
         if v2 == 4:  # totp now
-            acc_id = InputPage("Input the account id:").prompt()
-            print(totp_for_account(acc_id))
+            acc_id = InputPage("Input the account id:")
+            print(totp_for_account(acc_id.prompt()))
 
 
     elif v1 == 1:  # MEDIA POOLS
@@ -86,15 +97,26 @@ def main():
         if v2 == 1:  # delete media pool
             media_id = InputPage("Input media pool id to delete").prompt()
             ret = delete_media_pool(media_id)
-            print(f"return value, {ret}")
+            if isinstance(ret, BaseException):
+                raise ret
+            else:
+                print(f"return value, {ret}")
 
         if v2 == 2:  # display media pool
             media_pool_name = InputPage("Input media pool name").prompt()
             ret = display_media_pool(media_pool_name)
-            print(f"return value\n {ret}")
+            if isinstance(ret, BaseException):
+                raise ret
+            else:
+                print(f"return value\n {ret}")
 
         if v2 == 3:  # display all media pools
-            print(display_all_accounts_names())
+            InputPage.clear()
+            ret = display_all_media_pool_names()
+            if isinstance(ret, BaseException):
+                raise ret
+            else:
+                print(ret)
 
     elif v1 == 2:  # MANAGE ACCOUNT & MEDIA POOL LINK
 
@@ -105,13 +127,13 @@ def main():
             acc_id = InputPage("Input account id").prompt()
             pool_id = InputPage("Input media pool id").prompt()
             result = link_account_to_media_pool(acc_id, pool_id)  # Got an infinite loop here
-            print(f"return value\n {result}")
+            print(f"ret value {result}")
 
         if v2 == 1:  # unlink
             acc_id = InputPage("Input account id").prompt()
             pool_id = InputPage("Input media pool id").prompt()
             result = unlink_account_to_media_pool(acc_id, pool_id)  # And here
-            print(f"return value\n {result}")
+            print(f"ret value {result}")
 
         if v2 == 2:  # display links
             acc_id = InputPage("Input account id").prompt()
@@ -127,19 +149,21 @@ def main():
 
         v2 = p2.prompt("Select an action:")
         if v2 == 0:  # create archiver service
+            InputPage.clear()
             prompt_values = pg.start_service()
             ret = create_archiver_service(prompt_values[0], prompt_values[1])
-            print(f"return value {ret}")
+            print(f"ret value {ret}")
 
         if v2 == 1:  # delete archiver service
             name = InputPage("Input service name to delete:").prompt()
             ret = delete_archiver_service(name)
             # raise ret
-            print(f"return value {ret}")
+            print(f"ret value {ret}")
 
         if v2 == 2:  # display service
+            InputPage.clear()
             ret = display_services()
-            print(f"return value\n {ret}")
+            print(f"Service Map:\n\n {ret}")
 
 
 # --- Account methods ---
@@ -278,7 +302,7 @@ def display_all_accounts_names():
         str_output = ""
         records = DbNasConnection().read_all_accounts()
         for record in records:
-            str_output = f"{record}\n"
+            str_output = f"{str_output}{record}\n"
     except Exception as e:
         return e
     return str_output
@@ -289,7 +313,7 @@ def display_all_media_pool_names():
         str_output = ""
         records = DbNasConnection().read_all_media_pools()
         for record in records:
-            str_output = f"{record}\n"
+            str_output = f"{str_output}{record}\n"
     except Exception as e:
         return e
     return str_output

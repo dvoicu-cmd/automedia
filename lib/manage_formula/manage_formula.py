@@ -54,10 +54,7 @@ if __name__ == "__main__":
 
         cwd = os.getcwd()
 
-        if not os.path.exists(f"{cwd}/py_services"):
-            os.mkdir("py_services")
-
-        save_location = f"{cwd}/py_services/{service_name}.py"
+        save_location = f"{cwd}/{service_name}.py"
 
         with open(save_location, "w") as file:
             file.write(script_content)
@@ -65,12 +62,12 @@ if __name__ == "__main__":
     @staticmethod
     def delete_generated_script(service_name):
         """Static method to shortcut delete the py service script"""
-        path = f"{os.getcwd()}/py_services/{service_name}.py"
+        path = f"{os.getcwd()}/{service_name}.py"
         os.remove(path)
 
     @staticmethod
     def print_script_names():
         """Print all files in the py_service dir"""
-        d = f"{os.getcwd()}/py_services"  # Directory
+        d = f"{os.getcwd()}"  # Directory
         return os.listdir(d)  # Return lmao
 
