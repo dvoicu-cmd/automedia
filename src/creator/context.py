@@ -41,7 +41,7 @@ this_file = os.path.abspath(__file__)
 this_dir = os.path.dirname(this_file)
 
 # cd to project root
-cd_to_desired_root(this_dir, 'automedia_backend')
+cd_to_desired_root(this_dir, 'automedia')
 
 # Append to path
 sys.path.insert(0, os.path.abspath(os.path.join(os.getcwd())))

@@ -55,11 +55,17 @@ ADD COLUMN media_file_id INT,
 ADD CONSTRAINT fk_media_pool_mp_mf FOREIGN KEY (media_pool_id) REFERENCES media_pools (media_pool_id),
 ADD CONSTRAINT fk_media_file_mp_mf FOREIGN KEY (media_file_id) REFERENCES media_files (media_file_id);
 
--- Create the python interface user
--- Replace the remote host with your subnetwork. ex: 192.168.1.%
+-- Crash Course: Create users for the mariadb server
+-- Replace the remote host with your subnetwork. ex: 192.168.1.% or 10.10.2.%
 -- Update password to be more secure
 -- When granting privileges, you want to specify the database name
-
--- CREATE USER 'py_interface'@'10.10.2.%' IDENTIFIED BY 'password';
--- GRANT SELECT, INSERT, UPDATE, DELETE ON *.* TO 'py_interface'@'10.10.2.%';
+-- ex
+-- CREATE USER 'automedia_node'@'localhost' IDENTIFIED BY 'password';
+-- GRANT SELECT, INSERT, UPDATE, DELETE ON *.* TO 'automedia_node'@'localhost';
 -- FLUSH PRIVILEGES;
+
+-- Crash Course: Deleting users for the mariadb server
+-- DROP USER 'automedia_node'@'localhost';
+
+-- Crash Course: Showing all users for mariadb server
+-- SELECT User, Host FROM mysql.user;
