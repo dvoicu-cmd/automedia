@@ -83,38 +83,41 @@ def start_service():
 def main_menu(node_name):
     page = PickerPage(
         [
-            f"Create {node_name} formula",
-            f"Delete {node_name} formula",
+            f"Create {node_name} Formula",
+            f"Delete {node_name} Formula",
+            f"Display All Formulas",
             f"Display Service Map",
-            f"Display All formulas"
             f"Start Service",
             f"Stop Service"
         ])
 
-    v = page.prompt()
+    v = page.prompt(f"{node_name} Menu \nselect an option:")
     if v == 0:  # Create formula
-        return 'custom'  # Do something custom in the __main__.py
+        return 'custom'  # Do something custom in the __main__.py file
 
     if v == 1:  # Delete a formula
-        value = InputPage("Input the formula to delete").prompt()
+        value = InputPage("Input the name of the formula to delete").prompt()
         try:
             ManageFormula().delete_generated_script(value)
         except Exception as e:
             raise e
 
-    if v == 2:  # Display map
+    if v == 2:  # Display all formulas
+        InputPage.clear()
+        try:
+            print(f"All files in py_services: \n {ManageFormula().print_script_names()}")
+        except Exception as e:
+            raise e
+
+    if v == 3:  # Display Service Map
+        InputPage.clear()
         try:
             print(ManageService().print_map())
         except Exception as e:
             raise e
 
-    if v == 3:  # Display all formulas
-        try:
-            print(f"All service files: \n {ManageFormula().print_script_names()}")
-        except Exception as e:
-            raise e
-
     if v == 4:  # Start Service
+        InputPage.clear()
         try:
             out = start_service()
             ManageService().create(out[0], out[1])
@@ -122,6 +125,7 @@ def main_menu(node_name):
             raise e
 
     if v == 5:  # Stop service
+        InputPage.clear()
         try:
             value = InputPage("Input the name of the service you wish to stop").prompt()
             ManageService().delete(value)

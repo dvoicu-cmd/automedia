@@ -11,7 +11,7 @@ Wrapper functions
 
 def main():
     pg.verify_cfg()
-    v1 = pg.main_menu("creator")
+    v1 = pg.main_menu("Creator")
     if v1 == 'custom':
 
         # CUSTOM CREATOR FORMULA CREATION

@@ -80,6 +80,9 @@ class ManageService:
         self.__delete_timer_file(python_file)
         self.__delete_service_file(python_file)
 
+        # Save to pickle file
+        self.timer_map.serialize()
+
     def lock(self):
         """
         Creates creates the lock file that forces other python services to sleep
