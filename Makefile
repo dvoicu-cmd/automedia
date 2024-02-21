@@ -4,7 +4,7 @@
 # ---------------- MAKE SURE TO RUN AS ROOT ----------------- #
 # ----------------------------------------------------------- #
 
-# ------------------------ Variables ------------------------ #
+# ---------------------------- Variables ---------------------------- #
 
 # Define the virtual environment directory
 VENV_DIR = $(PWD)/.venv/automedia_venv
@@ -24,7 +24,7 @@ CHROME_DEB = google-chrome-stable_current_amd64.deb
 # ------------------------ All/Regular Nodes ------------------------ #
 
 # First install chrome, then the apt dependencies, then the virtual environment, then install the dependencies into the virtual environment
-all: install_chrome apt_dependencies $(VENV_DIR)/bin/activate $(VENV_DIR)/.installed nfs_mount reboot
+all: install_chrome apt_dependencies $(VENV_DIR)/bin/activate $(VENV_DIR)/.installed
 
 # Rule to install apt dependencies
 apt_dependencies:
@@ -45,6 +45,8 @@ install_chrome:
 	apt-get install -y -f  # Install any missing dependencies
 	rm -f $(CHROME_DEB)
 
+# ------------------------ Additional NFS Client Rules ------------------------ #
+
 # Rule that sets the nfs mount points on clients
 # Expects a specific ip, ex: 10.10.2.3
 nfs_mount:
@@ -52,11 +54,18 @@ nfs_mount:
 	mkdir /mnt/archive
 	echo "$(IP_ADDRESS):/mnt/active /mnt/active nfs auto 0 0" | tee -a /etc/fstab >/dev/null
 	echo "$(IP_ADDRESS):/mnt/archive /mnt/archive nfs auto 0 0" | tee -a /etc/fstab >/dev/null
+	systemctl reboot
+
+# Rule to clean the nfs mounts
+clean_nfs_mounts:
+	-umount /mnt/activate
+	-umount /mnt/archive
+	rm -r /mnt/archive
+	rm -r /mnt/active
+	head -n -2 /etc/fstab > tmp && mv tmp /etc/fstab
 
 
 # ------------------------ Additional DbNas Server Rules ------------------------ #
-
-db_nas: nfs_exports secure_mariadb
 
 # Rule that sets the nfs exports on the server
 # Expects an ip range, ex: 10.10.2.0/24
@@ -67,17 +76,20 @@ nfs_exports:
 	mkdir /mnt/archive
 	echo "/mnt/active $(IP_RANGE)(rw,sync,no_subtree_check,insecure,no_root_squash)" | tee -a /etc/exports >/dev/null
 	echo "/mnt/archive $(IP_RANGE)(rw,sync,no_subtree_check,insecure,no_root_squash)" | tee -a /etc/exports >/dev/null
+	systemctl reboot
+
+# Rule to clean the nfs exports
+clean_nfs_exports:
+	-umount /mnt/activate
+	-umount /mnt/archive
+	rm -r /mnt/archive
+	rm -r /mnt/active
+	head -n -2 /etc/exports > tmp && mv tmp /etc/exports
 
 # Rule to install mariadb server and secure the installation
 secure_mariadb:
 	apt-get install -y mariadb-server
 	mysql_secure_installation
-
-
-# ------------------------ Reboot ------------------------ #
-# Reboot rule
-reboot:
-	systemctl reboot
 
 
 # ------------------------ CLEAN ------------------------ #
@@ -88,8 +100,5 @@ clean:
 	rm -rf $(HOME)/.config/google-chrome
 	apt-get remove -y google-chrome-stable
 	apt-get remove -y $(APT_DEPENDENCIES)
-	-umount /mnt/activate
-	-umount /mnt/archive
-	rm -r /mnt/archive
-	rm -r /mnt/active
+
 
