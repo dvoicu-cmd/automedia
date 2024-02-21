@@ -3,7 +3,7 @@ import string
 import random
 import os
 import glob
-import tempfile
+from shutil import rmtree
 
 
 class DirManager:
@@ -75,11 +75,12 @@ class DirManager:
     def create_tmp_dir(self):
         wd = f"{os.getcwd()}/output"
         tmp_dir = os.path.join(wd, self.rand_hash)
-        return tempfile.TemporaryDirectory(prefix=tmp_dir)  # Create the tmp file
+        os.mkdir(tmp_dir)
+        return tmp_dir
 
     @ staticmethod
-    def cleanup(tmp_dir: tempfile.TemporaryDirectory):
-        tmp_dir.cleanup()
+    def cleanup(tmp_dir):
+        rmtree(tmp_dir)
 
     @staticmethod
     def __init_dirs():

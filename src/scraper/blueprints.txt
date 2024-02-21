@@ -1,7 +1,9 @@
 Writing scraper formulas:
 
-1) Init CreatorDirManager
+1) Init ScraperDirManager
 2) Get the tmp dir file address from DirManager
 3) Pick a platform strategy to take content from
 4) Output file to tmp dir
-5) Init DbNasConnection and upload file to appropriate media_pool
+5) Init DbNasConnection
+6) upload file to appropriate media_pool
+7) Clean up
