@@ -11,14 +11,15 @@ def main():
     # db_nas = DbNasConnection()
     tmp = manager.create_tmp_dir()
 
-
     rd = RedditScrape()
-    output = rd.scrape("memes", "new", "image", 2, 5)
+    output = rd.scrape("AmItheAsshole", "hot", "text", 0, 5)
 
-    print(output)
+    manager.dl_list_of_text(output, 'AM_I_THE_ASSHOLE', tmp)
 
-    manager.dl_list_of_links(output, 'image', 'reddit_memes', tmp)
+    entries = manager.select_dir(tmp)
+    print(entries)
 
+    pdb.set_trace()
 
     manager.cleanup(tmp)
 

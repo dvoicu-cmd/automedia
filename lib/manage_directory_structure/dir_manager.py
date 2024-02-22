@@ -61,13 +61,13 @@ class DirManager:
         return random_string
 
     @staticmethod
-    def select_dir(dir_name):
+    def select_dir(dir_path):
         """
         Returns all files in a dir name as a list
-        :param dir_name:
+        :param dir_path: The path to the dir to select
         :return:
         """
-        wd = f"{os.getcwd()}/output/{dir_name}"
+        wd = dir_path
         pattern = os.path.join(wd, '*')
         files = glob.glob(pattern)
         return files

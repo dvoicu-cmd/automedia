@@ -39,8 +39,6 @@ class ScraperDirManager(DirManager):
         response = requests.get(link)
         if response.status_code == 200:
             with open(f"{output_tmp_dir_path}/{self.rand_hash}_{name}{fs_extension}", "wb") as f:
-                print("DOWNLOADING:"+link+"\n")
-                print(f"{output_tmp_dir_path}/{self.rand_hash}_{name}{fs_extension}")
                 f.write(response.content)
         else:
             ProcessLookupError(f"Failed to download contents. Response code:{response.status_code}")

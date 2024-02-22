@@ -54,10 +54,6 @@ class RedditScrape:
         # Variable to return
         output = None
 
-        post = shreddit_posts[0]
-        elm = post.find_element(By.TAG_NAME, 'img')
-        elm.get_attribute('src')
-
         # This is where you need to handle post types differently and extract the information you want
         if post_type == 'image':
             output = self.__image(shreddit_posts)
@@ -81,28 +77,85 @@ class RedditScrape:
     def __image(posts: []):
         links = []
         for post in posts:
-            try:
-                img_elm = post.find_element(By.TAG_NAME, 'img')
-                link = img_elm.get_attribute('src')
-                links.append(link)
-            except:
-                pass
+            post_type = post.get_attribute('post-type')
+            if post_type == 'image':
+                try:
+                    img_elm = post.find_element(By.TAG_NAME, 'img')
+                    link = img_elm.get_attribute('src')
+                    links.append(link)
+                except:
+                    pass
         return links
 
     @staticmethod
     def __video(posts: []):
+        links = []
         for post in posts:
-            pass
+            post_type = post.get_attribute('post-type')
+            if post_type == 'video':
+                try:
+                    vid_elm = post.find_element(By.TAG_NAME, 'video')
+                    link = vid_elm.get_attribute('src')
+                    links.append(link)
+                except:
+                    pass
+        return links
 
     @staticmethod
-    def __link(posts: []):
+    def __link(posts: []):  # bruh who cares about link posts
+        links = []
         for post in posts:
-            pass
+            post_type = post.get_attribute('post-type')
+            if post_type == 'link':
+                try:
+                    vid_elm = post.find_element(By.TAG_NAME, 'video')
+                    link = vid_elm.get_attribute('src')
+                    links.append(link)
+                except:
+                    pass
+        return links
 
-    @staticmethod
-    def __text(posts: []):
+
+    def __text(self, posts: []):  # Real shit
+
+        full_post_links = []
+        text_output = []
+
+        # First loop to get the full post links
         for post in posts:
-            pass
+            post_type = post.get_attribute('post-type')
+            if post_type == 'text':
+                a_elm = post.find_element(By.TAG_NAME, 'a')
+                link = a_elm.get_attribute('href')
+                full_post_links.append(link)
+
+        for full_post in full_post_links:
+            build_string = ''
+
+            # Navigate to post
+            self.driver.get(full_post)
+
+            # First try to click the read more button
+            try:
+                self.driver.find_element(By.XPATH, '/html/body/shreddit-app/dsa-transparency-modal-provider/div/main/shreddit-post/div[3]/div/button').click()
+                time.sleep(1)
+            except:
+                pass
+
+            # Get the post title
+            title = self.driver.find_element(By.XPATH, '/html/body/shreddit-app/dsa-transparency-modal-provider/div/main/shreddit-post/h1')  # Title Text
+            build_string = build_string + title.text + " "
+
+            # Get the post content
+            content = self.driver.find_element(By.XPATH, '/html/body/shreddit-app/dsa-transparency-modal-provider/div/main/shreddit-post/div[3]')
+            build_string = build_string + content.text
+
+            build_string = build_string.replace("\n", " ")
+
+            # Add to list
+            text_output.append(build_string)
+
+        return text_output
 
     @staticmethod
     def __gallery(posts: []):
