@@ -7,6 +7,7 @@ from .input_pages import InputPage
 from .picker_pages import PickerPage
 import os
 import subprocess
+from context import cd_to_desired_root
 
 """
 General wrapper functions for the cli user input
@@ -39,10 +40,17 @@ def verify_cfg():
     if not os.path.exists('paths.cfg'):
         service_path = InputPage("There is no configuration set up for managing services. \nInput the absolute path of the systemd service directory. Typically on debian systems this would be: /etc/systemd/system").prompt()
 
+        cwd = os.getcwd()  # save current working directory
+        cd_to_desired_root(cwd, 'automedia')  # cd up to project root
+        venv_path = os.getcwd() + '/.venv/automedia_venv/bin/python3'  # get the venv path
+        os.chdir(cwd)  # change dir back
+
+        print(venv_path)
+
         paths_list = [
             service_path,  # append the service dir
-            os.getcwd()+'/.venv/automedia_venv/bin/python3',  # append the default expected location of the python virtual environment
-            os.getcwd()  # Input the current directory to read from the python scripts in py_services
+            venv_path,  # append the default expected location of the python virtual environment
+            cwd  # Input the current directory to read from the python scripts in py_services
         ]
 
         # Create paths.cfg file
@@ -88,7 +96,8 @@ def main_menu(node_name):
             f"Display All Formulas",
             f"Display Service Map",
             f"Start Service",
-            f"Stop Service"
+            f"Stop Service",
+            f"Manual Action"
         ])
 
     v = page.prompt(f"{node_name} Menu \nselect an option:")
@@ -131,3 +140,6 @@ def main_menu(node_name):
             ManageService().delete(value)
         except Exception as e:
             raise e
+
+    if v == 6:  # Manual action
+        return 'manual'  # manual action to be done in __main__.py

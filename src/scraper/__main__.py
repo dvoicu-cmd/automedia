@@ -6,26 +6,27 @@ from lib import *
 
 def main():
     pg.verify_cfg()
-    v1 = pg.main_menu("scraper")
+    v1 = pg.main_menu("Scraper")
     if v1 == 'custom':
+        # Make scraper formula
+        pass
 
-        # CUSTOM SCRAPER FORMULA CREATION
-        v2 = PickerPage(['Make Scraper Formula', 'Manually Upload Content to Media Pool']).prompt()
-        if v2 == 0:
-            # MAKE SCRAPER FORMULA
-            pass
-        if v2 == 1:
-            pool_parent = InputPage("Input Media pool to upload to:").prompt()
-            content = InputPage("Input absolute path to file you wish to upload:").prompt()
+    if v1 == 'manual':
 
-            content_types = ['text', 'audio', 'image', 'video']
-            index = PickerPage(['text', 'audio', 'image', 'video']).prompt()
+        inputs = [
+            InputPage("Manually Inputting a media file.\nInput absolute path of content to upload:\n(FILE MUST BE VISIBLE TO COMPUTER)").prompt(),
+            InputPage("Input the media type.\nAccepted types: 'text', 'audio', 'image', 'video'.").prompt(),
+            InputPage("Input a title for the media file:").prompt(),
+            InputPage("Input a description for the media file:").prompt(),
+            InputPage("Input the associated media pool this file is related to:").prompt()
+        ]
 
-            title = InputPage("Input a title").prompt()
-            desc = InputPage("Input a description").prompt()
-
-            DbNasConnection().create_media_file(content, content_types[index], title, desc, pool_parent)
-            print(200)
+        try:
+            db = DbNasConnection()
+            db.create_media_file(*inputs)
+        except Exception as e:
+            raise e
+        print("ret value: 200")
 
 
 if __name__ == '__main__':

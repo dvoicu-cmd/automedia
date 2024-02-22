@@ -38,6 +38,9 @@ def main():
         # while contd:
         #     PickerPage([''])
 
+    if v1 == 'manual':
+        print('There is no manual option on the creator')
+
 
 def create_creator_formula(py_service_name, code_lines: [str]):
     try:
