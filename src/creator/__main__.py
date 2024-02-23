@@ -39,7 +39,14 @@ def main():
         #     PickerPage([''])
 
     if v1 == 'manual':
-        print('There is no manual option on the creator')
+        inputs = [
+            InputPage("Manually uploading content file:\n Input the absolute file location of the contents you wish to upload").prompt(),
+            InputPage("Input the title of the content:").prompt(),
+            InputPage("Input a description for the content file(s):").prompt(),
+            InputPage("Input the associated name of the account that these contents are related to:").prompt()
+        ]
+        db = DbNasConnection()
+        db.create_content(*inputs)
 
 
 def create_creator_formula(py_service_name, code_lines: [str]):

@@ -72,11 +72,25 @@ class DirManager:
         files = glob.glob(pattern)
         return files
 
+    def select_dir_one(self, dir_path):
+        """
+        Returns the file path in a dir with only one file in it
+        :param dir_path:
+        :return:
+        """
+        return self.select_dir(dir_path)[0]
+
     def create_tmp_dir(self):
         wd = f"{os.getcwd()}/output"
         tmp_dir = os.path.join(wd, self.rand_hash)
         os.mkdir(tmp_dir)
         return tmp_dir
+
+    @staticmethod
+    def read_text(file_location):
+        with open(file_location, 'r') as f:
+            file_contents = f.read()
+        return file_contents
 
     @ staticmethod
     def cleanup(tmp_dir):

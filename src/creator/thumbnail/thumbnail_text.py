@@ -19,8 +19,29 @@ class ThumbnailText:
         self.font_color = (255, 255, 255)
         self.thickness = 2
 
-    def limit_words(self, word_limit: int):
-        self.text_content = TextUtils().split_partition_sentences(self.text_content, word_limit)[0]
-        self.text_content = f"{self.text_content}..."
+    def limit_words(self, word_limit: int, new_line: int):
+        """
+
+        :param word_limit: The number of words limited
+        :param new_line: After x many words, add in a new line
+        :return:
+        """
+        # Chop off words
+        words = TextUtils().split_single_words(self.text_content)
+        words = words[:word_limit]
+
+        # Reconstruct and format the string
+        txt = ''
+        i = 0
+        for word in words:
+            if i == new_line:
+                txt = f"{txt} {word}\n"
+                i = 0
+            else:
+                txt = f"{txt} {word}"
+                i += 1
+        # End with ellipsis
+        txt = txt + '...'
+        self.text_content = txt
 
 

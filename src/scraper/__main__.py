@@ -18,7 +18,7 @@ def main():
             InputPage("Input the media type.\nAccepted types: 'text', 'audio', 'image', 'video'.").prompt(),
             InputPage("Input a title for the media file:").prompt(),
             InputPage("Input a description for the media file:").prompt(),
-            InputPage("Input the associated media pool this file is related to:").prompt()
+            InputPage("Input the associated name of the media pool that this file is related to:").prompt()
         ]
 
         try:

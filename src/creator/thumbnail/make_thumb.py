@@ -1,4 +1,6 @@
 import cv2
+import numpy as np
+import os
 from src.creator.canvas import *
 from src.creator.thumbnail.thumbnail_text import ThumbnailText
 
@@ -10,9 +12,9 @@ class MakeThumbnail:
     def place_img(self, img_path, resize: tuple, position: tuple):
         """
         Places an image
-        :param img_path:
-        :param resize:
-        :param position:
+        :param img_path: The absolute path of the image you want to place
+        :param resize: The tuple with (x,y). Where x -> the number of pixels that are horizontally scaling, y -> the number of pixels that are vertically scaling.
+        :param position: The position to place the image relative to the top left corner of it. With the tuple (x,y) being the x and y position respectively.
         :return:
         """
         additional_image = cv2.imread(img_path)  # Load the img
@@ -21,7 +23,34 @@ class MakeThumbnail:
         height, width, _ = additional_image.shape
         x2, y2 = position[0] + width, position[1] + height
 
-        self.image[position[0]:x2, position[1]:y2] = additional_image  # attach image
+        self.image[position[1]:y2, position[0]:x2] = additional_image
+
+    def place_img_circle(self, img_path, radius, position: tuple):
+        # idk, stolen from stack over flow:
+        # https://stackoverflow.com/questions/61516526/how-to-use-opencv-to-crop-circular-image
+
+        # Load image
+        image = cv2.imread(img_path)
+        hh, ww = image.shape[:2]
+
+        # Define circles
+        xc = hh // 2
+        yc = ww // 2
+
+        # Define masks
+        mask = np.zeros_like(image)
+        mask = cv2.circle(mask, (xc, yc), radius, (255, 255, 255), -1)
+
+        result = cv2.cvtColor(image, cv2.COLOR_BGR2BGRA)
+        result[:, :, 3] = mask[:, :, 0]
+
+        tmp = f"{os.path.dirname(img_path)}/tmp.png"
+        cv2.imwrite(tmp, result)
+
+        self.place_img(tmp, (512, 512), position)
+
+        os.remove(tmp)
+
 
     def place_text(self, t: ThumbnailText):
         """
@@ -29,7 +58,9 @@ class MakeThumbnail:
         :param t:
         :return:
         """
-        cv2.putText(self.image, t.text_content, t.position, t.font, t.font_scale, t.font_color, t.thickness)
+        lines = t.text_content.split('\n')
+        for i, line in enumerate(lines):
+            cv2.putText(self.image, line, (t.position[0], t.position[1] + i*(t.font_scale*20)), t.font, t.font_scale, t.font_color, t.thickness)
 
     def blur_current_img(self):
         """

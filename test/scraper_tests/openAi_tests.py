@@ -1,3 +1,4 @@
+from context import src
 from src.scraper.platform_strategies.open_ai_api import OpenAiAPI
 
 def speech():
@@ -6,7 +7,7 @@ def speech():
 
 def image():
     ai = OpenAiAPI()
-    ai.stable_diffusion("A Bath&BodyWorks candle holding a minecraft sword sword diamond sword")
+    ai.stable_diffusion("I want you to generate me an image of a goofy cartoony looney tunes looking ahh nerd with giant glasses reading with intense focus at a comically large book. He also is holding a comically large spoon while smerking at the book.", '/Users/dvoicu/mnt/GoofyTestFiles/minecraft parkour')
 
 def text():
     ai = OpenAiAPI()
@@ -14,6 +15,5 @@ def text():
     print(res)
 
 
-speech()
 image()
-text()
+
