@@ -1,6 +1,5 @@
 import cv2
 import numpy as np
-import os
 from src.creator.canvas import *
 from src.creator.thumbnail.thumbnail_text import ThumbnailText
 
@@ -25,7 +24,24 @@ class MakeThumbnail:
 
         self.image[position[1]:y2, position[0]:x2] = additional_image
 
-    def place_img_circle(self, img_path, radius, position: tuple):
+    def place_text(self, t: ThumbnailText):
+        """
+        Places text given the params from text object
+        :param t:
+        :return:
+        """
+        lines = t.text_content.split('\n')
+        for i, line in enumerate(lines):
+            cv2.putText(self.image, line, (t.position[0], t.position[1] + i*(t.font_scale*20)), t.font, t.font_scale, t.font_color, t.thickness)
+
+    @staticmethod
+    def create_img_circle(img_path, radius):
+        """
+        Crops an image to a circle
+        :param img_path:
+        :param radius:
+        :return:
+        """
         # idk, stolen from stack over flow:
         # https://stackoverflow.com/questions/61516526/how-to-use-opencv-to-crop-circular-image
 
@@ -44,23 +60,8 @@ class MakeThumbnail:
         result = cv2.cvtColor(image, cv2.COLOR_BGR2BGRA)
         result[:, :, 3] = mask[:, :, 0]
 
-        tmp = f"{os.path.dirname(img_path)}/tmp.png"
+        tmp = f"{img_path}_circle_crop.jpg"
         cv2.imwrite(tmp, result)
-
-        self.place_img(tmp, (512, 512), position)
-
-        os.remove(tmp)
-
-
-    def place_text(self, t: ThumbnailText):
-        """
-        Places text given the params from text object
-        :param t:
-        :return:
-        """
-        lines = t.text_content.split('\n')
-        for i, line in enumerate(lines):
-            cv2.putText(self.image, line, (t.position[0], t.position[1] + i*(t.font_scale*20)), t.font, t.font_scale, t.font_color, t.thickness)
 
     def blur_current_img(self):
         """
