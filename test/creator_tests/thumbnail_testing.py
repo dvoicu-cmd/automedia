@@ -8,9 +8,7 @@ import cv2
 
 canvas = SixteenByNine('1920x1080')
 thumb = MakeThumbnail(canvas=canvas)
-thumb.place_img('/Users/dvoicu/mnt/GoofyTestFiles/minecraft parkour/Thumbnail.png', (1920, 1080), (0, 0))
-thumb.place_img('/Users/dvoicu/mnt/GoofyTestFiles/minecraft parkour/gooffy ahh picture circle.png', (512, 512), (0, 0))
-thumb.place_img_circle('/Users/dvoicu/mnt/GoofyTestFiles/minecraft parkour/gooffy ahh picture.jpg', 512, (0, 0))
+thumb.place_img('/Users/dvoicu/Desktop/automedia prod accounts/am I the ass hole?/assets/@UrOpinionBruh_thumb.jpg', (1920, 1080), (0, 0))
 
 ttxt = ThumbnailText("BF SHAT HIS PANTS AND BLAIMS ME, FOR TAKING A SHIT, WHATS GOOD MY GUYahey. yeah eh? we out here making thumbnails.")
 ttxt.font = cv2.FONT_HERSHEY_PLAIN

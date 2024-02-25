@@ -80,9 +80,9 @@ class DirManager:
         """
         return self.select_dir(dir_path)[0]
 
-    def create_tmp_dir(self):
+    def create_tmp_dir(self, name=''):
         wd = f"{os.getcwd()}/output"
-        tmp_dir = os.path.join(wd, self.rand_hash)
+        tmp_dir = os.path.join(wd, f"{name}_{self.rand_hash}")
         os.mkdir(tmp_dir)
         return tmp_dir
 

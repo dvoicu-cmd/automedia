@@ -1,13 +1,10 @@
 # Getting the ide to stfu
 from lib.central_connector.db_nas_connection import DbNasConnection
 from lib.manage_service.manage_service import ManageService
-from lib.manage_service.service_configurator import ServiceConfigurator
 from lib.manage_formula.manage_formula import ManageFormula
 from .input_pages import InputPage
 from .picker_pages import PickerPage
 import os
-import subprocess
-from context import cd_to_desired_root
 
 """
 General wrapper functions for the cli user input
@@ -41,11 +38,13 @@ def verify_cfg():
         service_path = InputPage("There is no configuration set up for managing services. \nInput the absolute path of the systemd service directory. Typically on debian systems this would be: /etc/systemd/system").prompt()
 
         cwd = os.getcwd()  # save current working directory
-        cd_to_desired_root(cwd, 'automedia')  # cd up to project root
-        venv_path = os.getcwd() + '/.venv/automedia_venv/bin/python3'  # get the venv path
-        os.chdir(cwd)  # change dir back
+        # assuming at, py_services
+        os.chdir('..')  # cd to specific node type package
+        os.chdir('..')  # cd to src
+        os.chdir('..')  # cd to automedia root
+        venv_path = os.getcwd()+'/.venv/automedia_venv/bin/python3'  # get the venv path
 
-        print(venv_path)
+        os.chdir(cwd)  # change dir back
 
         paths_list = [
             service_path,  # append the service dir
