@@ -18,4 +18,6 @@
 
 # formula files should not be tracked in the repo.
 **/py_services
+!py_services/context.py
+!py_services/__init__.py
 

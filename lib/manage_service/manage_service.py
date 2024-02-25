@@ -245,6 +245,8 @@ class ManageService:
 
         path_dict = self.service_config.read()
         os.remove(f"{path_dict.get('service_dir_path')}/{py_file}.service")
+        subprocess.run("systemctl daemon-reload")
+        subprocess.run("systemctl reset-failed")
 
     def __delete_timer_file(self, py_file):
         """

@@ -17,5 +17,5 @@ systemctl disable $3
 systemctl disable $2
 
 # Refresh the dameons
-systemctl daemon-reload
+# Now done in manage_service.py
 
