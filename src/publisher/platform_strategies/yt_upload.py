@@ -8,6 +8,8 @@ from pyotp.totp import TOTP
 
 from .upload import Upload
 
+import pdb
+
 
 class YtUpload(Upload):
     """
@@ -22,7 +24,24 @@ class YtUpload(Upload):
             password (str): The password for the account
             auth_secret (str): The 32 character keys for the 2fa authentication code.
         """
-        self.driver = uc.Chrome()
+        # Setting up headless mode to run without a gui and by systemctl scripts
+        options = uc.ChromeOptions()
+        options.debugger_address = '127.0.0.1:9222'
+        options.add_argument('--disable-gpu')
+        options.add_argument('--headless')
+
+        # user_agent = 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/15.0 Safari/605.1.15'
+        # user_agent = 'accounts.google.com'
+        # options.add_argument('User-Agent={0}'.format(user_agent))
+
+        # https://stackoverflow.com/questions/59514049/unable-to-sign-into-google-with-selenium-automation-because-of-this-browser-or
+        options.add_argument('--disable-web-security')
+        options.add_argument('--user-data-dir')
+        options.add_argument('--allow-running-insecure-content')
+        options.add_argument('--enable-automation')
+
+        self.driver = uc.Chrome(options=options)
+
         self.__login_google(email, password, auth_secret)
         self.title = "default"
         self.description = "default"
@@ -224,19 +243,23 @@ class YtUpload(Upload):
         """
         Function for automating the Google login
         """
+
         # Create yt_studio login
         self.driver.get("https://studio.youtube.com/")
 
+
         # Login into google
         # Get email button
-        email_button = self.driver.find_element(By.XPATH, '/html/body/div[1]/div[1]/div[2]/div/c-wiz/div/div[2]/div/div[1]/div/form/span/section/div/div/div[1]/div/div[1]/div/div[1]/input')
+        email_button = self.driver.find_element(By.XPATH, '/html/body/div/div/div/div/div/form/div[1]/section/div/div/div[1]/div/div/label/input')
         email_button.send_keys(account)
         time.sleep(5)
 
         # Next
-        next_button = self.driver.find_element(By.XPATH, '/html/body/div[1]/div[1]/div[2]/div/c-wiz/div/div[2]/div/div[2]/div/div[1]/div/div/button')
+        next_button = self.driver.find_element(By.XPATH, '/html/body/div/div/div/div/div/form/div[2]/div/div[1]/button')
         next_button.click()
         time.sleep(5)
+
+        pdb.set_trace()
 
         # Input password
         password_input = self.driver.find_element(By.XPATH, '/html/body/div[1]/div[1]/div[2]/div/c-wiz/div/div[2]/div/div[1]/div/form/span/section[2]/div/div/div[1]/div[1]/div/div/div/div/div[1]/div/div[1]/input')
