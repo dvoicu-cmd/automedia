@@ -26,21 +26,34 @@ class YtUpload(Upload):
         """
         # Setting up headless mode to run without a gui and by systemctl scripts
         options = uc.ChromeOptions()
+
+        # Remote debugger options for headless
         options.debugger_address = '127.0.0.1:9222'
         options.add_argument('--disable-gpu')
-        options.add_argument('--headless')
+        options.add_argument('--headless=new')
 
         # user_agent = 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/15.0 Safari/605.1.15'
-        # user_agent = 'accounts.google.com'
-        # options.add_argument('User-Agent={0}'.format(user_agent))
 
-        # https://stackoverflow.com/questions/59514049/unable-to-sign-into-google-with-selenium-automation-because-of-this-browser-or
-        options.add_argument('--disable-web-security')
-        options.add_argument('--user-data-dir')
-        options.add_argument('--allow-running-insecure-content')
-        options.add_argument('--enable-automation')
+        options.add_argument("--disable-blink-features=AutomationControlled")
+
+        options.add_argument("--enable-javascript")
+        options.add_argument("--disable-extensions")
+        options.add_argument("--disable-dev-shm-usage")
+
+
+        options.add_argument("--no-sandbox")
+        options.add_argument("--lang=en_US")
+        options.add_argument("--window-size=1920,1080")
+
+
+        user_agent = (
+            "Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/47.0.2526.111 Safari/537.36"
+        )
+        # options.add_argument('User-Agent={0}'.format(user_agent))
+        options.add_argument(f"--user-agent={user_agent}")
 
         self.driver = uc.Chrome(options=options)
+        print(self.driver.capabilities['chrome']['chromedriverVersion'].split(' ')[0])
 
         self.__login_google(email, password, auth_secret)
         self.title = "default"
@@ -246,18 +259,23 @@ class YtUpload(Upload):
 
         # Create yt_studio login
         self.driver.get("https://studio.youtube.com/")
+        # self.driver.get('accounts.google.com')
 
+        # Tried injecting
+        self.driver.execute_script("Object.defineProperty(navigator, 'webdriver', {get: () => undefined})")
+
+        pdb.set_trace()
 
         # Login into google
         # Get email button
         email_button = self.driver.find_element(By.XPATH, '/html/body/div/div/div/div/div/form/div[1]/section/div/div/div[1]/div/div/label/input')
         email_button.send_keys(account)
-        time.sleep(5)
+        time.sleep(2)
 
         # Next
         next_button = self.driver.find_element(By.XPATH, '/html/body/div/div/div/div/div/form/div[2]/div/div[1]/button')
         next_button.click()
-        time.sleep(5)
+        time.sleep(2)
 
         pdb.set_trace()
 
