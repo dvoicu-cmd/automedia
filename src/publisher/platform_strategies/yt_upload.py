@@ -29,33 +29,38 @@ class YtUpload(Upload):
 
         # Remote debugger options for headless
         options.debugger_address = '127.0.0.1:9222'
+
         options.add_argument('--disable-gpu')
-        options.add_argument('--headless=new')
+        options.add_argument('--window-size=1920,1080')
+        options.add_argument('--no-sandbox')
+        options.add_argument('--start-maximized')
+        options.add_argument('--disable-setuid-sandbox')
+
 
         # user_agent = 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/15.0 Safari/605.1.15'
+        # options.add_argument("--disable-blink-features=AutomationControlled")
 
-        options.add_argument("--disable-blink-features=AutomationControlled")
+        custom_user_agent_script = """
+        Object.defineProperty(navigator, 'userAgent', {get: () => 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36'});
+        Object.defineProperty(navigator, 'webdriver', {get: () => undefined});
+        """
 
-        options.add_argument("--enable-javascript")
-        options.add_argument("--disable-extensions")
-        options.add_argument("--disable-dev-shm-usage")
+        # This don't work :(
+        # options.add_argument(f"--user-agent={user_agent}")
 
+        # https://stackoverflow.com/questions/71933644/getting-xvfb-to-work-in-jupyter-notebook-on-m1-mac
+        # xquartz package contains xvfb for mac
+        #os.environ["PATH"] += f"{os.pathsep}/opt/X11/bin"  # statement for specifying the binary
 
-        options.add_argument("--no-sandbox")
-        options.add_argument("--lang=en_US")
-        options.add_argument("--window-size=1920,1080")
-
-
-        user_agent = (
-            "Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/47.0.2526.111 Safari/537.36"
-        )
-        # options.add_argument('User-Agent={0}'.format(user_agent))
-        options.add_argument(f"--user-agent={user_agent}")
-
-        self.driver = uc.Chrome(options=options)
-        print(self.driver.capabilities['chrome']['chromedriverVersion'].split(' ')[0])
-
+        print("Create uc")
+        self.driver = uc.Chrome(headless=True, options=options)
+        print("exec script")
+        self.driver.execute_script(custom_user_agent_script)
+        print("uc created")
+        print(self.driver.capabilities['chrome']['chromedriverVersion'].split(' ')[0]) # prints the chrome version
         self.__login_google(email, password, auth_secret)
+
+
         self.title = "default"
         self.description = "default"
         self.tags = "default1,default2,default3"
@@ -262,7 +267,7 @@ class YtUpload(Upload):
         # self.driver.get('accounts.google.com')
 
         # Tried injecting
-        self.driver.execute_script("Object.defineProperty(navigator, 'webdriver', {get: () => undefined})")
+        # self.driver.execute_script("Object.defineProperty(navigator, 'webdriver', {get: () => undefined})")
 
         pdb.set_trace()
 
