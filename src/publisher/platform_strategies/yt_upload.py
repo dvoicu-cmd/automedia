@@ -4,6 +4,7 @@ import time
 import selenium.common.exceptions
 from selenium.webdriver.common.by import By
 import undetected_chromedriver as uc
+from seleniumbase import Driver, BaseCase
 from pyotp.totp import TOTP
 
 from .upload import Upload
@@ -16,6 +17,9 @@ class YtUpload(Upload):
     Class for uploading content to YouTube via YouTube studio.
     """
 
+    TIMEOUT = 3
+    MAX_TRY = 3
+
     def __init__(self, email, password, auth_secret):
         """
         Constructor
@@ -24,42 +28,10 @@ class YtUpload(Upload):
             password (str): The password for the account
             auth_secret (str): The 32 character keys for the 2fa authentication code.
         """
-        # Setting up headless mode to run without a gui and by systemctl scripts
-        options = uc.ChromeOptions()
+        self.MAX_TRY = 3
 
-        # Remote debugger options for headless
-        options.debugger_address = '127.0.0.1:9222'
-
-        options.add_argument('--disable-gpu')
-        options.add_argument('--window-size=1920,1080')
-        options.add_argument('--no-sandbox')
-        options.add_argument('--start-maximized')
-        options.add_argument('--disable-setuid-sandbox')
-
-
-        # user_agent = 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/15.0 Safari/605.1.15'
-        # options.add_argument("--disable-blink-features=AutomationControlled")
-
-        custom_user_agent_script = """
-        Object.defineProperty(navigator, 'userAgent', {get: () => 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36'});
-        Object.defineProperty(navigator, 'webdriver', {get: () => undefined});
-        """
-
-        # This don't work :(
-        # options.add_argument(f"--user-agent={user_agent}")
-
-        # https://stackoverflow.com/questions/71933644/getting-xvfb-to-work-in-jupyter-notebook-on-m1-mac
-        # xquartz package contains xvfb for mac
-        #os.environ["PATH"] += f"{os.pathsep}/opt/X11/bin"  # statement for specifying the binary
-
-        print("Create uc")
-        self.driver = uc.Chrome(headless=True, options=options)
-        print("exec script")
-        self.driver.execute_script(custom_user_agent_script)
-        print("uc created")
-        print(self.driver.capabilities['chrome']['chromedriverVersion'].split(' ')[0]) # prints the chrome version
+        self.driver = Driver(uc=True, headless=True, remote_debug="127.0.0.1:9222")
         self.__login_google(email, password, auth_secret)
-
 
         self.title = "default"
         self.description = "default"
@@ -264,55 +236,56 @@ class YtUpload(Upload):
 
         # Create yt_studio login
         self.driver.get("https://studio.youtube.com/")
-        # self.driver.get('accounts.google.com')
-
-        # Tried injecting
-        # self.driver.execute_script("Object.defineProperty(navigator, 'webdriver', {get: () => undefined})")
 
         pdb.set_trace()
 
-        # Login into google
-        # Get email button
-        email_button = self.driver.find_element(By.XPATH, '/html/body/div/div/div/div/div/form/div[1]/section/div/div/div[1]/div/div/label/input')
-        email_button.send_keys(account)
-        time.sleep(2)
+        i = 0  # var to count num of retries
 
-        # Next
-        next_button = self.driver.find_element(By.XPATH, '/html/body/div/div/div/div/div/form/div[2]/div/div[1]/button')
-        next_button.click()
-        time.sleep(2)
+        def email_page():
+            self.driver.uc_click('#identifierId', reconnect_time=1)
+            self.driver.type('#identifierId', account)
+            self.driver.uc_click('#identifierNext > div > button', reconnect_time=1)
 
-        pdb.set_trace()
+        def password_page():
+            self.driver.uc_click('#password > div.aCsJod.oJeWuf > div > div.Xb9hP > input', reconnect_time=1)
+            self.driver.type('#password > div.aCsJod.oJeWuf > div > div.Xb9hP > input', password)
+            self.driver.uc_click('#passwordNext > div > button')
 
-        # Input password
-        password_input = self.driver.find_element(By.XPATH, '/html/body/div[1]/div[1]/div[2]/div/c-wiz/div/div[2]/div/div[1]/div/form/span/section[2]/div/div/div[1]/div[1]/div/div/div/div/div[1]/div/div[1]/input')
-        password_input.send_keys(password)
-        time.sleep(5)
+        def auth_2fa():
+            self.driver.uc_click('#totpPin', reconnect_time=0.5)
+            totp_code = TOTP(auto_secrete)
+            self.driver.type('#totpPin', totp_code.now())
+            self.driver.uc_click('#totpNext > div > button')
 
-        # Next
-        password_button = self.driver.find_element(By.CSS_SELECTOR, '#passwordNext > div > button')
-        password_button.click()
-        time.sleep(5)
 
-        # Now input 2fa
+        email_page()
+        while i < self.MAX_TRY:
+            try:
+                password_page()
+                break
+            except Exception as e:
+                i = i + 1
+                if i == self.MAX_TRY:
+                    raise e
+                print(f"Threw err: {e} \n attempt num:{i}")
+                self.driver.sleep(self.TIMEOUT)
+                self.driver.get("https://studio.youtube.com/")
+                email_page()
+                pass
 
-        # Set up elements to select
-        two_fa = self.driver.find_element(By.XPATH, '/html/body/div[1]/div[1]/div[2]/div/c-wiz/div/div[2]/div/div[1]/div/form/span/section[3]/div/div/div[1]/div/div[1]/div/div[1]/input')
-        save_device = self.driver.find_element(By.XPATH, '/html/body/div[1]/div[1]/div[2]/div/c-wiz/div/div[2]/div/div[1]/div/form/span/section[3]/div/div/div[2]/div[1]/div/div/div[1]/div/input')
-        next_button = self.driver.find_element(By.XPATH, '/html/body/div[1]/div[1]/div[2]/div/c-wiz/div/div[2]/div/div[2]/div/div[1]/div/div/button')
-
-        # Toggle click, as you don't want the browser to remember the device as it messes with the alg
-        save_device.click()
-        # Send the 2fa code
-        totp = TOTP(auto_secrete)
-        two_fa.send_keys(totp.now())
-        # Click next ASAP
-        next_button.click()
-
-        # There is a rare chance that inbetween sending the keys and clicking the button that the totp keys could have changed.
-        # If that happens, god-damn, call me unlucky for the upload for that day.
-
-        time.sleep(5)
+        # TOTP
+        while i < self.MAX_TRY:
+            try:
+                auth_2fa()
+                break
+            except Exception as e:
+                i = i + 1
+                if i == self.MAX_TRY:
+                    raise e
+                print(f"Threw err: {e} \n attempt num:{i}")
+                self.driver.sleep(self.TIMEOUT)
+                self.driver.find_element('#totpNext > div > button').clear()
+                continue
 
 
 

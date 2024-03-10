@@ -3,7 +3,7 @@ from src.publisher.platform_strategies.yt_upload import YtUpload
 
 def test_2fa():
     print("calling yt")
-    yt = YtUpload("dvmedia00@gmail.com", "d", "")
+    yt = YtUpload("redditreadcreators@gmail.com", "qR1kYbTD7R", "ybq3joz5rckh4bvybe4fpgloqffgsyf2")
 
 # def test_upload():
 #     yt = YtUpload("dvmedia00@gmail.com", "XXm7E81IVk")
