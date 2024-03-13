@@ -17,10 +17,7 @@ class YtUpload(Upload):
     Class for uploading content to YouTube via YouTube studio.
     """
 
-    TIMEOUT = 3
-    MAX_TRY = 3
-
-    def __init__(self, email, password, auth_secret):
+    def __init__(self, email, password, auth_secret, time_out=5, max_try=5):
         """
         Constructor
         Args:
@@ -28,11 +25,11 @@ class YtUpload(Upload):
             password (str): The password for the account
             auth_secret (str): The 32 character keys for the 2fa authentication code.
         """
-        self.MAX_TRY = 3
 
-        self.driver = Driver(uc=True, headless=True, remote_debug="127.0.0.1:9222")
+        self.driver = Driver(uc=True, headless=True, remote_debug="127.0.0.1:9222")  # remote_debug="127.0.0.1:9222"
+        self.TIMEOUT = time_out
+        self.MAX_TRY = max_try
         self.__login_google(email, password, auth_secret)
-
         self.title = "default"
         self.description = "default"
         self.tags = "default1,default2,default3"
@@ -119,7 +116,7 @@ class YtUpload(Upload):
         if not os.path.exists(file_path):
             raise ValueError(f"Video path does not exists: {file_path}")
 
-        time.sleep(1)
+        self.driver.sleep(self.TIMEOUT)
 
         # Click create button
         self.driver.find_element(By.ID, 'create-icon').click()
@@ -204,30 +201,39 @@ class YtUpload(Upload):
 
     def select_account(self, account_name):
         # Get to the list of the associated accounts.
-        self.driver.implicitly_wait(time_to_wait=5)
-        account_btn = self.driver.find_element(By.XPATH, '/html/body/ytcp-app/ytcp-entity-page/div/ytcp-header/header/div/ytd-topbar-menu-button-renderer/button')
-        account_btn.click()
-        self.driver.implicitly_wait(time_to_wait=5)
-        switch_account = self.driver.find_element(By.XPATH, '/html/body/ytcp-app/ytcp-popup-container/tp-yt-iron-dropdown/div/ytd-multi-page-menu-renderer/div[3]/div[1]/yt-multi-page-menu-section-renderer[1]/div[2]/ytd-compact-link-renderer[3]/a/tp-yt-paper-item')
-        switch_account.click()
-        self.driver.implicitly_wait(time_to_wait=5)
-        div_list_accounts = self.driver.find_element(By.XPATH, '/html/body/ytcp-app/ytcp-popup-container/tp-yt-iron-dropdown/div/ytd-multi-page-menu-renderer/div[4]/ytd-multi-page-menu-renderer/div[3]/div[1]/ytd-account-section-list-renderer/div[2]/ytd-account-item-section-renderer/div[2]')
+        i = 0  # counter for retrying
 
-        # Grab the list of webelements containing the accounts
-        list_accounts = div_list_accounts.find_elements(By.CSS_SELECTOR, '#channel-title')
+        # You need to do an initial check, for the avatar button.
+        # Sometimes the webpage moves too slow when initially loading so this loop provides a little safety net.
+        # If you can see the avatar button, everything else should be present.
+        while i < self.MAX_TRY:
+            try:
+                self.driver.wait_for_element('body > ytd-app > ytd-popup-container > tp-yt-paper-dialog')
+                break
+            except Exception as e:
+                i = i + 1
+                if i == self.MAX_TRY:
+                    raise e
+                print(f"Threw err: {e} \n attempt num:{i}")
+                self.driver.sleep(self.TIMEOUT)
+                continue
+
+        dir_list_accounts = self.driver.find_element(by=By.CSS_SELECTOR, value='#sections')
+        list_accounts = dir_list_accounts.find_elements(by=By.CSS_SELECTOR, value='#channel-title')
 
         # Iterate through all elements and find the one with the matching string value
         account_to_switch_to = None
         for account in list_accounts:
-            if account.__text == account_name:
+            if account.text == account_name:
                 account_to_switch_to = account
                 break
         if not account_to_switch_to:
-            raise ValueError(f"{account_name} is not a valid account name. Valid dir contents: \n\n{div_list_accounts.__text}")
+            raise ValueError(f"{account_name} is not a valid account name. Valid dir contents: \n\n{list_accounts.get_text()}")
 
         # Then switch to that account
         account_to_switch_to.click()
 
+        pdb.set_trace()
 
     def __login_google(self, account, password, auto_secrete):
         """
@@ -237,30 +243,31 @@ class YtUpload(Upload):
         # Create yt_studio login
         self.driver.get("https://studio.youtube.com/")
 
-        pdb.set_trace()
-
         i = 0  # var to count num of retries
 
         def email_page():
-            self.driver.uc_click('#identifierId', reconnect_time=1)
+            self.driver.wait_for_element('#identifierId')
+            self.driver.uc_click('#identifierId', reconnect_time=0.5)
             self.driver.type('#identifierId', account)
-            self.driver.uc_click('#identifierNext > div > button', reconnect_time=1)
+            self.driver.uc_click('#identifierNext > div > button', reconnect_time=0.5)
 
         def password_page():
-            self.driver.uc_click('#password > div.aCsJod.oJeWuf > div > div.Xb9hP > input', reconnect_time=1)
+            self.driver.wait_for_element('#password > div.aCsJod.oJeWuf > div > div.Xb9hP > input')
+            self.driver.uc_click('#password > div.aCsJod.oJeWuf > div > div.Xb9hP > input', reconnect_time=0.5)
             self.driver.type('#password > div.aCsJod.oJeWuf > div > div.Xb9hP > input', password)
             self.driver.uc_click('#passwordNext > div > button')
 
         def auth_2fa():
+            self.driver.wait_for_element('#totpPin')
             self.driver.uc_click('#totpPin', reconnect_time=0.5)
             totp_code = TOTP(auto_secrete)
             self.driver.type('#totpPin', totp_code.now())
             self.driver.uc_click('#totpNext > div > button')
 
 
-        email_page()
         while i < self.MAX_TRY:
             try:
+                email_page()
                 password_page()
                 break
             except Exception as e:
@@ -270,7 +277,6 @@ class YtUpload(Upload):
                 print(f"Threw err: {e} \n attempt num:{i}")
                 self.driver.sleep(self.TIMEOUT)
                 self.driver.get("https://studio.youtube.com/")
-                email_page()
                 pass
 
         # TOTP
@@ -286,7 +292,3 @@ class YtUpload(Upload):
                 self.driver.sleep(self.TIMEOUT)
                 self.driver.find_element('#totpNext > div > button').clear()
                 continue
-
-
-
-
