@@ -1,15 +1,11 @@
 import os
-import time
+from .upload import Upload
 
 import selenium.common.exceptions
 from selenium.webdriver.common.by import By
-import undetected_chromedriver as uc
-from seleniumbase import Driver, BaseCase
+from seleniumbase import Driver
 from pyotp.totp import TOTP
 
-from .upload import Upload
-
-import pdb
 
 
 class YtUpload(Upload):
@@ -26,7 +22,7 @@ class YtUpload(Upload):
             auth_secret (str): The 32 character keys for the 2fa authentication code.
         """
 
-        self.driver = Driver(uc=True, headless=True, remote_debug="127.0.0.1:9222")  # remote_debug="127.0.0.1:9222"
+        self.driver = Driver(uc=True, headless=True)  # remote_debug="127.0.0.1:9222"
         self.TIMEOUT = time_out
         self.MAX_TRY = max_try
         self.__login_google(email, password, auth_secret)
@@ -116,83 +112,86 @@ class YtUpload(Upload):
         if not os.path.exists(file_path):
             raise ValueError(f"Video path does not exists: {file_path}")
 
-        self.driver.sleep(self.TIMEOUT)
+        try:  # if anything goes wrong, you want to ensure that that driver closes so you don't spawn 50+ driver instances.
 
-        # Click create button
-        self.driver.find_element(By.ID, 'create-icon').click()
+            # placeholder var to hold long XPaths
+            e = ''
 
-        # Click upload video
-        self.driver.find_element(By.ID, 'text-item-0').click()
+            # Checking for create icon if it is loaded. If this is fine, assume everything will be present.
+            self.__wait_verify('#create-icon')
+            self.driver.find_element(by=By.CSS_SELECTOR, value='#create-icon').click()
 
-        # Get the upload button
-        upload_button = self.driver.find_element(By.XPATH, '/html/body/ytcp-uploads-dialog/tp-yt-paper-dialog/div/ytcp-uploads-file-picker/div/input')
+            # Click upload video
+            self.driver.find_element(by=By.CSS_SELECTOR, value='#text-item-0').click()
 
-        # Send file to upload button
-        upload_button.send_keys(file_path)
+            # Get the upload button
+            upload_button = self.driver.find_element(by=By.XPATH, value='/html/body/ytcp-uploads-dialog/tp-yt-paper-dialog/div/ytcp-uploads-file-picker/div/input')
 
-        # Wait for next button to be seen. I know EC exists, but damn does it not work with this.
-        time.sleep(3)
+            # Send file to upload button
+            upload_button.send_keys(file_path)
 
-        # Set the title
-        title_input = self.driver.find_element(By.XPATH, '/html/body/ytcp-uploads-dialog/tp-yt-paper-dialog/div/ytcp-animatable[1]/ytcp-ve/ytcp-video-metadata-editor/div/ytcp-video-metadata-editor-basics/div[1]/ytcp-video-title/ytcp-social-suggestions-textbox/ytcp-form-input-container/div[1]/div[2]/div/ytcp-social-suggestion-input/div')
-        title_input.clear()
-        title_input.send_keys(self.title)
+            # A wait for upload to finish before the move to the next page.
+            self.__wait_verify('#basics')
 
-        # Set the description
-        desc_input = self.driver.find_element(By.XPATH, '/html/body/ytcp-uploads-dialog/tp-yt-paper-dialog/div/ytcp-animatable[1]/ytcp-ve/ytcp-video-metadata-editor/div/ytcp-video-metadata-editor-basics/div[2]/ytcp-video-description/div/ytcp-social-suggestions-textbox/ytcp-form-input-container/div[1]/div[2]/div/ytcp-social-suggestion-input/div')
-        desc_input.clear()
-        desc_input.send_keys(self.description)
+            # Set the title
+            e = '/html/body/ytcp-uploads-dialog/tp-yt-paper-dialog/div/ytcp-animatable[1]/ytcp-ve/ytcp-video-metadata-editor/div/ytcp-video-metadata-editor-basics/div[1]/ytcp-video-title/ytcp-social-suggestions-textbox/ytcp-form-input-container/div[1]/div[2]/div/ytcp-social-suggestion-input/div'
+            self.driver.type(e, self.title)
 
-        # Set thumbnail if configured to do so
-        if self.thumbnail_config["set_thumbnail"]:
-            thumbnail_input = self.driver.find_element(By.XPATH, '/html/body/ytcp-uploads-dialog/tp-yt-paper-dialog/div/ytcp-animatable[1]/ytcp-ve/ytcp-video-metadata-editor/div/ytcp-video-metadata-editor-basics/div[3]/ytcp-thumbnails-compact-editor/div[3]/ytcp-thumbnails-compact-editor-uploader/ytcp-thumbnail-uploader/input')
-            thumbnail_input.send_keys(self.thumbnail_config["path"])
+            # Set the description
+            e = '/html/body/ytcp-uploads-dialog/tp-yt-paper-dialog/div/ytcp-animatable[1]/ytcp-ve/ytcp-video-metadata-editor/div/ytcp-video-metadata-editor-basics/div[2]/ytcp-video-description/div/ytcp-social-suggestions-textbox/ytcp-form-input-container/div[1]/div[2]/div/ytcp-social-suggestion-input/div'
+            self.driver.type(e, self.description)
 
-        # Set not for kids
-        if self.for_kids:
-            for_kids = self.driver.find_element(By.XPATH, '/html/body/ytcp-uploads-dialog/tp-yt-paper-dialog/div/ytcp-animatable[1]/ytcp-ve/ytcp-video-metadata-editor/div/ytcp-video-metadata-editor-basics/div[5]/ytkc-made-for-kids-select/div[4]/tp-yt-paper-radio-group/tp-yt-paper-radio-button[1]/div[1]')
-            for_kids.click()
-        else:
-            not_for_kids = self.driver.find_element(By.XPATH, '/html/body/ytcp-uploads-dialog/tp-yt-paper-dialog/div/ytcp-animatable[1]/ytcp-ve/ytcp-video-metadata-editor/div/ytcp-video-metadata-editor-basics/div[5]/ytkc-made-for-kids-select/div[4]/tp-yt-paper-radio-group/tp-yt-paper-radio-button[2]/div[1]')
-            not_for_kids.click()
+            # Set thumbnail if configured to do so
+            if self.thumbnail_config["set_thumbnail"]:
+                e = '/html/body/ytcp-uploads-dialog/tp-yt-paper-dialog/div/ytcp-animatable[1]/ytcp-ve/ytcp-video-metadata-editor/div/ytcp-video-metadata-editor-basics/div[3]/ytcp-thumbnails-compact-editor/div[3]/ytcp-thumbnails-compact-editor-uploader/ytcp-thumbnail-uploader/input'
+                thumbnail_input = self.driver.find_element(by=By.XPATH, value=e)
+                thumbnail_input.send_keys(self.thumbnail_config["path"])
 
-        # Toggle advanced settings
-        show_more = self.driver.find_element(By.XPATH, '/html/body/ytcp-uploads-dialog/tp-yt-paper-dialog/div/ytcp-animatable[1]/ytcp-ve/ytcp-video-metadata-editor/div/div/ytcp-button')
-        show_more.click()
+            # Set not for kids
+            if self.for_kids:
+                for_kids = self.driver.find_element(by=By.XPATH, value='/html/body/ytcp-uploads-dialog/tp-yt-paper-dialog/div/ytcp-animatable[1]/ytcp-ve/ytcp-video-metadata-editor/div/ytcp-video-metadata-editor-basics/div[5]/ytkc-made-for-kids-select/div[4]/tp-yt-paper-radio-group/tp-yt-paper-radio-button[1]/div[1]')
+                for_kids.click()
+            else:
+                not_for_kids = self.driver.find_element(by=By.XPATH, value='/html/body/ytcp-uploads-dialog/tp-yt-paper-dialog/div/ytcp-animatable[1]/ytcp-ve/ytcp-video-metadata-editor/div/ytcp-video-metadata-editor-basics/div[5]/ytkc-made-for-kids-select/div[4]/tp-yt-paper-radio-group/tp-yt-paper-radio-button[2]/div[1]')
+                not_for_kids.click()
 
-        # Enable paid promotions if configured to do so.
-        if self.paid_promo:
-            toggle_paid_promo = self.driver.find_element(By.XPATH, '/html/body/ytcp-uploads-dialog/tp-yt-paper-dialog/div/ytcp-animatable[1]/ytcp-ve/ytcp-video-metadata-editor/div/ytcp-video-metadata-editor-advanced/div[1]/ytcp-checkbox-lit/div[1]')
-            toggle_paid_promo.click()
+            # Toggle advanced settings
+            show_more = self.driver.find_element(by=By.XPATH, value='/html/body/ytcp-uploads-dialog/tp-yt-paper-dialog/div/ytcp-animatable[1]/ytcp-ve/ytcp-video-metadata-editor/div/div/ytcp-button')
+            show_more.click()
 
-        # Input tags,
-        tags_input = self.driver.find_element(By.XPATH, '/html/body/ytcp-uploads-dialog/tp-yt-paper-dialog/div/ytcp-animatable[1]/ytcp-ve/ytcp-video-metadata-editor/div/ytcp-video-metadata-editor-advanced/div[5]/ytcp-form-input-container/div[1]/div/ytcp-free-text-chip-bar/ytcp-chip-bar/div/input')
-        tags_input.clear()
-        tags_input.send_keys(self.tags)
+            # Enable paid promotions if configured to do so.
+            if self.paid_promo:
+                toggle_paid_promo = self.driver.find_element(By.XPATH, '/html/body/ytcp-uploads-dialog/tp-yt-paper-dialog/div/ytcp-animatable[1]/ytcp-ve/ytcp-video-metadata-editor/div/ytcp-video-metadata-editor-advanced/div[1]/ytcp-checkbox-lit/div[1]')
+                toggle_paid_promo.click()
 
-        # get the next button and click it to move to next page.
-        next_button = self.driver.find_element(By.XPATH, '/html/body/ytcp-uploads-dialog/tp-yt-paper-dialog/div/ytcp-animatable[2]/div/div[2]/ytcp-button[2]')
-        next_button.click()
-        time.sleep(3)
+            # Input tags,
+            tags_input = self.driver.find_element(By.XPATH, '/html/body/ytcp-uploads-dialog/tp-yt-paper-dialog/div/ytcp-animatable[1]/ytcp-ve/ytcp-video-metadata-editor/div/ytcp-video-metadata-editor-advanced/div[5]/ytcp-form-input-container/div[1]/div/ytcp-free-text-chip-bar/ytcp-chip-bar/div/input')
+            tags_input.clear()
+            tags_input.send_keys(self.tags)
 
-        # Skip video elements
-        next_button.click()
-        time.sleep(1)
-        # Skip checks
-        next_button.click()
-        time.sleep(1)
+            # get the next button and click it to move to next page.
+            next_button = self.driver.find_element(By.XPATH, '/html/body/ytcp-uploads-dialog/tp-yt-paper-dialog/div/ytcp-animatable[2]/div/div[2]/ytcp-button[2]')
+            next_button.click()
 
-        # Now click visibility to public
-        public_button = self.driver.find_element(By.XPATH, '/html/body/ytcp-uploads-dialog/tp-yt-paper-dialog/div/ytcp-animatable[1]/ytcp-uploads-review/div[2]/div[1]/ytcp-video-visibility-select/div[2]/tp-yt-paper-radio-group/tp-yt-paper-radio-button[3]')
-        public_button.click()
-        time.sleep(1)
+            # Skip video elements
+            next_button.click()
 
-        # Click the publish button
-        publish_button = self.driver.find_element(By.XPATH, '/html/body/ytcp-uploads-dialog/tp-yt-paper-dialog/div/ytcp-animatable[2]/div/div[2]/ytcp-button[3]')
-        publish_button.click()
-        time.sleep(6)
+            # Skip checks
+            next_button.click()
 
-        self.driver.refresh()
+            # Now click visibility to public
+            public_button = self.driver.find_element(By.XPATH, '/html/body/ytcp-uploads-dialog/tp-yt-paper-dialog/div/ytcp-animatable[1]/ytcp-uploads-review/div[2]/div[1]/ytcp-video-visibility-select/div[2]/tp-yt-paper-radio-group/tp-yt-paper-radio-button[3]')
+            public_button.click()
+
+            # Click the publish button
+            publish_button = self.driver.find_element(By.XPATH, '/html/body/ytcp-uploads-dialog/tp-yt-paper-dialog/div/ytcp-animatable[2]/div/div[2]/ytcp-button[3]')
+            publish_button.click()
+
+            self.driver.refresh()
+
+        except Exception as e:
+            self.driver.quit()
+            raise e
 
         try:
             self.driver.switch_to.alert.accept()
@@ -200,24 +199,8 @@ class YtUpload(Upload):
             pass
 
     def select_account(self, account_name):
-        # Get to the list of the associated accounts.
-        i = 0  # counter for retrying
-
-        # You need to do an initial check, for the avatar button.
-        # Sometimes the webpage moves too slow when initially loading so this loop provides a little safety net.
         # If you can see the avatar button, everything else should be present.
-        while i < self.MAX_TRY:
-            try:
-                self.driver.wait_for_element('body > ytd-app > ytd-popup-container > tp-yt-paper-dialog')
-                break
-            except Exception as e:
-                i = i + 1
-                if i == self.MAX_TRY:
-                    raise e
-                print(f"Threw err: {e} \n attempt num:{i}")
-                self.driver.sleep(self.TIMEOUT)
-                continue
-
+        self.__wait_verify('body > ytd-app > ytd-popup-container > tp-yt-paper-dialog')
         dir_list_accounts = self.driver.find_element(by=By.CSS_SELECTOR, value='#sections')
         list_accounts = dir_list_accounts.find_elements(by=By.CSS_SELECTOR, value='#channel-title')
 
@@ -232,8 +215,6 @@ class YtUpload(Upload):
 
         # Then switch to that account
         account_to_switch_to.click()
-
-        pdb.set_trace()
 
     def __login_google(self, account, password, auto_secrete):
         """
@@ -264,7 +245,6 @@ class YtUpload(Upload):
             self.driver.type('#totpPin', totp_code.now())
             self.driver.uc_click('#totpNext > div > button')
 
-
         while i < self.MAX_TRY:
             try:
                 email_page()
@@ -273,6 +253,7 @@ class YtUpload(Upload):
             except Exception as e:
                 i = i + 1
                 if i == self.MAX_TRY:
+                    self.driver.quit()
                     raise e
                 print(f"Threw err: {e} \n attempt num:{i}")
                 self.driver.sleep(self.TIMEOUT)
@@ -287,8 +268,29 @@ class YtUpload(Upload):
             except Exception as e:
                 i = i + 1
                 if i == self.MAX_TRY:
+                    self.driver.quit()
                     raise e
                 print(f"Threw err: {e} \n attempt num:{i}")
                 self.driver.sleep(self.TIMEOUT)
                 self.driver.find_element('#totpNext > div > button').clear()
+                continue
+
+    def quit(self):
+        self.driver.quit()
+
+    def __wait_verify(self, selector):
+        i = 0  # counter for retrying
+        # Initial wait and check to verify if an element exists
+        # Sometimes the webpage moves too slow when initially loading so this loop provides a little safety net.
+        while i < self.MAX_TRY:
+            try:
+                self.driver.wait_for_element(selector)
+                break
+            except Exception as e:
+                i = i + 1
+                if i == self.MAX_TRY:
+                    self.driver.quit()
+                    raise e
+                print(f"Threw err: {e} \n attempt num:{i}")
+                self.driver.sleep(self.TIMEOUT)
                 continue

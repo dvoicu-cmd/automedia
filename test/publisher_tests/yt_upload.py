@@ -12,15 +12,16 @@ def test_upload():
     print("Successfully created obj and logged in")
 
     yt.select_account("deepfried")
-    yt.enable_thumbnail("/Users/dvoicu/mnt/Goofy Aughhh Test Files copy/Aughhhhh.png")
+    yt.enable_thumbnail("/Users/dvoicu/mnt/GoofyTestFiles/Aughhhhh.png")
     yt.set_title("Real posting")
     yt.set_tags("Not,okay,delete,soon")
     yt.set_description("2mls of water will do the trick")
     yt.toggle_paid_promotions()
 
     print("exec upload")
-    yt.exec_upload("/Users/dvoicu/Documents/Archive Files/Videos/Memes/igVideo-4-1.mp4")
+    yt.exec_upload('/Users/dvoicu/mnt/GoofyTestFiles/Edging my Brain AAUUGHeurysm-MnX2XOjdcWg.mp4')
     print("success on upload")
+    yt.quit()
 
 
 test_upload()
