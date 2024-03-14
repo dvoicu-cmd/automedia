@@ -1,5 +1,6 @@
 from context import src
 from src.publisher.platform_strategies.yt_upload import YtUpload
+import time
 
 def test_2fa():
     print("calling yt")
@@ -7,6 +8,8 @@ def test_2fa():
     print("SUCCESS Logged in headless")
 
 def test_upload():
+    start_time = time.time()
+
     print("Calling yt")
     yt = YtUpload("dvmedia00@gmail.com", "1Z078abFsD", "7orz4ydvf4ckslx3xvaiat2hmph6bib5", max_try=50)
     print("Successfully created obj and logged in")
@@ -22,6 +25,10 @@ def test_upload():
     yt.exec_upload('/Users/dvoicu/mnt/GoofyTestFiles/Edging my Brain AAUUGHeurysm-MnX2XOjdcWg.mp4')
     print("success on upload")
     yt.quit()
+
+    end_time = time.time()
+    elapsed_time = end_time - start_time
+    print(f"Elapsed Time: {elapsed_time}s")
 
 
 test_upload()
