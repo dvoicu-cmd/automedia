@@ -149,14 +149,22 @@ class YtUpload(Upload):
 
             # Set thumbnail if configured to do so
             if self.thumbnail_config["set_thumbnail"]:
-                try:
-                    e = '/html/body/ytcp-uploads-dialog/tp-yt-paper-dialog/div/ytcp-animatable[1]/ytcp-ve/ytcp-video-metadata-editor/div/ytcp-video-metadata-editor-basics/div[3]/ytcp-thumbnails-compact-editor/div[3]/ytcp-thumbnails-compact-editor-uploader/ytcp-thumbnail-uploader/input'
-                    self.__wait_verify(e)
-                    thumbnail_input = self.driver.find_element(by=By.XPATH, value=e)
-                    thumbnail_input.send_keys(self.thumbnail_config["path"])
-                except Exception as e:
-                    print(f"Thumbnail threw an err: {e}\n Make sure you have the thumbnail feature enabled on your account.")
-                    pass
+                i = 0
+                e = '/html/body/ytcp-uploads-dialog/tp-yt-paper-dialog/div/ytcp-animatable[1]/ytcp-ve/ytcp-video-metadata-editor/div/ytcp-video-metadata-editor-basics/div[3]/ytcp-thumbnails-compact-editor/div[3]/ytcp-thumbnails-compact-editor-uploader/ytcp-thumbnail-uploader/input'
+                while i < self.MAX_TRY:
+                    try:
+                        thumbnail_input = self.driver.find_element(by=By.XPATH, value=e)
+                        thumbnail_input.send_keys(self.thumbnail_config["path"])
+                        self.driver.sleep(self.TIMEOUT)
+                        break
+                    except Exception as e:
+                        i = i + 1
+                        if i == self.MAX_TRY:
+                            print(f"Thumbnail kept throwing an err: {e}\n Make sure you have the thumbnail feature enabled on your account.")
+                            break
+                        print(f"Threw err: {e} \n attempt num:{i}")
+                        self.driver.sleep(self.TIMEOUT)
+                        continue
 
             # Set not for kids
             if self.for_kids:
