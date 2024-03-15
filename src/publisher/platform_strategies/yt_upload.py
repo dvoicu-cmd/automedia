@@ -6,6 +6,7 @@ from selenium.webdriver.common.by import By
 from seleniumbase import Driver
 from pyotp.totp import TOTP
 
+import pdb
 
 
 class YtUpload(Upload):
@@ -25,6 +26,7 @@ class YtUpload(Upload):
         self.driver = Driver(uc=True, headless=True)  # remote_debug="127.0.0.1:9222"
         self.TIMEOUT = time_out
         self.MAX_TRY = max_try
+        pdb.set_trace()
         self.__login_google(email, password, auth_secret)
         self.title = "default"
         self.description = "default"
@@ -122,6 +124,7 @@ class YtUpload(Upload):
             self.driver.find_element(by=By.CSS_SELECTOR, value='#create-icon').click()
 
             # Click upload video
+            self.__wait_verify('#text-item-0')
             self.driver.find_element(by=By.CSS_SELECTOR, value='#text-item-0').click()
 
             # Get the upload button
@@ -136,30 +139,36 @@ class YtUpload(Upload):
 
             # Set the title
             e = '/html/body/ytcp-uploads-dialog/tp-yt-paper-dialog/div/ytcp-animatable[1]/ytcp-ve/ytcp-video-metadata-editor/div/ytcp-video-metadata-editor-basics/div[1]/ytcp-video-title/ytcp-social-suggestions-textbox/ytcp-form-input-container/div[1]/div[2]/div/ytcp-social-suggestion-input/div'
+            self.__wait_verify(e)
             self.driver.type(e, self.title)
 
             # Set the description
             e = '/html/body/ytcp-uploads-dialog/tp-yt-paper-dialog/div/ytcp-animatable[1]/ytcp-ve/ytcp-video-metadata-editor/div/ytcp-video-metadata-editor-basics/div[2]/ytcp-video-description/div/ytcp-social-suggestions-textbox/ytcp-form-input-container/div[1]/div[2]/div/ytcp-social-suggestion-input/div'
+            self.__wait_verify(e)
             self.driver.type(e, self.description)
 
             # Set thumbnail if configured to do so
             if self.thumbnail_config["set_thumbnail"]:
                 e = '/html/body/ytcp-uploads-dialog/tp-yt-paper-dialog/div/ytcp-animatable[1]/ytcp-ve/ytcp-video-metadata-editor/div/ytcp-video-metadata-editor-basics/div[3]/ytcp-thumbnails-compact-editor/div[3]/ytcp-thumbnails-compact-editor-uploader/ytcp-thumbnail-uploader/input'
+                self.__wait_verify(e)
                 thumbnail_input = self.driver.find_element(by=By.XPATH, value=e)
                 thumbnail_input.send_keys(self.thumbnail_config["path"])
 
             # Set not for kids
             if self.for_kids:
                 e = '/html/body/ytcp-uploads-dialog/tp-yt-paper-dialog/div/ytcp-animatable[1]/ytcp-ve/ytcp-video-metadata-editor/div/ytcp-video-metadata-editor-basics/div[5]/ytkc-made-for-kids-select/div[4]/tp-yt-paper-radio-group/tp-yt-paper-radio-button[1]/div[1]'
+                self.__wait_verify(e)
                 for_kids = self.driver.find_element(by=By.XPATH, value=e)
                 for_kids.click()
             else:
                 e = '/html/body/ytcp-uploads-dialog/tp-yt-paper-dialog/div/ytcp-animatable[1]/ytcp-ve/ytcp-video-metadata-editor/div/ytcp-video-metadata-editor-basics/div[5]/ytkc-made-for-kids-select/div[4]/tp-yt-paper-radio-group/tp-yt-paper-radio-button[2]/div[1]'
+                self.__wait_verify(e)
                 not_for_kids = self.driver.find_element(by=By.XPATH, value=e)
                 not_for_kids.click()
 
             # Toggle advanced settings
             e = '/html/body/ytcp-uploads-dialog/tp-yt-paper-dialog/div/ytcp-animatable[1]/ytcp-ve/ytcp-video-metadata-editor/div/div/ytcp-button'
+            self.__wait_verify(e)
             show_more = self.driver.find_element(by=By.XPATH, value=e)
             show_more.click()
 
@@ -173,13 +182,15 @@ class YtUpload(Upload):
                 toggle_paid_promo.click()
 
             # Input tags,
-            e = '/html/body/ytcp-uploads-dialog/tp-yt-paper-dialog/div/ytcp-animatable[1]/ytcp-ve/ytcp-video-metadata-editor/div/ytcp-video-metadata-editor-advanced/div[5]/ytcp-form-input-container/div[1]/div/ytcp-free-text-chip-bar/ytcp-chip-bar/div/input'
-            tags_input = self.driver.find_element(by=By.XPATH, value=e)
-            tags_input.clear()
-            tags_input.send_keys(self.tags)
+            #e = '/html/body/ytcp-uploads-dialog/tp-yt-paper-dialog/div/ytcp-animatable[1]/ytcp-ve/ytcp-video-metadata-editor/div/ytcp-video-metadata-editor-advanced/div[5]/ytcp-form-input-container/div[1]/div/ytcp-free-text-chip-bar/ytcp-chip-bar/div/input'
+            #self.__wait_verify(e)
+            #tags_input = self.driver.find_element(by=By.XPATH, value=e)
+            #tags_input.clear()
+            #tags_input.send_keys(self.tags)
 
             # get the next button and click it to move to next page.
             e = '/html/body/ytcp-uploads-dialog/tp-yt-paper-dialog/div/ytcp-animatable[2]/div/div[2]/ytcp-button[2]'
+            self.__wait_verify(e)
             next_button = self.driver.find_element(By.XPATH, e)
             next_button.click()
 
@@ -202,6 +213,8 @@ class YtUpload(Upload):
             e = '/html/body/ytcp-uploads-dialog/tp-yt-paper-dialog/div/ytcp-animatable[2]/div/div[2]/ytcp-button[3]'
             publish_button = self.driver.find_element(By.XPATH, e)
             publish_button.click()
+
+            self.driver.sleep(self.TIMEOUT)
 
             self.driver.refresh()
 
@@ -301,6 +314,7 @@ class YtUpload(Upload):
         while i < self.MAX_TRY:
             try:
                 self.driver.wait_for_element(selector)
+                self.driver.sleep(self.TIMEOUT)
                 break
             except Exception as e:
                 i = i + 1

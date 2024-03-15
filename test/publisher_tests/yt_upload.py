@@ -14,7 +14,7 @@ def test_upload():
     yt = YtUpload("dvmedia00@gmail.com", "1Z078abFsD", "7orz4ydvf4ckslx3xvaiat2hmph6bib5")
     print("Successfully created obj and logged in")
 
-    yt.select_account("deepfried")
+    yt.select_account("heeheehaw")
     yt.enable_thumbnail("/home/dv/Thumb.jpg")
     yt.set_title("Real posting")
     yt.set_tags("Not,okay,delete,soon")
