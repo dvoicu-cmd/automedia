@@ -149,28 +149,29 @@ class YtUpload(Upload):
 
             # Set thumbnail if configured to do so
             if self.thumbnail_config["set_thumbnail"]:
-                e = '/html/body/ytcp-uploads-dialog/tp-yt-paper-dialog/div/ytcp-animatable[1]/ytcp-ve/ytcp-video-metadata-editor/div/ytcp-video-metadata-editor-basics/div[3]/ytcp-thumbnails-compact-editor/div[3]/ytcp-thumbnails-compact-editor-uploader/ytcp-thumbnail-uploader/input'
-                self.__wait_verify(e)
-                thumbnail_input = self.driver.find_element(by=By.XPATH, value=e)
-                thumbnail_input.send_keys(self.thumbnail_config["path"])
+                try:
+                    e = '/html/body/ytcp-uploads-dialog/tp-yt-paper-dialog/div/ytcp-animatable[1]/ytcp-ve/ytcp-video-metadata-editor/div/ytcp-video-metadata-editor-basics/div[3]/ytcp-thumbnails-compact-editor/div[3]/ytcp-thumbnails-compact-editor-uploader/ytcp-thumbnail-uploader/input'
+                    self.__wait_verify(e)
+                    thumbnail_input = self.driver.find_element(by=By.XPATH, value=e)
+                    thumbnail_input.send_keys(self.thumbnail_config["path"])
+                except Exception as e:
+                    print(f"Thumbnail threw an err: {e}\n Make sure you have the thumbnail feature enabled on your account.")
+                    pass
 
             # Set not for kids
             if self.for_kids:
                 e = '/html/body/ytcp-uploads-dialog/tp-yt-paper-dialog/div/ytcp-animatable[1]/ytcp-ve/ytcp-video-metadata-editor/div/ytcp-video-metadata-editor-basics/div[5]/ytkc-made-for-kids-select/div[4]/tp-yt-paper-radio-group/tp-yt-paper-radio-button[1]/div[1]'
                 self.__wait_verify(e)
-                for_kids = self.driver.find_element(by=By.XPATH, value=e)
-                for_kids.click()
+                self.driver.find_element(by=By.XPATH, value=e).click()
             else:
                 e = '/html/body/ytcp-uploads-dialog/tp-yt-paper-dialog/div/ytcp-animatable[1]/ytcp-ve/ytcp-video-metadata-editor/div/ytcp-video-metadata-editor-basics/div[5]/ytkc-made-for-kids-select/div[4]/tp-yt-paper-radio-group/tp-yt-paper-radio-button[2]/div[1]'
                 self.__wait_verify(e)
-                not_for_kids = self.driver.find_element(by=By.XPATH, value=e)
-                not_for_kids.click()
+                self.driver.find_element(by=By.XPATH, value=e).click()
 
             # Toggle advanced settings
             e = '/html/body/ytcp-uploads-dialog/tp-yt-paper-dialog/div/ytcp-animatable[1]/ytcp-ve/ytcp-video-metadata-editor/div/div/ytcp-button'
             self.__wait_verify(e)
-            show_more = self.driver.find_element(by=By.XPATH, value=e)
-            show_more.click()
+            self.driver.find_element(by=By.XPATH, value=e).click()
 
             # Wait and verify paid promotions loaded.
             e = '/html/body/ytcp-uploads-dialog/tp-yt-paper-dialog/div/ytcp-animatable[1]/ytcp-ve/ytcp-video-metadata-editor/div/ytcp-video-metadata-editor-advanced/div[1]/ytcp-checkbox-lit/div[1]'
@@ -178,28 +179,24 @@ class YtUpload(Upload):
 
             # Enable paid promotions if configured to do so.
             if self.paid_promo:
-                toggle_paid_promo = self.driver.find_element(by=By.XPATH, value=e)
-                toggle_paid_promo.click()
+                self.driver.find_element(by=By.XPATH, value=e).click()
 
             # Input tags,
-            #e = '/html/body/ytcp-uploads-dialog/tp-yt-paper-dialog/div/ytcp-animatable[1]/ytcp-ve/ytcp-video-metadata-editor/div/ytcp-video-metadata-editor-advanced/div[5]/ytcp-form-input-container/div[1]/div/ytcp-free-text-chip-bar/ytcp-chip-bar/div/input'
-            #self.__wait_verify(e)
-            #tags_input = self.driver.find_element(by=By.XPATH, value=e)
-            #tags_input.clear()
-            #tags_input.send_keys(self.tags)
+            e = '/html/body/ytcp-uploads-dialog/tp-yt-paper-dialog/div/ytcp-animatable[1]/ytcp-ve/ytcp-video-metadata-editor/div/ytcp-video-metadata-editor-advanced/div[5]/ytcp-form-input-container/div[1]/div/ytcp-free-text-chip-bar/ytcp-chip-bar/div/input'
+            self.__wait_verify(e)
+            self.driver.type(e, self.tags)
 
             # get the next button and click it to move to next page.
-            e = '/html/body/ytcp-uploads-dialog/tp-yt-paper-dialog/div/ytcp-animatable[2]/div/div[2]/ytcp-button[2]'
-            self.__wait_verify(e)
-            next_button = self.driver.find_element(By.XPATH, e)
+            self.__wait_verify('#next-button')
+            next_button = self.driver.find_element(By.CSS_SELECTOR, '#next-button')
             next_button.click()
 
             # Skip video elements
-            self.__wait_verify(e)
+            self.__wait_verify('#next-button')
             next_button.click()
 
             # Skip checks
-            self.__wait_verify(e)
+            self.__wait_verify('#next-button')
             next_button.click()
 
             # Wait for public button to load
@@ -214,7 +211,8 @@ class YtUpload(Upload):
             publish_button = self.driver.find_element(By.XPATH, e)
             publish_button.click()
 
-            self.driver.sleep(self.TIMEOUT)
+            # Wait a little bit after upload
+            self.driver.sleep(self.TIMEOUT*1.5)
 
             self.driver.refresh()
 
