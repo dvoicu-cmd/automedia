@@ -11,18 +11,18 @@ def test_upload():
     start_time = time.time()
 
     print("Calling yt")
-    yt = YtUpload("dvmedia00@gmail.com", "1Z078abFsD", "7orz4ydvf4ckslx3xvaiat2hmph6bib5", max_try=50)
+    yt = YtUpload("dvmedia00@gmail.com", "1Z078abFsD", "7orz4ydvf4ckslx3xvaiat2hmph6bib5")
     print("Successfully created obj and logged in")
 
     yt.select_account("deepfried")
-    yt.enable_thumbnail("/Users/dvoicu/mnt/GoofyTestFiles/Aughhhhh.png")
+    yt.enable_thumbnail("/home/dv/Thumb.jpg")
     yt.set_title("Real posting")
     yt.set_tags("Not,okay,delete,soon")
     yt.set_description("2mls of water will do the trick")
     yt.toggle_paid_promotions()
 
     print("exec upload")
-    yt.exec_upload('/Users/dvoicu/mnt/GoofyTestFiles/Edging my Brain AAUUGHeurysm-MnX2XOjdcWg.mp4')
+    yt.exec_upload("/home/dv/When2HrOfSleep.mp4")
     print("success on upload")
     yt.quit()
 

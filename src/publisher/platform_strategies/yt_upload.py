@@ -117,7 +117,7 @@ class YtUpload(Upload):
             # placeholder var to hold long XPaths
             e = ''
 
-            # Checking for create icon if it is loaded. If this is fine, assume everything will be present.
+            # Checking for create icon if it is loaded.
             self.__wait_verify('#create-icon')
             self.driver.find_element(by=By.CSS_SELECTOR, value='#create-icon').click()
 
@@ -125,7 +125,8 @@ class YtUpload(Upload):
             self.driver.find_element(by=By.CSS_SELECTOR, value='#text-item-0').click()
 
             # Get the upload button
-            upload_button = self.driver.find_element(by=By.XPATH, value='/html/body/ytcp-uploads-dialog/tp-yt-paper-dialog/div/ytcp-uploads-file-picker/div/input')
+            e = '/html/body/ytcp-uploads-dialog/tp-yt-paper-dialog/div/ytcp-uploads-file-picker/div/input'
+            upload_button = self.driver.find_element(by=By.XPATH, value=e)
 
             # Send file to upload button
             upload_button.send_keys(file_path)
@@ -149,42 +150,57 @@ class YtUpload(Upload):
 
             # Set not for kids
             if self.for_kids:
-                for_kids = self.driver.find_element(by=By.XPATH, value='/html/body/ytcp-uploads-dialog/tp-yt-paper-dialog/div/ytcp-animatable[1]/ytcp-ve/ytcp-video-metadata-editor/div/ytcp-video-metadata-editor-basics/div[5]/ytkc-made-for-kids-select/div[4]/tp-yt-paper-radio-group/tp-yt-paper-radio-button[1]/div[1]')
+                e = '/html/body/ytcp-uploads-dialog/tp-yt-paper-dialog/div/ytcp-animatable[1]/ytcp-ve/ytcp-video-metadata-editor/div/ytcp-video-metadata-editor-basics/div[5]/ytkc-made-for-kids-select/div[4]/tp-yt-paper-radio-group/tp-yt-paper-radio-button[1]/div[1]'
+                for_kids = self.driver.find_element(by=By.XPATH, value=e)
                 for_kids.click()
             else:
-                not_for_kids = self.driver.find_element(by=By.XPATH, value='/html/body/ytcp-uploads-dialog/tp-yt-paper-dialog/div/ytcp-animatable[1]/ytcp-ve/ytcp-video-metadata-editor/div/ytcp-video-metadata-editor-basics/div[5]/ytkc-made-for-kids-select/div[4]/tp-yt-paper-radio-group/tp-yt-paper-radio-button[2]/div[1]')
+                e = '/html/body/ytcp-uploads-dialog/tp-yt-paper-dialog/div/ytcp-animatable[1]/ytcp-ve/ytcp-video-metadata-editor/div/ytcp-video-metadata-editor-basics/div[5]/ytkc-made-for-kids-select/div[4]/tp-yt-paper-radio-group/tp-yt-paper-radio-button[2]/div[1]'
+                not_for_kids = self.driver.find_element(by=By.XPATH, value=e)
                 not_for_kids.click()
 
             # Toggle advanced settings
-            show_more = self.driver.find_element(by=By.XPATH, value='/html/body/ytcp-uploads-dialog/tp-yt-paper-dialog/div/ytcp-animatable[1]/ytcp-ve/ytcp-video-metadata-editor/div/div/ytcp-button')
+            e = '/html/body/ytcp-uploads-dialog/tp-yt-paper-dialog/div/ytcp-animatable[1]/ytcp-ve/ytcp-video-metadata-editor/div/div/ytcp-button'
+            show_more = self.driver.find_element(by=By.XPATH, value=e)
             show_more.click()
+
+            # Wait and verify paid promotions loaded.
+            e = '/html/body/ytcp-uploads-dialog/tp-yt-paper-dialog/div/ytcp-animatable[1]/ytcp-ve/ytcp-video-metadata-editor/div/ytcp-video-metadata-editor-advanced/div[1]/ytcp-checkbox-lit/div[1]'
+            self.__wait_verify(e)
 
             # Enable paid promotions if configured to do so.
             if self.paid_promo:
-                toggle_paid_promo = self.driver.find_element(By.XPATH, '/html/body/ytcp-uploads-dialog/tp-yt-paper-dialog/div/ytcp-animatable[1]/ytcp-ve/ytcp-video-metadata-editor/div/ytcp-video-metadata-editor-advanced/div[1]/ytcp-checkbox-lit/div[1]')
+                toggle_paid_promo = self.driver.find_element(by=By.XPATH, value=e)
                 toggle_paid_promo.click()
 
             # Input tags,
-            tags_input = self.driver.find_element(By.XPATH, '/html/body/ytcp-uploads-dialog/tp-yt-paper-dialog/div/ytcp-animatable[1]/ytcp-ve/ytcp-video-metadata-editor/div/ytcp-video-metadata-editor-advanced/div[5]/ytcp-form-input-container/div[1]/div/ytcp-free-text-chip-bar/ytcp-chip-bar/div/input')
+            e = '/html/body/ytcp-uploads-dialog/tp-yt-paper-dialog/div/ytcp-animatable[1]/ytcp-ve/ytcp-video-metadata-editor/div/ytcp-video-metadata-editor-advanced/div[5]/ytcp-form-input-container/div[1]/div/ytcp-free-text-chip-bar/ytcp-chip-bar/div/input'
+            tags_input = self.driver.find_element(by=By.XPATH, value=e)
             tags_input.clear()
             tags_input.send_keys(self.tags)
 
             # get the next button and click it to move to next page.
-            next_button = self.driver.find_element(By.XPATH, '/html/body/ytcp-uploads-dialog/tp-yt-paper-dialog/div/ytcp-animatable[2]/div/div[2]/ytcp-button[2]')
+            e = '/html/body/ytcp-uploads-dialog/tp-yt-paper-dialog/div/ytcp-animatable[2]/div/div[2]/ytcp-button[2]'
+            next_button = self.driver.find_element(By.XPATH, e)
             next_button.click()
 
             # Skip video elements
+            self.__wait_verify(e)
             next_button.click()
 
             # Skip checks
+            self.__wait_verify(e)
             next_button.click()
 
+            # Wait for public button to load
+            e = '/html/body/ytcp-uploads-dialog/tp-yt-paper-dialog/div/ytcp-animatable[1]/ytcp-uploads-review/div[2]/div[1]/ytcp-video-visibility-select/div[2]/tp-yt-paper-radio-group/tp-yt-paper-radio-button[3]'
+            self.__wait_verify(e)
             # Now click visibility to public
-            public_button = self.driver.find_element(By.XPATH, '/html/body/ytcp-uploads-dialog/tp-yt-paper-dialog/div/ytcp-animatable[1]/ytcp-uploads-review/div[2]/div[1]/ytcp-video-visibility-select/div[2]/tp-yt-paper-radio-group/tp-yt-paper-radio-button[3]')
+            public_button = self.driver.find_element(By.XPATH, e)
             public_button.click()
 
             # Click the publish button
-            publish_button = self.driver.find_element(By.XPATH, '/html/body/ytcp-uploads-dialog/tp-yt-paper-dialog/div/ytcp-animatable[2]/div/div[2]/ytcp-button[3]')
+            e = '/html/body/ytcp-uploads-dialog/tp-yt-paper-dialog/div/ytcp-animatable[2]/div/div[2]/ytcp-button[3]'
+            publish_button = self.driver.find_element(By.XPATH, e)
             publish_button.click()
 
             self.driver.refresh()

@@ -1,12 +1,12 @@
 from selenium.webdriver.common.by import By
-import undetected_chromedriver as uc
+from seleniumbase import Driver
 import time
 
 
 class RedditScrape:
 
     def __init__(self):
-        self.driver = uc.Chrome()
+        self.driver = Driver(uc=True, headless=True)
 
 
     def scrape(self, subreddit, filter_type, post_type, num_scrolls: int, time_to_scroll: int, top_time='day'):
