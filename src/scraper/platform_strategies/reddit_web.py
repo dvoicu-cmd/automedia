@@ -1,6 +1,8 @@
+import pdb
+
+import json
 from selenium.webdriver.common.by import By
 from seleniumbase import Driver
-import time
 
 
 class RedditScrape:
@@ -8,6 +10,8 @@ class RedditScrape:
     def __init__(self):
         self.driver = Driver(uc=True, headless=True)
 
+    def quit(self):
+        self.driver.quit()
 
     def scrape(self, subreddit, filter_type, post_type, num_scrolls: int, time_to_scroll: int, top_time='day'):
         """
@@ -121,39 +125,66 @@ class RedditScrape:
         full_post_links = []
         text_output = []
 
-        # First loop to get the full post links
-        for post in posts:
-            post_type = post.get_attribute('post-type')
-            if post_type == 'text':
-                a_elm = post.find_element(By.TAG_NAME, 'a')
-                link = a_elm.get_attribute('href')
-                full_post_links.append(link)
+        try:  # You want to quit the driver if something goes wrong.
+            # First loop to get the full post links
+            for post in posts[1:]:  # You want skip the first post, as that is usually a pinned post.
+                post_type = post.get_attribute('post-type')
+                if post_type == 'text':
+                    a_elm = post.find_element(By.TAG_NAME, 'a')
+                    link = a_elm.get_attribute('href')
+                    full_post_links.append(link)
 
-        for full_post in full_post_links:
-            build_string = ''
+            print(len(full_post_links))
 
-            # Navigate to post
-            self.driver.get(full_post)
+            for full_post in full_post_links:
+                try:
+                    build_string = ''
 
-            # First try to click the read more button
-            try:
-                self.driver.find_element(By.XPATH, '/html/body/shreddit-app/dsa-transparency-modal-provider/div/main/shreddit-post/div[3]/div/button').click()
-                time.sleep(1)
-            except:
-                pass
+                    # So ids have appended another unique id everytime you visit a page. The show more button, the text...
+                    # This unique id is the post identifier. It is in the shreddit-screenview-data tag and the url
+                    # raw_page_data = self.driver.find_element(by=By.TAG_NAME, value='shreddit-screenview-data').get_attribute('data')
+                    # page_data = json.loads(raw_page_data)
 
-            # Get the post title
-            title = self.driver.find_element(By.XPATH, '/html/body/shreddit-app/dsa-transparency-modal-provider/div/main/shreddit-post/h1')  # Title Text
-            build_string = build_string + title.text + " "
+                    segments = full_post.split("/")
+                    id_value = segments[6]
+                    id_value = f"t3_{id_value}"
 
-            # Get the post content
-            content = self.driver.find_element(By.XPATH, '/html/body/shreddit-app/dsa-transparency-modal-provider/div/main/shreddit-post/div[3]')
-            build_string = build_string + content.text
+                    # Navigate to post
+                    self.driver.get(full_post)
 
-            build_string = build_string.replace("\n", " ")
+                    # First try to click the read more button
+                    try:
+                        self.driver.find_element(by=By.ID, value=f'{id_value}-read-more-button').click()
+                        self.driver.wait(1)
+                    except:
+                        pass
 
-            # Add to list
-            text_output.append(build_string)
+                    # Get the post title
+                    title = self.driver.find_element(by=By.ID, value=f'post-title-{id_value}')  # Title Text
+                    build_string = build_string + title.text + " "
+
+                    # Get the username:
+                    user = self.driver.find_element(by=By.CLASS_NAME, value='author-name')
+                    build_string = build_string + "By: u/" + user.text + ". "
+
+                    # Get the post content
+                    content = self.driver.find_element(by=By.ID, value=f'{id_value}-post-rtjson-content')
+
+                    build_string = build_string + content.text
+                    build_string = build_string.replace("\n", " ")
+
+                    # Add to list
+                    text_output.append(build_string)
+                except Exception as e:
+                    print(e)
+                    # Reddit is weird and too funky with their web elements.
+                    # They keep varying and have no consistency at times.
+                    # Have
+                    continue
+
+        except Exception as e:
+            self.driver.quit()
+            raise e
 
         return text_output
 
@@ -176,6 +207,6 @@ class RedditScrape:
         """
         # One scroll -> give around 30 posts
         self.driver.execute_script('window.scrollTo(0, document.body.scrollHeight);')
-        time.sleep(wait_time)
+        self.driver.sleep(wait_time)
 
 

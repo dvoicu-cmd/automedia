@@ -12,12 +12,13 @@ def main():
     tmp = manager.create_tmp_dir()
 
     rd = RedditScrape()
-    output = rd.scrape("AmItheAsshole", "hot", "text", 0, 5)
+    output = rd.scrape("AmItheAsshole", "hot", "text", 1, 4)
 
     manager.dl_list_of_text(output, 'AM_I_THE_ASSHOLE', tmp)
 
     entries = manager.select_dir(tmp)
-    print(entries)
+
+    rd.quit()
 
     pdb.set_trace()
 
