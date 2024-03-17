@@ -40,6 +40,7 @@ $(VENV_DIR)/.installed: $(VENV_DIR)/bin/activate requirements.txt
 
 # Define the rule to download and install Google Chrome
 install_chrome:
+    apt-get update -y -f
 	wget $(CHROME_URL) -O $(CHROME_DEB)
 	-dpkg -i $(CHROME_DEB)
 	apt-get install -y -f  # Install any missing dependencies
@@ -52,8 +53,8 @@ install_chrome:
 nfs_mount:
 	mkdir /mnt/active
 	mkdir /mnt/archive
-	echo "$(IP_ADDRESS):/mnt/active /mnt/active nfs auto 0 0" | tee -a /etc/fstab >/dev/null
-	echo "$(IP_ADDRESS):/mnt/archive /mnt/archive nfs auto 0 0" | tee -a /etc/fstab >/dev/null
+	echo "$(IP_ADDRESS):/mnt/active /mnt/active nfs noauto,x-systemd.automount 0 0" | tee -a /etc/fstab >/dev/null
+	echo "$(IP_ADDRESS):/mnt/archive /mnt/archive nfs noauto,x-systemd.automount 0 0" | tee -a /etc/fstab >/dev/null
 	systemctl reboot
 
 # Rule to clean the nfs mounts
