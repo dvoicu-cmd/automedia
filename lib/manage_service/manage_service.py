@@ -83,25 +83,6 @@ class ManageService:
         # Save to pickle file
         self.timer_map.serialize()
 
-    def lock(self):
-        """
-        Creates creates the lock file that forces other python services to sleep
-        """
-        path_dict = self.service_config.read()
-        path_to_lock = f"{path_dict.get('service_dir_path')}/lock"
-        if not os.path.exists(path_to_lock):
-            with open(path_to_lock, 'w'):
-                pass
-
-    def unlock(self):
-        """
-        Deletes the lock file and allows for the next python services that awakes from sleep
-        """
-        path_dict = self.service_config.read()
-        path_to_lock = f"{path_dict.get('service_dir_path')}/lock"
-        if os.path.exists(path_to_lock):
-            os.remove(path_to_lock)
-
     def create_paths_config(self, service_dir_path, python_runtime_path, python_scripts_path):
         """
         Creates a paths.cfg file in the current directory that contains the needed absolute file paths to create services
@@ -190,7 +171,6 @@ class ManageService:
                         f"[Service]\n"
                         f"Type=simple\n"
                         f"User=root\n"
-                        f"ExecStartPre=/bin/bash -c 'while [[ -e {path_dict.get('service_dir_path')}/lock ]]; do sleep 5; done'\n"  # Checks if the lock exists
                         f"ExecStart={path_dict.get('python_runtime_path')} {path_dict.get('python_scripts_path')}/{py_file}.py\n"
                         f"WorkingDirectory={path_dict.get('python_scripts_path')}\n"
                         f"KillMode=process\n"
@@ -245,8 +225,6 @@ class ManageService:
 
         path_dict = self.service_config.read()
         os.remove(f"{path_dict.get('service_dir_path')}/{py_file}.service")
-        subprocess.run("systemctl daemon-reload")
-        subprocess.run("systemctl reset-failed")
 
     def __delete_timer_file(self, py_file):
         """
