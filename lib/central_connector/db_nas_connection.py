@@ -866,7 +866,9 @@ class DbNasConnection:
             account_id (int): The account id.
         """
 
-        # ______ NAS Component ______
+        # You need to do the DB components first else you will have files in the dir
+
+        # ______ DB Component ______
 
         # First check if the account record exists
         account_record = self.read_account_by_id(account_id)
@@ -878,26 +880,24 @@ class DbNasConnection:
         for record in all_content_file_records:
             self.delete_content_file(record[0])
 
-        # Finally, delete the directory
-        local_path = self.__nas_root()
-        local_path = f"{local_path}/active/created_videos/{account_record[1]}"
-        os.rmdir(local_path)
-
-        # ______ DB Component ______
+        # Now delete any associated media_pools:
+        all_media_pool_connections = self.read_media_pools_of_account(account_id)
+        for record in all_media_pool_connections:
+            self.delete_link_account_to_media_pool(account_id, record[0])
 
         self.__make_connection()
-
-        # First the junction tables
-        query = f"DELETE FROM j_accounts__content_files WHERE account_id = {account_id}"
-        self.curr.execute(query)
-
-        query = f"DELETE FROM j_accounts__media_pools WHERE account_id = {account_id}"
-        self.curr.execute(query)
 
         query = f"DELETE FROM accounts WHERE account_id = {account_id}"
         self.curr.execute(query)
 
         self.__close_connection()
+
+        # ______ NAS Component ______
+
+        # Finally, delete the directory
+        local_path = self.__nas_root()
+        local_path = f"{local_path}/active/created_videos/{account_record[1]}"
+        os.rmdir(local_path)
 
         return
 
@@ -938,6 +938,8 @@ class DbNasConnection:
         """
 
         """
+        # You need to do the DB components first else you will have files in the dir
+
         # Check existence of media pool
         media_pool_record = self.read_media_pool_by_id(media_pool_id)
         if not media_pool_record:

@@ -45,8 +45,12 @@ def main():
             InputPage("Input a description for the content file(s):").prompt(),
             InputPage("Input the associated name of the account that these contents are related to:").prompt()
         ]
-        db = DbNasConnection()
-        db.create_content(*inputs)
+        try:
+            db = DbNasConnection()
+            db.create_content(*inputs)
+        except Exception as e:
+            raise e
+        print(200)
 
 
 def create_creator_formula(py_service_name, code_lines: [str]):
