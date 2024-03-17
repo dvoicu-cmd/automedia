@@ -145,7 +145,8 @@ def main():
 
         p2 = PickerPage(["Create Archiver Service",
                          "Delete Archiver Service",
-                         "Display Services"])
+                         "Display Services",
+                         "Manually Archive"])
 
         v2 = p2.prompt("Select an action:")
         if v2 == 0:  # create archiver service
@@ -165,8 +166,29 @@ def main():
             ret = display_services()
             print(f"Service Map:\n\n {ret}")
 
+        if v2 == 3:  # manually archive
+            InputPage.clear()
+            p3 = PickerPage([
+                "Media_Pool Files",
+                "Account Content Files"
+            ])
+
+            v3 = p3.prompt("Select what to immediately archive:")
+            if v3 == 0:  # Media pools
+                InputPage.clear()
+                DbNasConnection().delete_all_archived_media_files()
+                print(200)
+                pass
+            elif v3 == 1:  # Accounts
+                InputPage.clear()
+                DbNasConnection().delete_all_archived_content_files()
+                print(200)
+                pass
+
 
 # --- Account methods ---
+
+
 
 def create_account(username, email, password, platform, hash2fa, description):
     # Action for "Create Account"
