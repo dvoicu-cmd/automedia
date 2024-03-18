@@ -118,8 +118,6 @@ class ManageService:
         wd = os.getcwd()  # working directory
         self.__cd_to_desired_root(wd, 'lib')  # cd until the lib directory
 
-        print(os.getcwd())
-
         # Change to dir with the bash files
         os.chdir('manage_service')
 
@@ -206,6 +204,7 @@ class ManageService:
 
         # Add remaining items to file
         file_content = (f"{file_content}"
+                        f"RandomizedDelaySec=300"
                         f"\n"
                         f"[Install]\n"
                         f"WantedBy=timers.target")
