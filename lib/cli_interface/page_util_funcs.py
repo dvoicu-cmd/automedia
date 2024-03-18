@@ -71,12 +71,17 @@ def start_service():
     contd = True
     on_cal_list = []
     while contd:
-        page = InputPage("Input an on calendar value to schedule this service. \nsystemd timers use the format: {day of the week} {year}-{month}-{day} {hr}:{min}:{sec}.")
+        page = InputPage("Input cron interval to schedule this service. \n"
+                         "Cron timers use the format: {minute} {hour} {day #} {month} {day of the week}\n"
+                         "*	--> any value \n"
+                         ", --> value list separator\n"
+                         "- --> range of values\n"
+                         "/	--> step values.")
         on_cal_list.append(page.prompt())
 
         # prompt if user wishes to add more on_calendar values
         continue_loop = PickerPage([
-            "Add another on calendar time",
+            "Add another cron time",
             "Save file"
         ])
         result = continue_loop.prompt()
