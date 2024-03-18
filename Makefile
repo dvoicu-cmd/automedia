@@ -10,7 +10,7 @@
 VENV_DIR = $(PWD)/.venv/automedia_venv
 
 # Define the apt and pip dependencies
-APT_DEPENDENCIES = ffmpeg gcc libespeak1 libmariadb-dev libmariadb3 nfs-kernel-server python3-dev python3.11-venv imagemagick
+APT_DEPENDENCIES = ffmpeg gcc libespeak1 libmariadb-dev libmariadb3 nfs-kernel-server python3-dev python3.11-venv imagemagick cron
 PIP_DEPENDENCIES = -r requirements.txt
 # Define the URL for the Google Chrome .deb package
 CHROME_URL = https://dl.google.com/linux/direct/google-chrome-stable_current_amd64.deb
@@ -40,7 +40,7 @@ $(VENV_DIR)/.installed: $(VENV_DIR)/bin/activate requirements.txt
 
 # Define the rule to download and install Google Chrome
 install_chrome:
-    apt-get update -y -f
+	apt-get update -y -f
 	wget $(CHROME_URL) -O $(CHROME_DEB)
 	-dpkg -i $(CHROME_DEB)
 	apt-get install -y -f  # Install any missing dependencies

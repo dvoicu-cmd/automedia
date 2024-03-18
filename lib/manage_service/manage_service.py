@@ -26,15 +26,8 @@ class ManageService:
 
     def create(self, python_file, on_calendar_list):
         """
-        Creates a systemd service that executes the inputted python script on the given onCalendar schedules.
-        OnCalendar formatting: systemd timers use the format: {day of the week} {year}-{month}-{day} {hr}:{min}:{sec}.
-        You can use the wild card * to signify every option for the calendar.
-        ex1: execute script every day at 9 pm *-*-* 21:00:00
-        ex2: execute script every monday at 9 am Mon *-*-* 09:00:00
-        More documentation and specific can be found at:
-        https://www.freedesktop.org/software/systemd/man/latest/systemd.time.html#
-        and
-        https://opensource.com/article/20/7/systemd-timers
+        Creates a cron service that executes the inputted python script on the given schedule.
+        https://crontab.guru/
 
         Args:
             python_file (str): The string that contains the name of the python file excluding the .py extension in the current directory
@@ -51,11 +44,7 @@ class ManageService:
         self.timer_map.new_exec_time_value(python_file, on_calendar_list)
 
         # Write the service and timer files
-        self.__write_service_file(python_file)
-        self.__write_timer_file(python_file, on_calendar_list)
-
-        # Activate the service with subsystem
-        self.__activate_service(python_file)
+        self.__write_cron_file(python_file, on_calendar_list)
 
         # Save serialize the timer map
         self.timer_map.serialize()
@@ -73,12 +62,8 @@ class ManageService:
         # Delete the key on the map
         self.timer_map.delete_timer_key(python_file)
 
-        # Stop services with subsystem
-        self.__stop_service(python_file)
-
         # Delete files
-        self.__delete_timer_file(python_file)
-        self.__delete_service_file(python_file)
+        self.__delete_cron_file(python_file)
 
         # Save to pickle file
         self.timer_map.serialize()
@@ -103,84 +88,9 @@ class ManageService:
         self.timer_map.deserialize()
         return self.timer_map.json_return()
 
-    # --------- Service Control --------- #
-
-    def __activate_service(self, py_file):
-        """
-        Helper method that runs the bash scripts that enable and start the .service and .timer files for the python script
-
-        Args:
-            py_file (str): The string that contains the name of the python file excluding the .py extension in the current directory
-        """
-        # Get that file location to the service files for the script before changing dirs for subprocess
-        d = self.service_config.read()
-
-        wd = os.getcwd()  # working directory
-        self.__cd_to_desired_root(wd, 'lib')  # cd until the lib directory
-
-        # Change to dir with the bash files
-        os.chdir('manage_service')
-
-        subprocess.run(['./start_service.sh', d.get('service_dir_path'), f"{py_file}.timer", f"{py_file}.service"])
-
-        # Change back working directory
-        os.chdir(wd)
-
-    def __stop_service(self, py_file):
-        """
-        Helper method that runs the bash scripts that stop and disable the .service and .timer files for the python script
-
-        Args:
-            py_file (str): The string that contains the name of the python file excluding the .py extension in the current directory
-        """
-        # Get that file location to the service files for the script before changing dirs
-        d = self.service_config.read()
-
-        wd = os.getcwd()  # working directory
-        self.__cd_to_desired_root(wd, 'lib')  # cd until the src directory
-
-        # Change to dir with the bash files
-        os.chdir('manage_service')
-        
-        # Run the bash files
-        r = subprocess.run(['./stop_service.sh', d.get('service_dir_path'), f"{py_file}.timer", f"{py_file}.service"])
-        # self.__verify_subprocess(r)
-
-        # Change back working directory
-        os.chdir(wd)
-
     # --------- Writing Files --------- #
 
-    def __write_service_file(self, py_file):
-        """
-        Writes the .service file given the location found in the paths.cfg file
-
-        Args:
-            py_file (str): The string that contains the name of the python file excluding the .py extension in the current directory
-        """
-        path_dict = self.service_config.read()
-
-        file_content = (f"[Unit]\n"
-                        f"Description=''\n"
-                        f"After=multi-user.target\n"
-                        f"Conflicts=getty@tty1.service\n"
-                        f"Wants={py_file}.timer\n"
-                        f"\n"
-                        f"[Service]\n"
-                        f"Type=simple\n"
-                        f"User=root\n"
-                        f"ExecStart={path_dict.get('python_runtime_path')} {path_dict.get('python_scripts_path')}/{py_file}.py\n"
-                        f"WorkingDirectory={path_dict.get('python_scripts_path')}\n"
-                        f"KillMode=process\n"
-                        f"\n"
-                        f"[Install]\n"
-                        f"WantedBy=multi-user.target")
-
-        # write file in service directory
-        with open(f"{path_dict.get('service_dir_path')}/{py_file}.service", 'w') as f:
-            f.write(file_content)
-
-    def __write_timer_file(self, py_file, on_calendar_list):
+    def __write_cron_file(self, py_file, on_calendar_list):
         """
         Writes the .timer file given the location found in the paths.cfg file
 
@@ -191,30 +101,20 @@ class ManageService:
         """
         path_dict = self.service_config.read()
 
-        file_content = (f"[Unit]\n"
-                        f"Description=''\n"
-                        f"Requires={py_file}.service\n"
-                        f"\n"
-                        f"[Timer]\n"
-                        f"Unit={py_file}.service\n")
+        cmd = f"{path_dict.get('python_runtime_path')} {path_dict.get('python_scripts_path')}/{py_file}.py"
+
+        file_content = "MAILTO=\"\""
 
         # Append the on calendar elements
         for on_calendar_element in on_calendar_list:
-            file_content = f"{file_content}OnCalendar={on_calendar_element}\n"
+            file_content = f"{file_content}{on_calendar_element} root {cmd}\n"
 
-        # Add remaining items to file
-        file_content = (f"{file_content}"
-                        f"RandomizedDelaySec=300"
-                        f"\n"
-                        f"[Install]\n"
-                        f"WantedBy=timers.target")
-
-        with open(f"{path_dict.get('service_dir_path')}/{py_file}.timer", 'w') as f:
+        with open(f"{path_dict.get('service_dir_path')}/{py_file}_job", 'w') as f:
             f.write(file_content)
 
     # --------- Deleting Files --------- #
 
-    def __delete_service_file(self, py_file):
+    def __delete_cron_file(self, py_file):
         """
         Deletes the .service file given the location found in the paths.cfg file
 
@@ -223,49 +123,9 @@ class ManageService:
         """
 
         path_dict = self.service_config.read()
-        os.remove(f"{path_dict.get('service_dir_path')}/{py_file}.service")
+        os.remove(f"{path_dict.get('service_dir_path')}/{py_file}_job")
 
-    def __delete_timer_file(self, py_file):
-        """
-        Deletes the .timer file given the location found in the paths.cfg file
-
-        Args:
-            py_file (str): The string that contains the name of the python file excluding the .py extension in the current directory
-        """
-
-        path_dict = self.service_config.read()
-        os.remove(f"{path_dict.get('service_dir_path')}/{py_file}.timer")
-
-    # --------- Helper Methods --------- #
-
-    @staticmethod
-    def __cd_to_desired_root(current_dir, desired_root):
-        """
-        Changes directories of the python runtime up the file system tree until you reach the desired directory
-
-        Args:
-            current_dir (str): The current working directory path.
-            desired_root (str): The string name of the directory to cd up the file system to.
-        """
-        while True:
-            # Check if this is the current directory tree
-            if desired_root in os.listdir(current_dir):
-                # You have reached the dir containing the desired directory. Append the desired dir to the current dir.
-                current_dir = f"{current_dir}/{desired_root}"
-                break
-
-            # Move up a level in directory tree
-            parent_dir = os.path.dirname(current_dir)
-
-            # If you reach the fs root somehow
-            if parent_dir == current_dir:
-                raise ValueError(f"Reached the top most directory with out finding {desired_root}")
-
-            # Update for next iteration
-            current_dir = parent_dir
-
-        # Update the current working directory of this file
-        os.chdir(current_dir)
+    # --------- Helper Method --------- #
 
     def run_py_service(self, py_file):
         """
