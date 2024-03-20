@@ -103,7 +103,7 @@ class ManageService:
 
         cmd = f"{path_dict.get('python_runtime_path')} {path_dict.get('python_scripts_path')}/{py_file}.py"
 
-        file_content = "MAILTO=\"\""
+        file_content = "MAILTO=\"\"\n"
 
         # Append the on calendar elements
         for on_calendar_element in on_calendar_list:

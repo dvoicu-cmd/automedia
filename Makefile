@@ -40,7 +40,7 @@ $(VENV_DIR)/.installed: $(VENV_DIR)/bin/activate requirements.txt
 
 # Define the rule to download and install Google Chrome
 install_chrome:
-	apt-get update -y -f
+	apt-get update
 	wget $(CHROME_URL) -O $(CHROME_DEB)
 	-dpkg -i $(CHROME_DEB)
 	apt-get install -y -f  # Install any missing dependencies

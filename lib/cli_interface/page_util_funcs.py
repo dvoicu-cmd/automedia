@@ -18,12 +18,14 @@ def verify_cfg():
     """
     if not os.path.exists('cred.cfg'):
         in_list = [
-            InputPage("The credentials for the database have not been setup. \nInput the host ip of the database:"),
+            InputPage("The credentials for the database have not been setup. \n"
+                      "Input the host ip of the database:"),
             InputPage("Input the sql port of the database server:"),
             InputPage("Input the database username this node will use:"),
             InputPage("Input the password for the user:"),
             InputPage("Input the name of the database:"),
-            InputPage("Input the root file mount location for the nas on this machine: \nTypically the default location is /mnt/nfs_nas ")
+            InputPage("Input the root file mount location for the nas on this machine: \n"
+                      "Typically the default location is /mnt")
         ]
 
         result_list = []
@@ -35,7 +37,9 @@ def verify_cfg():
         cfg_db.make_connection_config(*result_list)
 
     if not os.path.exists('paths.cfg'):
-        service_path = InputPage("There is no configuration set up for managing services. \nInput the absolute path of the systemd service directory. Typically on debian systems this would be: /etc/systemd/system").prompt()
+        service_path = InputPage("There is no configuration set up for managing services. \n"
+                                 "Input the absolute path of the cron system directory. \n"
+                                 "Typically on debian systems this would be: /etc/cron.d").prompt()
 
         cwd = os.getcwd()  # save current working directory
         # assuming at, py_services
