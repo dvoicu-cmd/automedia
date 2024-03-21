@@ -112,7 +112,7 @@ class DbNasConnection:
 
         # ______ NAS component ______
 
-        path = self.__nas_root()
+        path = self.nas_root()
         path = path + "/active/created_videos"
 
         # First check if the path exists, if not, just make the directory.
@@ -178,12 +178,12 @@ class DbNasConnection:
             raise ValueError(f"The record by the name: {media_pool_parent} does not exist")
 
         # Asemble abs path of the media pool (ie the source destination of the final file)
-        path = self.__nas_root()
+        path = self.nas_root()
         path = path + f"/active/media_pools/{record_media_pool[0][1]}"  # Even if there are multiple media pools with the same name, just use the first
 
         # If, for some reason, the media file directory has never been created, create it.
-        if not os.path.exists(f"{self.__nas_root()}/active/media_pools"):
-            os.mkdir(f"{self.__nas_root()}/active/media_pools")
+        if not os.path.exists(f"{self.nas_root()}/active/media_pools"):
+            os.mkdir(f"{self.nas_root()}/active/media_pools")
 
         # If the pool dir does not exist, create it
         if not os.path.exists(path):
@@ -239,7 +239,7 @@ class DbNasConnection:
         """
 
         # ______ NAS component ______
-        path = self.__nas_root()
+        path = self.nas_root()
         path = path + "/active/media_pools"
 
         # First check if the media_pool dir exists, if not, just make the directory.
@@ -292,12 +292,12 @@ class DbNasConnection:
             raise ValueError(f"The record by the name: {account_parent} does not exist")
 
         # Asemble abs path of the account (ie the source destination of the final file)
-        path = self.__nas_root()
+        path = self.nas_root()
         path = path + f"/active/created_videos/{record_account[0][1]}"
 
         # If, for some reason, the created_videos directory has never been created, create it.
-        if not os.path.exists(f"{self.__nas_root()}/active/created_videos"):
-            os.mkdir(f"{self.__nas_root()}/active/created_videos")
+        if not os.path.exists(f"{self.nas_root()}/active/created_videos"):
+            os.mkdir(f"{self.nas_root()}/active/created_videos")
 
         # Make the account directory has not been created, create it.
         if not os.path.exists(path):
@@ -750,7 +750,7 @@ class DbNasConnection:
 
         # Move the file to the archive
         location_on_server = record[1]
-        local_path = f"{self.__nas_root()}/{location_on_server}"
+        local_path = f"{self.nas_root()}/{location_on_server}"
         shutil.move(local_path, to_archive_path)
 
         # ______ DB Component ______
@@ -778,7 +778,7 @@ class DbNasConnection:
         # Create a directory
         current_date = datetime.date.today()
 
-        archive_path = self.__nas_root()
+        archive_path = self.nas_root()
         archive_path = f"{archive_path}/archive/media_files_archive_{current_date}"
         try:
             os.mkdir(archive_path)
@@ -810,7 +810,7 @@ class DbNasConnection:
 
 
         location_on_server = record[1]
-        local_path = f"{self.__nas_root()}/{location_on_server}"
+        local_path = f"{self.nas_root()}/{location_on_server}"
         shutil.move(local_path, to_archive_path)
 
         # ______ DB Component ______
@@ -836,7 +836,7 @@ class DbNasConnection:
         # ______ NAS Component ______
         # Create the directory
         current_date = datetime.date.today()
-        archive_path = self.__nas_root()
+        archive_path = self.nas_root()
         archive_path = f"{archive_path}/archive/content_files_archive_{current_date}"
         try:
             os.mkdir(archive_path)
@@ -895,7 +895,7 @@ class DbNasConnection:
         # ______ NAS Component ______
 
         # Finally, delete the directory
-        local_path = self.__nas_root()
+        local_path = self.nas_root()
         local_path = f"{local_path}/active/created_videos/{account_record[1]}"
         os.rmdir(local_path)
 
@@ -912,7 +912,7 @@ class DbNasConnection:
         # Check the existence of the content pool
         content_record = self.read_specific_content_file_by_id(content_id)
         file_path = content_record[1]
-        file_path_local = f"{self.__nas_root()}/{file_path}"
+        file_path_local = f"{self.nas_root()}/{file_path}"
 
         # Delete the file
         if os.path.exists(file_path_local):
@@ -954,7 +954,7 @@ class DbNasConnection:
 
         # ______ NAS Component ______
         # First the directory
-        path = self.__nas_root()
+        path = self.nas_root()
         path = f"{path}/active/media_pools/{media_pool_record[1]}"
         os.rmdir(path)
 
@@ -982,7 +982,7 @@ class DbNasConnection:
         # Remove file from nas
         media_file_record = self.read_specific_media_file_by_id(media_file_id)
         file_path = media_file_record[1]
-        file_path_local = f"{self.__nas_root()}/{file_path}"
+        file_path_local = f"{self.nas_root()}/{file_path}"
 
         # Delete the file
         if os.path.exists(file_path_local):
@@ -1148,9 +1148,9 @@ class DbNasConnection:
         column_names = [column[0] for column in columns]
         return column_names
 
-    def __nas_root(self):
+    def nas_root(self):
         """
-        private method to quickly return the defined local root location
+        method to quickly return the defined local root location
         """
         return self.credentials.get('nas_root')
 
