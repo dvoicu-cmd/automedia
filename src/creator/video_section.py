@@ -29,8 +29,9 @@ class VideoSection:
         :return:
         """
         for edit in list_of_edits:
-            print(f"-> {self}: applying edit: {edit}")
+            print(f"-> {self}: Applying Edit: {edit}")
             self.clip = edit.apply(self.clip)
+            print("-> Applied Edit")
 
         # Now subclip and cut the duration
         self.clip = self.clip.subclip(0, duration_edit.duration())
@@ -62,4 +63,4 @@ class VideoSection:
         :param output_path: The absolute path for the output video.
         :return:
         """
-        self.clip.write_videofile(output_path, codec='libx264', audio_codec='aac')
+        self.clip.write_videofile(output_path, codec='libx264', audio_codec='aac', threads=8)

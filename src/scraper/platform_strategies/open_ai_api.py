@@ -1,8 +1,13 @@
+import pdb
+
 from openai import OpenAI
 from dotenv import load_dotenv
 import os
 
 from lib.manage_directory_structure.scraper_dir_manager import ScraperDirManager
+from lib.text_util.util import TextUtils
+
+from moviepy.editor import AudioFileClip, concatenate_audioclips
 
 
 class OpenAiAPI:
@@ -69,9 +74,32 @@ class OpenAiAPI:
         :param path_dir_output The absolute path of the output directory
         :param str_input: text to input
         """
-        response = self.client.audio.speech.create(
-            model="tts-1",
-            voice=voice,
-            input=str_input
-        )
-        response.stream_to_file(f"{path_dir_output}/{self.dm.get_rand_id()}_tts_{str_input[:10]}.mp3")
+        # Because openAi has a character limit of 4096 per request, you need to chunk your str input.
+        # So chunk the requests and then reassemble the audio file
+        partitions = TextUtils.split_partition_sentences(str_input, 4096)
+
+        i = 0
+        for part in partitions:
+            response = self.client.audio.speech.create(
+                model="tts-1",
+                voice=voice,
+                input=part
+            )
+            response.stream_to_file(f"{path_dir_output}/{i}_audio_part_{self.dm.get_rand_id()}_.mp3")
+            i = i + 1
+
+        # Now patch all parts into one mp3 file
+        mp3_parts = self.dm.select_dir(path_dir_output)
+        sorted_mp3_parts = sorted(mp3_parts, key=lambda x: os.path.basename(x))  # sort them as the fs would
+
+        # Compile into one audio file
+        audio_clips = [AudioFileClip(mp3) for mp3 in sorted_mp3_parts]
+        final_clip = concatenate_audioclips(audio_clips)
+        final_output = f"{path_dir_output}/{self.dm.get_rand_id()}_tts_{str_input[:10]}.mp3"
+        final_clip.write_audiofile(final_output)
+
+        # Delete the parts, they are no longer needed.
+        for mp3_part in mp3_parts:
+            os.remove(mp3_part)
+
+

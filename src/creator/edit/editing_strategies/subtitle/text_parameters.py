@@ -1,5 +1,6 @@
 from moviepy.video.VideoClip import TextClip
 
+
 class TextParam:
     def __init__(self):
         self._font = 'times'

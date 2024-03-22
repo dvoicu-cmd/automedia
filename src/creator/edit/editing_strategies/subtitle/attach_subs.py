@@ -1,7 +1,9 @@
 # Subtitle imports
 import os
-import pdb
 import shutil
+import random
+import string
+import pdb
 import tempfile
 import whisper
 from whisper.utils import get_writer
@@ -74,11 +76,12 @@ class AttachSubtitles(Edit):
             text_file.write(result["text"])
 
         # make a dir with the srt file
-        output_dir = f"{os.getcwd()}/srt_tmp"
+        output_dir = f"{os.getcwd()}/srt_tmp_{self.__generate_random_string(5)}"
+        os.mkdir(output_dir)
 
-        # If the directory does not exist, create it bozo.
-        if not os.path.exists(output_dir):
-            os.mkdir(output_dir)
+        # This is a workaround because you can't control the srt file name on output.
+        # So you shove the srt file output into a unique dir that you know the name of, look in the dir and then rm it after the fact.
+        # So now you can have multiple process of attach_subs without them conflicting and reading each other's srt files.
 
         # Write the srt file
         srt_writer = get_writer("srt", output_dir)
@@ -96,8 +99,7 @@ class AttachSubtitles(Edit):
         output = CompositeVideoClip([composite_clip, subtitles])
 
         # Remove the srt file.
-
-        os.remove(srt_file_path)
+        shutil.rmtree(output_dir)
 
         return output
 
@@ -116,3 +118,13 @@ class AttachSubtitles(Edit):
             stroke_color=self.__text.outline_color,
             stroke_width=self.__text.outline_width
         )
+
+    @staticmethod
+    def __generate_random_string(length):
+        # Define the characters to choose from
+        characters = string.ascii_letters + string.digits + string.punctuation
+
+        # Generate random string
+        random_string = ''.join(random.choice(characters) for _ in range(length))
+
+        return random_string
