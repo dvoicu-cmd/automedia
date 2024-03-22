@@ -1,11 +1,3 @@
-"""
-
-Note on timers: Timing needs to be done in a specific format
-For OnUnitActiveSec:
-s -> seconds, min -> minutes, d -> days, w -> weeks, M -> months, y -> years
-ex: OnUnitActiveSec=5min activates the script every five minutes
-"""
-
 import subprocess
 import os
 from .service_configurator import ServiceConfigurator
@@ -31,7 +23,7 @@ class ManageService:
 
         Args:
             python_file (str): The string that contains the name of the python file excluding the .py extension in the current directory
-            on_calendar_list (list): A list of strings in the appropriate on calendar format. ex: ["*-*-* 21:00:00", "*-*-* 09:00:00"]
+            on_calendar_list (list): A list of strings in the appropriate on calendar format. ex: ["* * * * *", "30 8 * * *"]
         """
 
         # Load the saved timer map
@@ -96,21 +88,36 @@ class ManageService:
 
         Args:
             py_file (str): The string that contains the name of the python file excluding the .py extension in the current directory
-            on_calendar_list (list): on_calendar_list (list): A list of strings in the appropriate on calendar format. ex: ["*-*-* 21:00:00", "*-*-* 09:00:00"]
+            on_calendar_list (list): A list of strings in the appropriate on calendar format. ex: ["* * * * *", "30 8 * * *"]
 
         """
         path_dict = self.service_config.read()
 
         cmd = f"{path_dict.get('python_runtime_path')} {path_dict.get('python_scripts_path')}/{py_file}.py"
 
+        # Make a logger file location in py_services
+        self.__make_logger_dir()
+        log_path = f"{path_dict.get('python_scripts_path')}/log/{py_file}.log"
+
         file_content = "MAILTO=\"\"\n"
 
-        # Append the on calendar elements
+        # For each time string given, create a line in a cron file to run the specified python file.
+        # Output standard output of the program into a log file in the py_services file.
         for on_calendar_element in on_calendar_list:
-            file_content = f"{file_content}{on_calendar_element} root {cmd}\n"
+            file_content = f"{file_content}{on_calendar_element} root {cmd} >> {log_path} 2>&1\n"
 
         with open(f"{path_dict.get('service_dir_path')}/{py_file}_job", 'w') as f:
             f.write(file_content)
+
+    def __make_logger_dir(self):
+        """
+        Small helper to create a logger dir
+        :return:
+        """
+        path_dict = self.service_config.read()
+        log_path = f"{path_dict.get('python_scripts_path')}/log"
+        if not os.path.exists(log_path):
+            os.mkdir(log_path)
 
     # --------- Deleting Files --------- #
 

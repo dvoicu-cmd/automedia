@@ -29,6 +29,7 @@ class VideoSection:
         :return:
         """
         for edit in list_of_edits:
+            print(f"-> {self}: applying edit: {edit}")
             self.clip = edit.apply(self.clip)
 
         # Now subclip and cut the duration

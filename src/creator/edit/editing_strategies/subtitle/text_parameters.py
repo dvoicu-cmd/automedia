@@ -1,3 +1,5 @@
+from moviepy.video.VideoClip import TextClip
+
 class TextParam:
     def __init__(self):
         self._font = 'times'
@@ -32,6 +34,9 @@ class TextParam:
         return self._outline_width
 
     def set_font(self, font_name, size):
+        v = TextClip.search(font_name, 'font')
+        if not v:
+            raise ValueError(f"Provided font: {font_name} value is not locally available/invalid. Try using a valid font: \n {TextClip.list('font')}")
         self._font = font_name
         self._size = size
 

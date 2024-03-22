@@ -90,28 +90,15 @@ class AttachSubtitles(Edit):
 
         # ---- MOVIEPY ----
 
-        print(srt_file_path)
-
-        pdb.set_trace()
-
-        generator = lambda txt: TextClip(txt, font='Georgia-Regular', fontsize=24, color='white')
-
-        subtitles = SubtitlesClip(srt_file_path, generator)
+        subtitles = SubtitlesClip(srt_file_path, self.__text_generator)
         subtitles = subtitles.set_position(self.__text_location)
 
         output = CompositeVideoClip([composite_clip, subtitles])
 
-        pdb.set_trace()
-
         # Remove the srt file.
-        shutil.rmtree(output_dir)
 
-        pdb.set_trace()
-        # os.remove(srt_file_path)
-        # try:
-        #     os.rmdir(output_dir)
-        # except OSError:
-        #     shutil.rmtree(output_dir)
+        os.remove(srt_file_path)
+
         return output
 
     def duration(self) -> int:
