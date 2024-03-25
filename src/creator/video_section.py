@@ -63,4 +63,4 @@ class VideoSection:
         :param output_path: The absolute path for the output video.
         :return:
         """
-        self.clip.write_videofile(output_path, codec='libx264', audio_codec='aac', threads=8)
+        self.clip.write_videofile(output_path, codec='libx264', audio_codec='aac', threads=8, logger=None)

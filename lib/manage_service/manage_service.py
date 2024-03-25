@@ -104,7 +104,7 @@ class ManageService:
         # For each time string given, create a line in a cron file to run the specified python file.
         # Output standard output of the program into a log file in the py_services file.
         for on_calendar_element in on_calendar_list:
-            file_content = f"{file_content}{on_calendar_element} root {cmd} >> {log_path} 2>&1\n"
+            file_content = f"{file_content}{on_calendar_element} root {cmd} > {log_path} 2>&1\n"
 
         with open(f"{path_dict.get('service_dir_path')}/{py_file}_job", 'w') as f:
             f.write(file_content)

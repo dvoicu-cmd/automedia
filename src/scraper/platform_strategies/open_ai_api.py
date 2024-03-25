@@ -96,7 +96,7 @@ class OpenAiAPI:
         audio_clips = [AudioFileClip(mp3) for mp3 in sorted_mp3_parts]
         final_clip = concatenate_audioclips(audio_clips)
         final_output = f"{path_dir_output}/{self.dm.get_rand_id()}_tts_{str_input[:10]}.mp3"
-        final_clip.write_audiofile(final_output)
+        final_clip.write_audiofile(final_output, logger=None)
 
         # Delete the parts, they are no longer needed.
         for mp3_part in mp3_parts:

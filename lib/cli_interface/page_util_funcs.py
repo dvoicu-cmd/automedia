@@ -126,8 +126,9 @@ def main_menu(node_name):
             # Stupid. Filtering py_services to just display the py files that where created by the formula class.
             ls = ManageFormula().print_script_names()
             srt_pattern = re.compile(r'srt_tmp_[A-Za-z0-9]{5}$')
-            ls_to_filter = ['cache', 'cache', '__init__.py', 'context.py', 'cred.cfg', 'paths.cfg']
-            filtered_list = [item for item in ls if item not in ls_to_filter or srt_pattern.match(item)]  # Filter out the list
+            tmp_video = re.compile(r'videoTEMP_[A-Za-z0-9]{3}_[A-Za-z0-9]{3}_[A-Za-z0-9]{3}.mp4')
+            ls_to_filter = ['cache', 'log', 'output', '__pycache__', 'timer_map.pickle', '__init__.py', 'context.py', 'cred.cfg', 'paths.cfg']
+            filtered_list = [item for item in ls if item not in ls_to_filter or srt_pattern.match(item) or tmp_video.match(item)]  # Filter out the list
             print(f"All files in py_services: \n {filtered_list}")
         except Exception as e:
             raise e
