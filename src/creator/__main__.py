@@ -231,25 +231,6 @@ manager.cleanup(tts_tmp)
         print(200)
 
 
-def create_creator_formula(py_service_name, code_lines: [str]):
-    try:
-        formula = ManageFormula()
-        for line in code_lines:
-            formula.append_code(line)
-        formula.save_generated_script(py_service_name)
-    except Exception as e:
-        return e
-    return 200
-
-
-def delete_creator_formula(py_service_name):
-    try:
-        ManageFormula().delete_generated_script(py_service_name)
-    except Exception as e:
-        return e
-    return 200
-
-
 
 if __name__ == '__main__':
     main()
