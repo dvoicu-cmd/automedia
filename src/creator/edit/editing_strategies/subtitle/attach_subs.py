@@ -81,7 +81,7 @@ class AttachSubtitles(Edit):
 
         # This is a workaround because you can't control the srt file name on output.
         # So you shove the srt file output into a unique dir that you know the name of, look in the dir and then rm it after the fact.
-        # So now you can have multiple process of attach_subs without them conflicting and reading each other's srt files.
+        # now you can have multiple process of attach_subs without them conflicting and reading each other's srt files.
 
         # Write the srt file
         srt_writer = get_writer("srt", output_dir)

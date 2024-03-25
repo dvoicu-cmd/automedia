@@ -10,46 +10,43 @@ class ManageFormula:
 # generate python script from ManageFormula class
 
 # Common code and imports
+import os
+import datetime
+import cv2
 from context import lib
 from context import src
 from lib import *
 from src import *
 
+start_time = datetime.datetime.now()
+t = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+print(f"------------ Starting Script: {t} ------------")  
+# User defined code
+"""
 
-def main():        
-    # Lock the critical section.
-    ManageService().lock()
-    
-    try:
-        # User defined strategies
-{}"""   # Don't ask. Just whatever you do. DON'T TOUCH IT.
-
-        self.template_bottom = """\
-    except Exception as e:
-        # If something goes wrong you need to unlock the critical section.
-        ManageService().unlock()
-        raise e
-    
-    # Unlock
-    ManageService().unlock()
-    
-    print("Successfully Ran Service:")
-    print(__file__)
-    # end of main()
-
-
-# Main method call
-if __name__ == "__main__":
-    main()
-
+        self.template_bottom = """
+# Current time
+end_time = datetime.datetime.now()
+elapsed_time = end_time - start_time
+t = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+print(f"------------ Finish Script: {t} ------------")
+print(f"------------ Elapsed Time: {elapsed_time} ------------")
+# end of main()
 """
 
     def append_code(self, code):
-        self.template_top = self.template_top.format(f"        {code}\n")
-        self.template_top += "{}"
+        self.template_top = self.template_top + '\n' + code
+
+    def ap(self, code):
+        """
+        shorthand for append_code
+        :param code:
+        :return:
+        """
+        self.append_code(code)
 
     def save_generated_script(self, service_name):
-        script_content = self.template_top.format("\n")
+        script_content = self.template_top + '\n'
         script_content += self.template_bottom
 
         cwd = os.getcwd()

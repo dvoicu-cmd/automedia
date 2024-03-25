@@ -164,8 +164,9 @@ class RedditScrape:
                     build_string = build_string + title.text + " "
 
                     # Get the username:
-                    user = self.driver.find_element(by=By.CLASS_NAME, value='author-name')
-                    build_string = build_string + "By: u/" + user.text + ". "
+                    # Actually nah, lets not get the user name cuz it messes with the whisper model.
+                    # user = self.driver.find_element(by=By.CLASS_NAME, value='author-name')
+                    # build_string = build_string + "By: u/" + user.text + ". "
 
                     # Get the post content
                     content = self.driver.find_element(by=By.ID, value=f'{id_value}-post-rtjson-content')
@@ -179,7 +180,6 @@ class RedditScrape:
                     print(e)
                     # Reddit is weird and too funky with their web elements.
                     # They keep varying and have no consistency at times.
-                    # Have
                     continue
 
         except Exception as e:

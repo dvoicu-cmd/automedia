@@ -122,6 +122,7 @@ def main_menu(node_name):
     if v == 2:  # Display all formulas
         InputPage.clear()
         try:
+            ls = ManageFormula().print_script_names()
             print(f"All files in py_services: \n {ManageFormula().print_script_names()}")
         except Exception as e:
             raise e
