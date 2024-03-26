@@ -11,6 +11,9 @@ def main():
     v1 = pg.main_menu("Scraper")
     if v1 == 'custom':
         # Make scraper formula
+
+        # This is a strategy for reddit scrapes
+
         f = ManageFormula()
 
         name = InputPage("Input the name of the service").prompt()
@@ -19,12 +22,14 @@ def main():
         media_pool = InputPage("Input the corresponding media_pool").prompt()
 
         f.ap(f"""
+        
 manager = ScraperDirManager()
 tmp = manager.create_tmp_dir()
 
 db = DbNasConnection()
 
 scrapes = RedditScrape().scrape("{subreddit}", "hot", "text", 1, 5)
+        
         """)
 
         # This is stupid, but it works.
@@ -33,12 +38,14 @@ scrapes = RedditScrape().scrape("{subreddit}", "hot", "text", 1, 5)
         f.ap(s)
 
         f.ap(f"""
+        
 files = manager.select_dir(tmp)
 
 for file in files:
     db.create_media_file(file, "text", os.path.basename(file), "{desc}", "{media_pool}")
 
 manager.cleanup(tmp)
+        
         """)
 
         f.save_generated_script(name)

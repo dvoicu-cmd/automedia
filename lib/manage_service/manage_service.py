@@ -2,6 +2,7 @@ import subprocess
 import os
 from .service_configurator import ServiceConfigurator
 from .timer_map import TimerMap
+from lib.manage_directory_structure.dir_manager import DirManager
 
 
 class ManageService:
@@ -98,13 +99,14 @@ class ManageService:
         # Make a logger file location in py_services
         self.__make_logger_dir()
         log_path = f"{path_dict.get('python_scripts_path')}/log/{py_file}.log"
+        tmp_log = f"{path_dict.get('python_scripts_path')}/log/{py_file}.tmp"
 
         file_content = "MAILTO=\"\"\n"
 
         # For each time string given, create a line in a cron file to run the specified python file.
         # Output standard output of the program into a log file in the py_services file.
         for on_calendar_element in on_calendar_list:
-            file_content = f"{file_content}{on_calendar_element} root {cmd} > {log_path} 2>&1\n"
+            file_content = f"{file_content}{on_calendar_element} root {cmd} > {tmp_log} 2>&1 || true && mv {tmp_log} {log_path} && rm -f {tmp_log}\n"
 
         with open(f"{path_dict.get('service_dir_path')}/{py_file}_job", 'w') as f:
             f.write(file_content)

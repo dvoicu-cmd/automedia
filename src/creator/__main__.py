@@ -260,7 +260,6 @@ print("-> Uploading to DbNas")
 db.create_content(output_tmp, ttxt.text_content, "{description}", "{account_name}")
 
 # clean the tmp dirs
-manager.cleanup(output_tmp)
 manager.cleanup(tts_tmp)
         
         """)

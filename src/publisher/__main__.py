@@ -18,6 +18,7 @@ def main():
         name = InputPage("Input the name of the account you want to set up a YT publisher for").prompt()
 
         f.ap(f""""
+        
 db = DbNasConnection()
 manager = PublisherDirManager()
 
@@ -38,17 +39,23 @@ yt.set_description(content_record[4])
 
 # organize files
 file_path = content_record[1]  # Expected directory with video and thumbnail.
+        
         """)
 
         f.ap("""
+        
 # set thumbnail (if verified)
-yt.enable_thumbnail(f"{file_path}/thumbnail.jpg")
+try:
+    yt.enable_thumbnail(f"{file_path}/thumbnail.jpg")
+except:
+    pass
 
 # exec
 yt.exec_upload(f"{file_path}/video.mp4")
 
 # Set to archive
 db.update_to_archived('content_files', content_record[0])
+        
         """)
 
         f.save_generated_script(service_name)
