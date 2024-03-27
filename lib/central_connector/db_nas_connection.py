@@ -916,7 +916,10 @@ class DbNasConnection:
 
         # Delete the file
         if os.path.exists(file_path_local):
-            os.remove(file_path_local)
+            try:
+                os.remove(file_path_local)
+            except IsADirectoryError:
+                shutil.rmtree(file_path_local)
 
         # ______ DB Component ______
         self.__make_connection()
