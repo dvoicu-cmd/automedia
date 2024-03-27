@@ -92,7 +92,7 @@ while i <= num_story:
         if archive == 0:
             f.ap("""
             
-    f.ap('db.update_to_archived("media_files", add_record[0])')
+    db.update_to_archived("media_files", add_record[0])
             
             """)
 
