@@ -636,7 +636,7 @@ class DbNasConnection:
 
         query = (f"SELECT * FROM media_files "
                  f"JOIN j_media_pools__media_files jt ON media_files.media_file_id = jt.media_file_id "
-                 f"WHERE jt.media_pool_id = {media_pool_id} AND media_files.to_archive = 0 ")
+                 f"WHERE jt.media_pool_id = {media_pool_id}")
 
         self.curr.execute(query)
 
