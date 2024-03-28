@@ -3,10 +3,10 @@ import os
 import shutil
 import random
 import string
-import pdb
 import tempfile
 import whisper
 from whisper.utils import get_writer
+from lib.manage_directory_structure.dir_manager import DirManager
 
 # MoviePy imports
 from moviepy.editor import TextClip, CompositeVideoClip, AudioFileClip
@@ -76,7 +76,7 @@ class AttachSubtitles(Edit):
             text_file.write(result["text"])
 
         # make a dir with the srt file
-        output_dir = f"{os.getcwd()}/srt_tmp_{self.__generate_random_string(5)}"
+        output_dir = f"{os.getcwd()}/output/srt_tmp_{DirManager().get_rand_id()}"
         os.mkdir(output_dir)
 
         # This is a workaround because you can't control the srt file name on output.
@@ -118,13 +118,3 @@ class AttachSubtitles(Edit):
             stroke_color=self.__text.outline_color,
             stroke_width=self.__text.outline_width
         )
-
-    @staticmethod
-    def __generate_random_string(length):
-        # Define the characters to choose from
-        characters = string.ascii_letters + string.digits + string.punctuation
-
-        # Generate random string
-        random_string = ''.join(random.choice(characters) for _ in range(length))
-
-        return random_string

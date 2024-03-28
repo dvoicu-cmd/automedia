@@ -9,7 +9,7 @@
 # Define the virtual environment directory
 VENV_DIR = $(PWD)/.venv/automedia_venv
 
-# Define the apt and pip dependencies
+# Define the apt and pip dependencies, maybe replace imagemagic with libmagick++-dev
 APT_DEPENDENCIES = ffmpeg gcc libespeak1 libmariadb-dev libmariadb3 nfs-kernel-server python3-dev python3.11-venv imagemagick cron
 PIP_DEPENDENCIES = -r requirements.txt
 # Define the URL for the Google Chrome .deb package
