@@ -17,13 +17,14 @@ def main():
         service_name = InputPage("Input the name of the service").prompt()
         name = InputPage("Input the name of the account you want to set up a YT publisher for").prompt()
 
-        f.ap(f""""
+        f.ap(f"""
         
 db = DbNasConnection()
 manager = PublisherDirManager()
 
 # 0 -> id, 1 -> username, 2 -> email, 3 -> password, 4 -> auth_secrete, 5 -> platform, 6 -> description
 acc_record = db.read_account_by_name('{name}')
+acc_record = acc_record[0] # read_account_by_name returns a tuple of tuples. why, idk
 
 # 0 -> id, 1 -> file location, 3 -> title, 4 -> description, 5 -> to archive
 content_record = db.read_rand_content_file(acc_record[0])  # Reads the content.

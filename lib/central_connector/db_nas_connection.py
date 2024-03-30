@@ -416,6 +416,9 @@ class DbNasConnection:
         self.curr.execute(query)
         record = self.curr.fetchone()
 
+        # verify that there are no byte strings
+        record = self.__iter_byte_str(record)
+
         self.__close_connection()
         return record
 
@@ -435,10 +438,17 @@ class DbNasConnection:
 
         # Get the record
         self.curr.execute(query)
-        record = self.curr.fetchall()  # Or records
+        records = self.curr.fetchall()  # Or records
+
+        # Update byte strings
+        records = list(records)
+        updated_records = []
+
+        for fetch in records:
+            updated_records.append(self.__iter_byte_str(fetch))
 
         self.__close_connection()
-        return record
+        return tuple(updated_records)
 
     def read_all_accounts(self):
         self.__make_connection()
@@ -448,10 +458,17 @@ class DbNasConnection:
         query = f"SELECT * FROM {table};"
 
         self.curr.execute(query)
-        record = self.curr.fetchall()
+        records = self.curr.fetchall()
+
+        # Update if there are any byte strings
+        records = records
+        updated_records = []
+
+        for fetch in records:
+            updated_records.append(self.__iter_byte_str(fetch))
 
         self.__close_connection()
-        return record
+        return tuple(updated_records)
 
     def read_rand_content_file(self, account_id):
         """
@@ -545,11 +562,11 @@ class DbNasConnection:
                  f"LIMIT 20; ")
 
         self.curr.execute(query)
-        record = self.curr.fetchall()
+        records = self.curr.fetchall()
 
         self.__close_connection()
 
-        return record
+        return records
 
     def read_media_pool_by_name(self, media_pool_name):
         """
@@ -573,7 +590,7 @@ class DbNasConnection:
 
     def read_media_pool_by_id(self, media_pool_id):
         """
-
+        reads the media pool by a given id
         """
         self.__make_connection()
 
@@ -595,10 +612,10 @@ class DbNasConnection:
         query = f"SELECT * FROM {table};"
 
         self.curr.execute(query)
-        record = self.curr.fetchall()
+        records = self.curr.fetchall()
 
         self.__close_connection()
-        return record
+        return records
 
     def read_rand_media_file_of_pool(self, media_pool_id):
         """
@@ -640,11 +657,11 @@ class DbNasConnection:
 
         self.curr.execute(query)
 
-        record = self.curr.fetchall()
+        records = self.curr.fetchall()
 
         self.__close_connection()
 
-        return record
+        return records
 
     def read_specific_media_file(self, location):
         """
@@ -1180,3 +1197,43 @@ class DbNasConnection:
         # Close the connection
         self.curr.close()
         self.conn.close()
+
+    @staticmethod
+    def extract_byte_str(byte_string):
+        """
+        Method that extracts byte strings.
+        :param byte_string:
+        :return: none if not a byte string or if data extracted is not in an expected format
+        """
+        if not isinstance(byte_string, bytes):
+            return None
+        decoded_string = byte_string.decode('utf-8')  # Decode the byte string to regular string
+        if decoded_string.startswith('b\'') and decoded_string.endswith('\''):
+            return decoded_string[2:-1]
+        elif isinstance(decoded_string, str):
+            return decoded_string
+        else:
+            return None  # Not in expected format.
+
+
+    def __iter_byte_str(self, record):
+        """
+        method that iterates through all the records and changes any records that are byte strings, and returns that new record without byte strings.
+        Really this is mostly used for the accounts table, as that table contains blobs that are in byte format.
+        :param record:
+        :return:
+        """
+
+        i = 0
+        for attr in record:
+            expected_str = self.extract_byte_str(attr)
+            if not expected_str:
+                pass
+            else:
+                # My dumb ass didn't know that tuples are immutable.
+                record_list = list(record)
+                record_list[i] = expected_str
+                record = tuple(record_list)
+            i += 1
+
+        return record
