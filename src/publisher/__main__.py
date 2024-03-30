@@ -30,12 +30,10 @@ acc_record = acc_record[0] # read_account_by_name returns a tuple of tuples. why
 content_record = db.read_rand_content_file(acc_record[0])  # Reads the content.
 
 # Set up uploader
-yt = YtUpload(acc_record[3], acc_record[4], acc_record[5])
-yt.select_account(acc_record[1])
+yt = YtUpload(acc_record[2], acc_record[3], acc_record[4])
 
-# Set title
+yt.set_account(acc_record[1])
 yt.set_title(content_record[3])
-# Set description
 yt.set_description(content_record[4])
 
 # organize files

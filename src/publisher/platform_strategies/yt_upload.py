@@ -1,4 +1,7 @@
 import os
+
+import seleniumbase.common.exceptions
+
 from .upload import Upload
 
 import selenium.common.exceptions
@@ -23,10 +26,11 @@ class YtUpload(Upload):
             auth_secret (str): The 32 character keys for the 2fa authentication code.
         """
 
-        self.driver = Driver(uc=True, headless=True)  # remote_debug="127.0.0.1:9222"
+        self.driver = Driver(uc=True, headless=True, remote_debug="127.0.0.1:9222")  # remote_debug="127.0.0.1:9222"
         self.TIMEOUT = time_out
         self.MAX_TRY = max_try
         self.__login_google(email, password, auth_secret)
+        self.account_name = None
         self.title = "default"
         self.description = "default"
         self.tags = "default1,default2,default3"
@@ -43,6 +47,14 @@ class YtUpload(Upload):
         # title has 100-character limit
         if not len(title) > 100:
             self.title = title
+
+    def set_account(self, account_name):
+        """
+        setter for tha account username.
+        :param account_name:
+        :return:
+        """
+        self.account_name = account_name
 
     def set_description(self, description):
         """
@@ -114,6 +126,14 @@ class YtUpload(Upload):
             raise ValueError(f"Video path does not exists: {file_path}")
 
         try:  # if anything goes wrong, you want to ensure that that driver closes so you don't spawn 50+ driver instances.
+
+            # If there is an account to change to select it.
+            if self.account_name:
+                try:
+                    self.__change_account()
+                except seleniumbase.common.exceptions.NoSuchElementException:
+                    # If that don't work, then the browser must have prompted to select before entering yt studio.
+                    self.__select_account()  # If this doesn't work, just fail.
 
             # placeholder var to hold long XPaths
             e = ''
@@ -189,9 +209,12 @@ class YtUpload(Upload):
                 self.driver.find_element(by=By.XPATH, value=e).click()
 
             # Input tags,
-            e = '/html/body/ytcp-uploads-dialog/tp-yt-paper-dialog/div/ytcp-animatable[1]/ytcp-ve/ytcp-video-metadata-editor/div/ytcp-video-metadata-editor-advanced/div[5]/ytcp-form-input-container/div[1]/div/ytcp-free-text-chip-bar/ytcp-chip-bar/div/input'
-            self.__wait_verify(e)
-            self.driver.type(e, self.tags)
+            try:
+                e = '/html/body/ytcp-uploads-dialog/tp-yt-paper-dialog/div/ytcp-animatable[1]/ytcp-ve/ytcp-video-metadata-editor/div/ytcp-video-metadata-editor-advanced/div[6]/ytcp-form-input-container/div[1]/div/ytcp-free-text-chip-bar/ytcp-chip-bar/div/input'
+                self.__wait_verify(e)
+                self.driver.type(e, self.tags)
+            except selenium.common.exceptions.NoSuchElementException:
+                pass  # Just ignore tags, they are not that important if they brick.
 
             # get the next button and click it to move to next page.
             self.__wait_verify('#next-button')
@@ -232,7 +255,44 @@ class YtUpload(Upload):
         except selenium.common.exceptions.NoAlertPresentException:
             pass
 
-    def select_account(self, account_name):
+    def __change_account(self):
+        """
+        Changes an account if you are already logged into the yt studio page
+        :return:
+        """
+        # Get to the list of the associated accounts.
+        e = '/html/body/ytcp-app/ytcp-entity-page/div/ytcp-header/header/div/ytd-topbar-menu-button-renderer/button'
+        self.__wait_verify(e)
+        account_btn = self.driver.find_element(By.XPATH, e)
+        account_btn.click()
+
+        e = '/html/body/ytcp-app/ytcp-popup-container/tp-yt-iron-dropdown/div/ytd-multi-page-menu-renderer/div[3]/div[1]/yt-multi-page-menu-section-renderer[1]/div[2]/ytd-compact-link-renderer[3]/a/tp-yt-paper-item'
+        self.__wait_verify(e)
+        switch_account = self.driver.find_element(By.XPATH, e)
+        switch_account.click()
+
+        e = '/html/body/ytcp-app/ytcp-popup-container/tp-yt-iron-dropdown/div/ytd-multi-page-menu-renderer/div[4]/ytd-multi-page-menu-renderer/div[3]/div[1]/ytd-account-section-list-renderer/div[2]/ytd-account-item-section-renderer/div[2]'
+        self.__wait_verify(e)
+        div_list_accounts = self.driver.find_element(By.XPATH, e)
+
+        # Grab the list of webelements containing the accounts
+        list_accounts = div_list_accounts.find_elements(By.CSS_SELECTOR, '#channel-title')
+
+        # Iterate through all elements and find the one with the matching string value
+        account_to_switch_to = None
+        for account in list_accounts:
+            if account.text == self.account_name:
+                account_to_switch_to = account
+                break
+        if not account_to_switch_to:
+            raise ValueError(
+                f"{self.account_name} is not a valid account name. Valid dir contents: \n\n{div_list_accounts.text}")
+
+        # Then switch to that account
+        account_to_switch_to.click()
+
+    def __select_account(self):
+        """Selects an account if you are not in the yt studio page"""
         # If you can see the avatar button, everything else should be present.
         self.__wait_verify('body > ytd-app > ytd-popup-container > tp-yt-paper-dialog')
         dir_list_accounts = self.driver.find_element(by=By.CSS_SELECTOR, value='#sections')
@@ -241,11 +301,11 @@ class YtUpload(Upload):
         # Iterate through all elements and find the one with the matching string value
         account_to_switch_to = None
         for account in list_accounts:
-            if account.text == account_name:
+            if account.text == self.account_name:
                 account_to_switch_to = account
                 break
         if not account_to_switch_to:
-            raise ValueError(f"{account_name} is not a valid account name. Valid dir contents: \n\n{list_accounts.get_text()}")
+            raise ValueError(f"{self.account_name} is not a valid account name. Valid dir contents: \n\n{list_accounts.get_text()}")
 
         # Then switch to that account
         account_to_switch_to.click()
