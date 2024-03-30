@@ -51,6 +51,7 @@ except:
 
 # exec
 yt.exec_upload(f"{db.nas_root()}/{file_path}/video.mp4")
+yt.quit() # quit the driver to save memory
 
 # Set to archive
 db.update_to_archived('content_files', content_record[0])

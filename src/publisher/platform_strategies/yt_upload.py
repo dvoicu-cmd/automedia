@@ -26,7 +26,7 @@ class YtUpload(Upload):
             auth_secret (str): The 32 character keys for the 2fa authentication code.
         """
 
-        self.driver = Driver(uc=True, headless=True, remote_debug="127.0.0.1:9222")  # remote_debug="127.0.0.1:9222"
+        self.driver = Driver(uc=True, headless=True)  # remote_debug="127.0.0.1:9222"
         self.TIMEOUT = time_out
         self.MAX_TRY = max_try
         self.__login_google(email, password, auth_secret)
