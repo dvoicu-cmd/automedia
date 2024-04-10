@@ -57,6 +57,7 @@ yt.quit() # quit the driver to save memory
 db.update_to_archived('content_files', content_record[0])
         
         """)
+        # Oh include a prompt to have a short form vid. look for short.mp4
 
         f.save_generated_script(service_name)
         print(200)

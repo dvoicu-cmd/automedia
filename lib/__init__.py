@@ -9,6 +9,8 @@ from .queue_pickle.queue import Queue
 from .text_util.util import TextUtils
 from .cli_interface.input_pages import InputPage
 from .cli_interface.picker_pages import PickerPage
+from .cli_interface.formula_strategies import *
+from .cli_interface.formula_strategies import __all__ as formula_strategies_all
 from .manage_formula.manage_formula import ManageFormula
 from .manage_directory_structure.creator_dir_manager import CreatorDirManager
 from .manage_directory_structure.scraper_dir_manager import ScraperDirManager
@@ -18,4 +20,4 @@ from .manage_directory_structure.publisher_dir_manager import PublisherDirManage
 from .cli_interface import page_util_funcs as pg
 
 __all__ = ['DbNasConnection', 'ManageService', 'Queue', 'TextUtils', 'InputPage', 'PickerPage', 'ManageFormula',
-           'CreatorDirManager', 'ScraperDirManager', 'PublisherDirManager', 'pg']
+           'CreatorDirManager', 'ScraperDirManager', 'PublisherDirManager', 'pg'] + formula_strategies_all
