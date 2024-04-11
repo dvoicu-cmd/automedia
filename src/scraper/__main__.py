@@ -11,11 +11,13 @@ def main():
     v1 = pg.main_menu("Scraper")
     if v1 == 'custom':
         # CUSTOM SCRAPER FORMULA CREATION
-        v2 = PickerPage(["Reddit Scrape", "Ai Text Prompt"]).prompt("Select a formula to use")
+        v2 = PickerPage(["Reddit Scrape", "Ai Text Prompt", "Ai Text and Images"]).prompt("Select a formula to use")
         if v2 == 0:
             ScraperFormulas().reddit_scrape()
         if v2 == 1:
             ScraperFormulas().open_ai_text()
+        if v2 == 2:
+            ScraperFormulas().open_ai_text_and_img()
 
     if v1 == 'manual':
 
