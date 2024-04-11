@@ -1,8 +1,10 @@
 import pdb
 
+import openai
 from openai import OpenAI
 from dotenv import load_dotenv
 import os
+import time
 
 from lib.manage_directory_structure.scraper_dir_manager import ScraperDirManager
 from lib.text_util.util import TextUtils
@@ -46,24 +48,44 @@ class OpenAiAPI:
         else:
             return str_response
 
-    def stable_diffusion(self, prompt, path_dir_output=''):
+    def stable_diffusion(self, prompt, path_dir_output='', name=None):
         """
         Creates a 1024x1024 image and downloads it
         https://platform.openai.com/docs/guides/images?context=node
         :param prompt: The string input describing the image to generate
         :param path_dir_output The absolute path of the output directory
+        :param name Optional parameter to manually set the name of the file
         :return: Downloads a file in
         """
-        response = self.client.images.generate(
-            model="dall-e-3",
-            prompt=prompt,
-            size="1024x1024",
-            quality="standard",
-            n=1,
-        )
+        attempts = 3
+        response = None
+
+        while attempts >= 0:
+            try:
+                response = self.client.images.generate(
+                    model="dall-e-3",
+                    prompt=prompt,
+                    size="1024x1024",
+                    quality="standard",
+                    n=1,
+                )
+                break
+            except openai.BadRequestError as e:
+                if attempts <= 0:
+                    raise e
+                else:
+                    attempts = attempts - 1
+                    continue
+            except openai.RateLimitError:
+                print("HIT RATE LIMIT, HALTING PROGRAM FOR 1 MIN")
+                time.sleep(65)
+                continue
 
         image_url = response.data[0].url
-        self.dm.dl_via_link(image_url, "image", f"sd_{prompt[:10]}", path_dir_output)
+        if not name:
+            self.dm.dl_via_link(image_url, "image", f"sd_{prompt[:10]}", path_dir_output)
+        elif name:
+            self.dm.dl_via_link(image_url, "image", f"{name}", path_dir_output, use_hash=False)
 
     def text_to_speech(self, voice, str_input, path_dir_output=''):
         """

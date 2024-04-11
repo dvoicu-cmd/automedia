@@ -19,7 +19,7 @@ class ScraperDirManager(DirManager):
             self.new_rand_id()
             self.dl_via_link(link, content_type, name, output_tmp_dir_path)
 
-    def dl_via_link(self, link, content_type, name, output_tmp_dir_path):
+    def dl_via_link(self, link, content_type, name, output_tmp_dir_path, use_hash=True):
         """
         Downloads audio, image, and video content
         """
@@ -38,8 +38,12 @@ class ScraperDirManager(DirManager):
 
         response = requests.get(link)
         if response.status_code == 200:
-            with open(f"{output_tmp_dir_path}/{self.rand_hash}_{name}{fs_extension}", "wb") as f:
-                f.write(response.content)
+            if use_hash:
+                with open(f"{output_tmp_dir_path}/{self.rand_hash}_{name}{fs_extension}", "wb") as f:
+                    f.write(response.content)
+            elif not use_hash:
+                with open(f"{output_tmp_dir_path}/{name}{fs_extension}", "wb") as f:
+                    f.write(response.content)
         else:
             ProcessLookupError(f"Failed to download contents. Response code:{response.status_code}")
 
@@ -48,12 +52,16 @@ class ScraperDirManager(DirManager):
             self.new_rand_id()
             self.dl_text(text, name, output_tmp_dir_path)
 
-    def dl_text(self, text, name, output_tmp_dir_path):
+    def dl_text(self, text, name, output_tmp_dir_path, use_hash=True):
         """
         Writes the string text into a file
         """
-        with open(f"{output_tmp_dir_path}/{self.rand_hash}_{name}.txt", "w") as f:
-            f.write(text)
+        if use_hash:
+            with open(f"{output_tmp_dir_path}/{self.rand_hash}_{name}.txt", "w") as f:
+                f.write(text)
+        elif not use_hash:
+            with open(f"{output_tmp_dir_path}/{name}.txt", "w") as f:
+                f.write(text)
 
     def save_cache(self, a1, a2):
         pass

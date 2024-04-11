@@ -113,3 +113,21 @@ manager.cleanup(tmp)
         f.save_generated_script(name)
         print(200)
 
+    @staticmethod
+    def open_ai_text_and_img():
+        f = ManageFormula()
+        name = InputPage("Input the name of the service").prompt()
+        desc = InputPage("Input the description for the scrapes").prompt()
+        llm_model = InputPage("Input the model you wish to use. \n"
+                          "Accepted values: gpt-4, gpt-4 turbo, gpt-3.5-turbo").prompt()
+        system_prompt = InputPage("Input a system prompt for the model.")
+        ai_prompt = InputPage("Input a text prompt you wish to give to the model.\n"
+                              "The text data will be fed into the stable diffusion model and give an image in relation to your text data.").prompt()
+        number_of_prompts = InputPage("Input the number of prompts you wish to have in a scrape").prompt()
+        number_of_images = InputPage("Input the number of images you wish to generate per prompt").prompt()
+        media_pool = InputPage("Input the corresponding media_pool").prompt()
+
+
+
+
+
