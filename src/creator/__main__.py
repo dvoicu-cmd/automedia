@@ -14,7 +14,9 @@ def main():
     v1 = pg.main_menu("Creator")
     if v1 == 'custom':
         # CUSTOM CREATOR FORMULA CREATION
-        CreatorFormulas().generic_text_story()
+        v2 = PickerPage(["Text Story"]).prompt("Select a formula to use")
+        if v2 == 0:
+            CreatorFormulas().generic_text_story()
 
     # end of custom
 

@@ -11,7 +11,9 @@ def main():
     v1 = pg.main_menu("Publisher")
     if v1 == 'custom':
         # CUSTOM PUBLISHER FORMULA CREATION
-        PublisherFormulas().yt_formula()
+        v2 = PickerPage(["YT Formula"]).prompt("Select a formula to use")
+        if v2 == 0:
+            PublisherFormulas().yt_formula()
 
     if v1 == 'manual':
 

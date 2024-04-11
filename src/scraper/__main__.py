@@ -11,7 +11,9 @@ def main():
     v1 = pg.main_menu("Scraper")
     if v1 == 'custom':
         # CUSTOM SCRAPER FORMULA CREATION
-        ScraperFormulas().reddit_scrape()
+        v2 = PickerPage(["Reddit Scrape"]).prompt("Select a formula to use")
+        if v2 == 0:
+            ScraperFormulas().reddit_scrape()
 
     if v1 == 'manual':
 
