@@ -110,7 +110,7 @@ class OpenAiAPI:
         https://platform.openai.com/docs/guides/text-to-speech
 
         :param voice: alloy, echo, fable, onyx, nova, and shimmer
-        :param path_dir_output The absolute path of the output directory
+        :param path_dir_output The absolute path of the output directory. Assumed to be a dir manager.
         :param str_input: text to input
         """
         # Because openAi has a character limit of 4096 per request, you need to chunk your str input.

@@ -202,6 +202,8 @@ for prompt_dir in prompt_dirs:
         print(200)
 
 
+# Formula idea. for long form videos (like 22 min or more, add like a checker for the content here using the estimator in openAI)
+
 
 
 

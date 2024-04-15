@@ -17,13 +17,13 @@ class CreatorFormulas:
         service_name = InputPage("Give a title to the service:").prompt()
 
         f.ap("""
-        
+
 manager = CreatorDirManager()
 output_tmp = manager.create_tmp_dir("am_i_the_a_hole_upload")
 db = DbNasConnection()
 
 print("-> Created DbNas Connection")
-        
+ 
         """)
 
         # Pick the canvas
@@ -57,20 +57,22 @@ num_story = {num_text_content}
 i = 1 
         """)
 
-        # Prompt to archive
-        archive = PickerPage(["Yes", "No"]).prompt("Do you wish to archive the text content after use?")
 
         # Reads in the stories
         f.ap("""
-        
+
 record = db.read_rand_media_file_of_pool(media_pool_id)
 story_text = manager.read_text(db.nas_root() + "/" + record[1])
 
         """)
 
+        # Prompt to archive
+        archive = PickerPage(["Yes", "No"]).prompt("Do you wish to archive the text content after use?")
+
         if archive == 0:
             f.ap("""
-            
+
+# Archive option selected
 db.update_to_archived("media_files", record[0])
 
         """)
@@ -88,9 +90,35 @@ while i <= num_story:
         if archive == 0:
             f.ap("""
             
+    # Archive option selected
     db.update_to_archived("media_files", add_record[0])
             
             """)
+
+        have_min_length = PickerPage(["Yes", "No"]).prompt("Do you wish to have a minimum duration for videos")
+        min_length = 0
+        if have_min_length == 0:
+            min_length = InputPage("Input the minimum length you wish to have for a video in min").prompt()
+            f.ap(f"""
+            
+# Selected Option to have a minimum story length
+min_len = {min_length}
+
+while OpenAiAPI.estimate_tts_time(story_text) < min_len:
+    add_record = db.read_rand_media_file_of_pool(media_pool_id)
+    story_text = story_text + " ... Next story. "
+    story_text = story_text + manager.read_text(db.nas_root() + "/" + db.read_rand_media_file_of_pool(media_pool_id)[1])
+            
+            """)
+
+        if archive == 0:
+            f.ap("""
+
+    # Archive option selected
+    db.update_to_archived("media_files", add_record[0])
+
+            """)
+
 
         # Call some tts
         tts_name = InputPage("Give a tts voice: alloy, echo, fable, onyx, nova, or shimmer").prompt()
