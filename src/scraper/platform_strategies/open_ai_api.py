@@ -87,6 +87,23 @@ class OpenAiAPI:
         elif name:
             self.dm.dl_via_link(image_url, "image", f"{name}", path_dir_output, use_hash=False)
 
+    @staticmethod
+    def estimate_tts_time(str_input):
+        """
+        Estimates the time it takes for an open ai tts model to read some given text
+        :param str_input:
+        :return: The amount of time
+        """
+
+        # https://community.openai.com/t/tts-talking-speed-words-per-minute/657893/2
+        # According to this post, the average wpm for each voice is about 178
+        wpm = 178 / 2  # Given some tests, results give half the result. So the tts is slower
+        words = TextUtils.split_single_words(str_input)
+        num_words = len(words)
+        print(num_words)
+        speech_time = num_words/wpm
+        return speech_time
+
     def text_to_speech(self, voice, str_input, path_dir_output=''):
         """
         The text to speach models from openAI
