@@ -48,6 +48,12 @@ try:
     yt.enable_thumbnail(f"{db.nas_root()}/{file_path}/thumbnail.jpg")
 except:
     pass
+    
+# try to upload short video (if there is one)
+try:
+    yt.exec_upload(f"{db.nas_root()}/{file_path}/short.mp4")
+except:
+    pass
 
 # exec
 yt.exec_upload(f"{db.nas_root()}/{file_path}/video.mp4")
@@ -57,7 +63,6 @@ yt.quit() # quit the driver to save memory
 db.update_to_archived('content_files', content_record[0])
         
         """)
-        # Oh include a prompt to have a short form vid. look for short.mp4
 
         f.save_generated_script(service_name)
         print(200)

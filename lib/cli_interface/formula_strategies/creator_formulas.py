@@ -279,6 +279,8 @@ ttxt.limit_words(16, 5)
         f.ap(f"""
         
 print("-> Uploading to DbNas")
+print("-> File:")
+print(output_tmp)
 
 # upload to db nas
 db.create_content(output_tmp, ttxt.text_content, "{description}", "{account_name}")

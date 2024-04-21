@@ -255,6 +255,14 @@ class YtUpload(Upload):
         except selenium.common.exceptions.NoAlertPresentException:
             pass
 
+    def exec_upload_linked_short(self):
+        """
+        Planned method to exec upload that links to the most recently uploaded video on the channel.
+        Requires tier 3 channel verification.
+        :return:
+        """
+        pass
+
     def __change_account(self):
         """
         Changes an account if you are already logged into the yt studio page

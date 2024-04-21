@@ -285,6 +285,7 @@ def create_archiver_service(service_name, on_cal_list: list):
         formula = ManageFormula()
         formula.append_code("db = DbNasConnection()")
         formula.append_code("db.delete_all_archived_media_files()")
+        formula.append_code("db.delete_all_archived_content_files()")
 
         # Save the script
         formula.save_generated_script(service_name)
