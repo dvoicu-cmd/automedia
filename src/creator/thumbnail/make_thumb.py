@@ -31,8 +31,38 @@ class MakeThumbnail:
         :return:
         """
         lines = t.text_content.split('\n')
-        for i, line in enumerate(lines):
-            cv2.putText(self.image, line, (t.position[0], t.position[1] + i*(t.font_scale*20)), t.font, t.font_scale, t.font_color, t.thickness)
+
+        if t.has_bg_color:
+            for i, line in enumerate(lines):
+                # https://aiphile.blogspot.com/2021/08/draw-transparent-shape-text-with.html
+                # Copy img
+                overlay = self.image.copy()
+
+                # Get text size
+                (t_w, t_h), _ = cv2.getTextSize(line, t.font, t.font_scale, t.thickness)
+
+                # get the text pos of the word
+                x = t.position[0]
+                y = t.position[1] + i*(t.font_scale*20)
+
+                # get the padding of the text
+                x_pad = t.bg_padding[0]
+                y_pad = t.bg_padding[1]
+
+                # Draw in the rectangle
+                cv2.rectangle(overlay, (x-x_pad, y+y_pad), (x+t_w+x_pad, y-t_h-y_pad), t.bg_color, -1)
+
+                # Overlay the rectangle onto the img
+                new_img = cv2.addWeighted(overlay, t.bg_opacity, self.image, 1 - t.bg_opacity, 0)
+
+                # Put in the text
+                cv2.putText(new_img, line, (t.position[0], t.position[1] + i*(t.font_scale*20)), t.font, t.font_scale, t.font_color, t.thickness)
+
+                self.image = new_img
+        else:
+            for i, line in enumerate(lines):
+                # Just place the text
+                cv2.putText(self.image, line, (t.position[0], t.position[1] + i*(t.font_scale*20)), t.font, t.font_scale, t.font_color, t.thickness)
 
     @staticmethod
     def create_img_circle(img_path, radius):
