@@ -270,8 +270,14 @@ short_base.render(f"{output_tmp}/short.mp4")
             base_image = InputPage("Input the media pool with your base thumbnail image").prompt()
             archive = PickerPage(["Yes", "No"]).prompt("Do you wish to archive the thumbnail after use?\n"
                                                        "Ensure that you have a constant supply of thumbnail images if you do.")
+
             font = InputPage("Input the font you wish to use. \n"
-                             "Valid Options: simplex, plain, duplex, complex, triplex, small, s_simplex, s_complex").prompt()
+                             "Valid Options: simplex, plain, duplex, complex, triplex, small, s_simplex, s_complex\n"
+                             "Recommended: simplex").prompt()
+            font_scale = InputPage("Input the font scale you wish to use. (Integer)\n"
+                                   "Recommended: 6").prompt()
+            font_thickness = InputPage("Input the font thickness you wish to use. (Integer)\n"
+                                       "Recommended: 12").prompt()
             highlights = PickerPage(["Highlights", "Random Highlights", "No Highlights"]).prompt("Do you wish for the thumbnail text to have highlights, randomized higlights, or no highlights at all.")
             bg_color = None
             if highlights == 0 or highlights == 1:
@@ -296,7 +302,7 @@ thumb.place_img(img_location, (1920, 1080), (0, 0))
 
 # thumb text
 ttxt = ThumbnailText(story_text)
-ttxt.set_font_attr("{font}", 6, 12, (0, 0, 0))
+ttxt.set_font_attr("{font}", {font_scale}, {font_thickness}, (0, 0, 0))
 ttxt.set_pos(75, 540)
 ttxt.limit_words(15, 5)  # Each line can hold about 38 characters. average word is 4.7 characters.
             """)
