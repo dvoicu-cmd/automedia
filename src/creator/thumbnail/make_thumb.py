@@ -2,6 +2,7 @@ import cv2
 import numpy as np
 from src.creator.canvas import *
 from src.creator.thumbnail.thumbnail_text import ThumbnailText
+import pdb
 
 
 class MakeThumbnail:
@@ -32,7 +33,7 @@ class MakeThumbnail:
         """
         lines = t.text_content.split('\n')
 
-        if t.has_bg_color:
+        if t.has_bg:
             for i, line in enumerate(lines):
                 # https://aiphile.blogspot.com/2021/08/draw-transparent-shape-text-with.html
                 # Copy img

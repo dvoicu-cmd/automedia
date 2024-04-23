@@ -8,8 +8,8 @@ class ThumbnailText:
     position: tuple  # Size 2 for x and y
     font: int
     font_scale: int
-    font_color: tuple  # size 3 for RGB
-    thickness: int
+    font_color: tuple  # size 3 for RGB (except, cv2 reads as b,g,r)
+    font_thickness: int
     # Background properties
     has_bg: bool  # check if a text background is enabled
     bg_padding: tuple  # (x,y) tuple determining the padding between the text and bg
@@ -23,22 +23,26 @@ class ThumbnailText:
         self.text_content = content
         self.position = (0, 0)
         self.font = cv2.FONT_HERSHEY_PLAIN
-        self.font_scale = 1
-        self.font_color = (255, 255, 255)
-        self.thickness = 2
-        self.has_bg_color = False
+        self.font_scale = 6
+        self.font_color = (0, 0, 0)
+        self.font_thickness = self.font_scale * 2
+        self.has_bg = False
 
     def set_background(self, padding: tuple, color: tuple, opacity: float):
         self.has_bg = True
         self.bg_padding = padding
-        self.bg_color = color
+        # For some reason cv2 reads the tuple values as (b,g,r) rather than (r,g,b). Ima just reverse the order.
+        self.bg_color = tuple(reversed(color))
         self.bg_opacity = opacity
 
     # https://codeyarns.com/tech/2015-03-11-fonts-in-opencv.html#gsc.tab=0
-    def set_text_font(self, text: str):
+    def set_font_attr(self, font: str, scale: int, thickness: int, color: tuple):
         """
         Sets the font for the thumbnail
-        :param text: String with the selected font. Valid: "simplex", "plain", "duplex", "complex", "triplex", "small", "s_simplex", "s_complex"
+        :param font: String with the selected font. Valid: "simplex", "plain", "duplex", "complex", "triplex", "small", "s_simplex", "s_complex"
+        :param scale:
+        :param thickness:
+        :param color:
         :return:
         """
         valid_fonts = {
@@ -51,15 +55,21 @@ class ThumbnailText:
             "s_simplex": cv2.FONT_HERSHEY_SCRIPT_SIMPLEX,
             "s_complex": cv2.FONT_HERSHEY_SCRIPT_COMPLEX,
         }
-        result = valid_fonts.get(text)
+        result = valid_fonts.get(font)
         if not result:  # if there is an invalid result, use the default font.
             result = cv2.FONT_HERSHEY_PLAIN
         self.font = result
+        self.font_thickness = thickness
+        self.font_scale = scale
+        self.font_color = tuple(reversed(color))
+
+    def set_pos(self, x: int, y: int):
+        self.position = (x, y)
 
 
     def limit_words(self, word_limit: int, new_line: int):
         """
-
+        Limits the amount of words in a string input to make it thumbnail appropriate.
         :param word_limit: The number of words limited
         :param new_line: After x many words, add in a new line
         :return:
