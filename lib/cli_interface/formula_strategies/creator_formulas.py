@@ -383,3 +383,8 @@ manager.cleanup(tts_tmp)
         print(f"Created Service File: {service_name}")
         print(200)
 
+
+    def cycling_images_story(self):
+
+        pass
+

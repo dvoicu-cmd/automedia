@@ -61,14 +61,15 @@ class DirManager:
         return random_string
 
     @staticmethod
-    def select_dir(dir_path):
+    def select_dir(dir_path, file_filter="*"):
         """
         Returns all files in a dir name as a list
         :param dir_path: The path to the dir to select
+        :param file_filter: optional parameter to filter for specific files. ex "*.jpg" to filter for images files
         :return:
         """
         wd = dir_path
-        pattern = os.path.join(wd, '*')
+        pattern = os.path.join(wd, file_filter)
         files = glob.glob(pattern)
         return files
 
