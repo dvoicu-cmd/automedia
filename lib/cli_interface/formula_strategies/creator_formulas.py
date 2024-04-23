@@ -26,6 +26,8 @@ print("-> Created DbNas Connection")
  
         """)
 
+        # ----------------- Canvas Options -----------------
+
         # Pick the canvas
         v2 = PickerPage(['NineBySixteen', 'SixteenByNine']).prompt("Pick a canvas size: width by height")
         if v2 == 0:  # 9x16
@@ -46,19 +48,18 @@ print("-> Created DbNas Connection")
         f.ap('# -------- Set up the edits --------')
         f.ap('edits = []')
 
+        # ----------------- Media Pool Selection Options -----------------
+
         # prompt for media_pool_ids
         text_content = InputPage("Input the media pool id for the story content (integer)").prompt()
-        num_text_content = InputPage("Input the number of stories to load from the media pool").prompt()
 
         f.ap(f"""
         
 media_pool_id = {text_content}
-num_story = {num_text_content}
 i = 1 
         """)
 
-
-        # Reads in the stories
+        # Read in at the minimum one text story.
         f.ap("""
 
 record = db.read_rand_media_file_of_pool(media_pool_id)
@@ -77,7 +78,13 @@ db.update_to_archived("media_files", record[0])
 
         """)
 
-        f.ap("""
+        # ----------------- Apply Multiple Stories -----------------
+
+        num_text_content = InputPage("Input the number of stories to load from the media pool").prompt()
+
+        f.ap(f"""
+        
+num_story = {num_text_content}
         
 while i <= num_story:
     add_record = db.read_rand_media_file_of_pool(media_pool_id)
@@ -95,8 +102,10 @@ while i <= num_story:
             
             """)
 
+        # ----------------- Minimum Video Length Options -----------------
+
         have_min_length = PickerPage(["Yes", "No"]).prompt("Do you wish to have a minimum duration for videos")
-        min_length = 0
+
         if have_min_length == 0:
             min_length = InputPage("Input the minimum length you wish to have for a video in min").prompt()
             f.ap(f"""
@@ -119,9 +128,11 @@ while OpenAiAPI.estimate_tts_time(story_text) < min_len:
 
             """)
 
+        # ----------------- Apply TTS option -----------------
 
         # Call some tts
         tts_name = InputPage("Give a tts voice: alloy, echo, fable, onyx, nova, or shimmer").prompt()
+
         f.ap(f"""
         
 # Call a tts
@@ -130,6 +141,8 @@ story_narration = OpenAiAPI().text_to_speech("{tts_name}", story_text, tts_tmp)
 narration = AttachAudio(manager.select_dir_one(tts_tmp))
         
         """)
+
+        # ----------------- Apply Subtitle Options -----------------
 
         max_word_per_line = InputPage("SUBS: Input the max words per line").prompt()
         font = InputPage("SUBS: Input a valid font: \n Recommended: Arial-Bold").prompt()
@@ -154,7 +167,8 @@ subs.set_max_word_per_line({max_word_per_line})
         """)
 
 
-        # Setting footage size.
+        # ----------------- Media Pool Background Footage Selection -----------------
+
         footage_id = InputPage("Input the media pool id from which you wish to pull background footage from").prompt()
 
         width = 0
@@ -195,12 +209,15 @@ while footage_duration_sum < narration.duration():
     footage_duration_sum += e.duration()  # add to sum
     
     """)
+
         if archive == 0:
             f.ap(f"""
             
     db.update_to_archived("media_files", record[0])
     
             """)
+
+        # ----------------- Final Application of Edits -----------------
 
         f.ap(f"""
         
@@ -219,7 +236,6 @@ base.apply_edits(edits, narration)
 print("-> Applied, Rendering Video:")
 
         """)
-
         f.ap("""
         
 # render footage to output dir
@@ -227,12 +243,43 @@ base.render(f"{output_tmp}/video.mp4")
 
         """)
 
+        # ----------------- Shortify Options -----------------
+
+        make_short = PickerPage(["Yes", "No"]).prompt("Do you wish to create a short form version of this video? \n"
+                                                     "This creates a copy of the video in a NineBySixteen format and is cropped to under a one minute")
+        if make_short:
+            f.ap("""
+            
+print("-> Creating Short")
+
+short_canvas = NineBySixteen('1080x1920')
+short_base = VideoSection(canvas=short_canvas)
+narration.set_start_and_end(0, 59)
+subs.set_max_word_per_line(2) # Force 2 words max per line for subs.
+short_base.apply_edits(edits, narration)
+short_base.render(f"{output_tmp}/short.mp4")
+            
+            """)
+
+
+        # ----------------- Thumbnail Options -----------------
+
         make_thumb = PickerPage(["Yes", "No"]).prompt("Do you wish to create a thumbnail with your content? \n"
                                                       "This only applies to YT uploads")
         if make_thumb == 0:
             base_image = InputPage("Input the media pool with your base thumbnail image").prompt()
             archive = PickerPage(["Yes", "No"]).prompt("Do you wish to archive the thumbnail after use?\n"
                                                        "Ensure that you have a constant supply of thumbnail images if you do.")
+            font = InputPage("Input the font you wish to use. \n"
+                             "Valid Options: simplex, plain, duplex, complex, triplex, small, s_simplex, s_complex").prompt()
+            highlights = PickerPage(["Highlights", "Random Highlights", "No Highlights"]).prompt("Do you wish for the thumbnail text to have highlights, randomized higlights, or no highlights at all.")
+            bg_color = None
+            if highlights == 0 or highlights == 1:
+                r = InputPage("Inputting the color value for the text highlights\n"
+                              "Input from 0 to 255 the Red Value").prompt()
+                g = InputPage("Input from 0 to 255 the Green Value").prompt()
+                b = InputPage("Input from 0 to 255 the Blue Value").prompt()
+                bg_color = (r, g, b)
 
             f.ap(f"""
             
@@ -249,29 +296,62 @@ thumb.place_img(img_location, (1920, 1080), (0, 0))
 
 # thumb text
 ttxt = ThumbnailText(story_text)
-ttxt.font = cv2.FONT_HERSHEY_PLAIN
-ttxt.position = (60, 540)
-ttxt.font_color = (0, 0, 0)
-ttxt.font_scale = 6
-ttxt.thickness = ttxt.font_scale * 2
-ttxt.limit_words(16, 5)  # Each line can hold about 38 characters. average word is 4.7 characters.
+ttxt.set_font_attr("{font}", 6, 12, (0, 0, 0))
+ttxt.set_pos(75, 540)
+ttxt.limit_words(15, 5)  # Each line can hold about 38 characters. average word is 4.7 characters.
+            """)
+
+            # Determining the thumbnail bg color settings
+            # Highlight all
+            if highlights == 0:
+                f.ap(f"""
+                
+# All Highlights Option Selected
+ttxt.set_background((50, 50), {bg_color}, 1)
 thumb.place_text(ttxt)
+                
+                """)
+
+            # Randomize Highlights
+            if highlights == 1:
+                f.ap(f"""
+
+# Randomized Highlights Option Selected
+ttxt.set_background((50, 50), {bg_color}, 1)
+thumb.place_text(ttxt, random_bg=True)
+
+                """)
+
+            if highlights == 2:
+                f.ap(f"""
+               
+# No Highlights Option Selected 
+thumb.place_text(ttxt)
+
+                """)
+
+            # Write that thumbnail file.
+            f.ap("""
+            
+# Write thumbnail file
+thumb.write(2, f"{output_tmp}", "thumbnail")
 
             """)
 
-            f.ap('# Write thumbnail')
-            f.ap('thumb.write(2, f"{output_tmp}", "thumbnail")')
             if archive == 0:
                 f.ap('db.update_to_archived("media_files", record[0])')
 
         elif make_thumb == 1:
             f.ap("""
             
-# Create post title (NO THUMBNAIL OPTION SELECTED)
+# NO THUMBNAIL OPTION SELECTED
+# Create post title
 ttxt = ThumbnailText(story_text)
 ttxt.limit_words(16, 5)
             
             """)
+
+        # ----------------- DB Upload Options -----------------
 
         description = InputPage("Input a generic description that will be posted on all your videos?").prompt()
         account_name = InputPage("Input the associated account name this content will be uploaded to").prompt()

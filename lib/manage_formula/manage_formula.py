@@ -12,7 +12,6 @@ class ManageFormula:
 # Common code and imports
 import os
 import datetime
-import cv2
 from context import lib
 from context import src
 from lib import *

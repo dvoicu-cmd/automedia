@@ -16,8 +16,6 @@ class ThumbnailText:
     bg_color: tuple  # (r,g,b) the rgb values of the background
     bg_opacity: float  # 0 to 1 float value determining the opacity
 
-
-
     def __init__(self, content):
         # Default values
         self.text_content = content

@@ -1,4 +1,5 @@
 import cv2
+import random
 import numpy as np
 from src.creator.canvas import *
 from src.creator.thumbnail.thumbnail_text import ThumbnailText
@@ -25,22 +26,29 @@ class MakeThumbnail:
 
         self.image[position[1]:y2, position[0]:x2] = additional_image
 
-    def place_text(self, t: ThumbnailText):
+    def place_text(self, t: ThumbnailText, random_bg=False):
         """
         Places text given the params from text object
         :param t:
+        :param random_bg: option to turn on sporadic background highlights. ie: randomly apply background highlights.
         :return:
         """
         lines = t.text_content.split('\n')
 
-        if t.has_bg:
-            for i, line in enumerate(lines):
+        # If you want to apply sporadic background highlights, have the random_bg variable turned on.
+        apply_bg = True
+
+        for i, line in enumerate(lines):
+            if random_bg:
+                apply_bg = random.choice([True, False])
+
+            if t.has_bg and apply_bg:
                 # https://aiphile.blogspot.com/2021/08/draw-transparent-shape-text-with.html
                 # Copy img
                 overlay = self.image.copy()
 
                 # Get text size
-                (t_w, t_h), _ = cv2.getTextSize(line, t.font, t.font_scale, t.thickness)
+                (t_w, t_h), _ = cv2.getTextSize(line, t.font, t.font_scale, t.font_thickness)
 
                 # get the text pos of the word
                 x = t.position[0]
@@ -57,13 +65,12 @@ class MakeThumbnail:
                 new_img = cv2.addWeighted(overlay, t.bg_opacity, self.image, 1 - t.bg_opacity, 0)
 
                 # Put in the text
-                cv2.putText(new_img, line, (t.position[0], t.position[1] + i*(t.font_scale*20)), t.font, t.font_scale, t.font_color, t.thickness)
+                cv2.putText(new_img, line, (t.position[0], t.position[1] + i*(t.font_scale*20)), t.font, t.font_scale, t.font_color, t.font_thickness)
 
                 self.image = new_img
-        else:
-            for i, line in enumerate(lines):
+            else:
                 # Just place the text
-                cv2.putText(self.image, line, (t.position[0], t.position[1] + i*(t.font_scale*20)), t.font, t.font_scale, t.font_color, t.thickness)
+                cv2.putText(self.image, line, (t.position[0], t.position[1] + i*(t.font_scale*20)), t.font, t.font_scale, t.font_color, t.font_thickness)
 
     @staticmethod
     def create_img_circle(img_path, radius):
