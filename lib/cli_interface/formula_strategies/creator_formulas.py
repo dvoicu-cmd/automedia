@@ -12,6 +12,15 @@ class CreatorFormulas:
 
     @staticmethod
     def generic_text_story():
+
+        # 1) Create dir manager and db connection
+        # 2) Set up video canvas
+        # 3) Set up story content, and multiple stories based on video length and/or specified minimum number of stories
+        # 4) Set background content
+        # 5) Glue it all together and render
+        # 6) Optional, make a short version of the video.
+        # 7) Optional, make a thumbnail.
+
         f = ManageFormula()
 
         service_name = InputPage("Give a title to the service:").prompt()
@@ -28,21 +37,7 @@ print("-> Created DbNas Connection")
 
         # ----------------- Canvas Options -----------------
 
-        # Pick the canvas
-        v2 = PickerPage(['NineBySixteen', 'SixteenByNine']).prompt("Pick a canvas size: width by height")
-        if v2 == 0:  # 9x16
-            v3 = PickerPage(['High Resolution: 1080x1920', 'Low Resolution: 720x1280']).prompt("Enter a resolution")
-            if v3 == 0:
-                f.ap("canvas = NineBySixteen('1080x1920')")
-            else:
-                f.ap("canvas = NineBySixteen('720x1280')")
-        if v2 == 1:  # 16x9
-            v3 = PickerPage(['High Resolution: 1080x1920', 'Low Resolution: 720x1280']).prompt("Enter a resolution")
-            if v3 == 0:
-                f.ap("canvas = SixteenByNine('1080x1920')")
-            else:
-                f.ap("canvas = SixteenByNine('720x1280')")
-        f.ap('base = VideoSection(canvas=canvas)')
+        CreatorFormulas.__canvas_options(f)
 
         # Set up edits
         f.ap('# -------- Set up the edits --------')
@@ -51,7 +46,7 @@ print("-> Created DbNas Connection")
         # ----------------- Media Pool Selection Options -----------------
 
         # prompt for media_pool_ids
-        text_content = InputPage("Input the media pool id for the story content (integer)").prompt()
+        text_content = InputPage("Input the media pool id for the story content").prompt()
 
         f.ap(f"""
         
@@ -128,94 +123,11 @@ while OpenAiAPI.estimate_tts_time(story_text) < min_len:
 
             """)
 
-        # ----------------- Apply TTS option -----------------
-
-        # Call some tts
-        tts_name = InputPage("Give a tts voice: alloy, echo, fable, onyx, nova, or shimmer").prompt()
-
-        f.ap(f"""
-        
-# Call a tts
-tts_tmp = manager.create_tmp_dir()
-story_narration = OpenAiAPI().text_to_speech("{tts_name}", story_text, tts_tmp)
-narration = AttachAudio(manager.select_dir_one(tts_tmp))
-        
-        """)
-
-        # ----------------- Apply Subtitle Options -----------------
-
-        max_word_per_line = InputPage("SUBS: Input the max words per line").prompt()
-        font = InputPage("SUBS: Input a valid font: \n Recommended: Arial-Bold").prompt()
-        font_size = InputPage("SUBS: Input a font size. \n Recommended: 96").prompt()
-        font_outline = InputPage("SUBS: Input size of font outline. \n Recommended: 4").prompt()
-        whisper_model = InputPage("SUBS: Enter transcription accuracy: tiny, base, small, medium, large \n Recommended medium for optimal render time and accuracy").prompt()
-
-
-        f.ap(f"""
-        
-# Create subtitles
-subs = AttachSubtitles(manager.select_dir_one(tts_tmp))
-txt = TextParam()
-txt.set_font('{font}', {font_size})
-txt.set_font_outline('black', {font_outline})
-txt.set_font_color('white', 'transparent')
-subs.set_text(txt)
-subs.set_whisper_model('{whisper_model}')
-subs.set_text_location(('center', 'center'))
-subs.set_max_word_per_line({max_word_per_line})
-        
-        """)
-
+        CreatorFormulas.__tts_and_subs(f)
 
         # ----------------- Media Pool Background Footage Selection -----------------
 
-        footage_id = InputPage("Input the media pool id from which you wish to pull background footage from").prompt()
-
-        width = 0
-        height = 0
-
-        expected_aspect = PickerPage(['NineBySixteen', 'SixteenByNine']).prompt(
-            "What is the expected aspect ratio of the media pool's content?")
-        if expected_aspect == 0:
-            width = 1920
-            height = 1080
-        elif expected_aspect == 1:
-            width = 1080
-            height = 1920
-
-        double_size = PickerPage(["Yes", "No"]).prompt("Do you wish to double the size of the background footage?")
-
-        if double_size == 0:
-            width = width * 2
-            height = height * 2
-        elif double_size == 1:
-            pass
-
-        archive = PickerPage(["Yes", "No"]).prompt("Do you wish to archive the footage after use?")
-
-        f.ap(f"""
-        
-# You need to count the length of the story narration as that is the edit that determines the duration.
-list_of_footage = []
-
-footage_duration_sum = 0
-while footage_duration_sum < narration.duration():
-    # Find way to stretch video vertically wider
-    record = db.read_rand_media_file_of_pool({footage_id})
-    e = AttachMuteVideo(db.nas_root() + "/" + record[1], ('center', 'center'))  # get random parkour footage
-    e.set_start_and_end(footage_duration_sum, e.duration())  # set times
-    e.resize({width}, {height})
-    list_of_footage.append(e)  # add the footage to the list
-    footage_duration_sum += e.duration()  # add to sum
-    
-    """)
-
-        if archive == 0:
-            f.ap(f"""
-            
-    db.update_to_archived("media_files", record[0])
-    
-            """)
+        CreatorFormulas.__background_footage_options(f)
 
         # ----------------- Final Application of Edits -----------------
 
@@ -261,7 +173,162 @@ short_base.render(f"{output_tmp}/short.mp4")
             
             """)
 
+        CreatorFormulas.__thumbnail_options(f)
 
+        # ----------------- DB Upload Options -----------------
+
+        description = InputPage("Input a generic description that will be posted on all your videos?").prompt()
+        account_name = InputPage("Input the associated account name this content will be uploaded to").prompt()
+
+        f.ap(f"""
+        
+print("-> Uploading to DbNas")
+print("-> File:")
+print(output_tmp)
+
+# upload to db nas
+db.create_content(output_tmp, ttxt.text_content, "{description}", "{account_name}")
+
+# clean the tmp dirs
+manager.cleanup(tts_tmp)
+        
+        """)
+
+        # Save the script
+        f.save_generated_script(service_name)
+
+        InputPage.clear()
+        print(f"Created Service File: {service_name}")
+        print(200)
+
+
+    @staticmethod
+    def cycling_images_story():
+
+        f = ManageFormula()
+
+        service_name = InputPage("Give a title to the service:").prompt()
+
+        f.save_generated_script(service_name)
+
+        print(f"Created Service File: {service_name}")
+        print(200)
+        pass
+
+    # --------------- Common Functionality ---------------
+    @staticmethod
+    def __canvas_options(f: ManageFormula):
+        # ----------------- Canvas Options -----------------
+
+        # Pick the canvas
+        v2 = PickerPage(['NineBySixteen', 'SixteenByNine']).prompt("Pick a canvas size: width by height")
+        if v2 == 0:  # 9x16
+            v3 = PickerPage(['High Resolution: 1080x1920', 'Low Resolution: 720x1280']).prompt("Enter a resolution")
+            if v3 == 0:
+                f.ap("canvas = NineBySixteen('1080x1920')")
+            else:
+                f.ap("canvas = NineBySixteen('720x1280')")
+        if v2 == 1:  # 16x9
+            v3 = PickerPage(['High Resolution: 1080x1920', 'Low Resolution: 720x1280']).prompt("Enter a resolution")
+            if v3 == 0:
+                f.ap("canvas = SixteenByNine('1080x1920')")
+            else:
+                f.ap("canvas = SixteenByNine('720x1280')")
+        f.ap('base = VideoSection(canvas=canvas)')
+
+    @staticmethod
+    def __tts_and_subs(f: ManageFormula):
+        # ----------------- Apply TTS option -----------------
+
+        # Call some tts
+        tts_name = InputPage("Give a tts voice: alloy, echo, fable, onyx, nova, or shimmer").prompt()
+
+        f.ap(f"""
+
+# Call a tts
+tts_tmp = manager.create_tmp_dir()
+story_narration = OpenAiAPI().text_to_speech("{tts_name}", story_text, tts_tmp)
+narration = AttachAudio(manager.select_dir_one(tts_tmp))
+
+            """)
+
+        # ----------------- Apply Subtitle Options -----------------
+
+        max_word_per_line = InputPage("SUBS: Input the max words per line").prompt()
+        font = InputPage("SUBS: Input a valid font: \n Recommended: Arial-Bold").prompt()
+        font_size = InputPage("SUBS: Input a font size. \n Recommended: 96").prompt()
+        font_outline = InputPage("SUBS: Input size of font outline. \n Recommended: 4").prompt()
+        whisper_model = InputPage(
+            "SUBS: Enter transcription accuracy: tiny, base, small, medium, large \n"
+            "Recommended medium for optimal render time and accuracy").prompt()
+
+        f.ap(f"""
+
+# Create subtitles
+subs = AttachSubtitles(manager.select_dir_one(tts_tmp))
+txt = TextParam()
+txt.set_font('{font}', {font_size})
+txt.set_font_outline('black', {font_outline})
+txt.set_font_color('white', 'transparent')
+subs.set_text(txt)
+subs.set_whisper_model('{whisper_model}')
+subs.set_text_location(('center', 'center'))
+subs.set_max_word_per_line({max_word_per_line})
+
+            """)
+
+
+    @staticmethod
+    def __background_footage_options(f: ManageFormula):
+        footage_id = InputPage("Input the media pool id from which you wish to pull background footage from").prompt()
+
+        width = 0
+        height = 0
+
+        expected_aspect = PickerPage(['NineBySixteen', 'SixteenByNine']).prompt(
+            "What is the expected aspect ratio of the media pool's content?")
+        if expected_aspect == 0:
+            width = 1920
+            height = 1080
+        elif expected_aspect == 1:
+            width = 1080
+            height = 1920
+
+        double_size = PickerPage(["Yes", "No"]).prompt("Do you wish to double the size of the background footage?")
+
+        if double_size == 0:
+            width = width * 2
+            height = height * 2
+        elif double_size == 1:
+            pass
+
+        archive = PickerPage(["Yes", "No"]).prompt("Do you wish to archive the footage after use?")
+
+        f.ap(f"""
+        
+# You need to count the length of the story narration as that is the edit that determines the duration.
+list_of_footage = []
+
+footage_duration_sum = 0
+while footage_duration_sum < narration.duration():
+    record = db.read_rand_media_file_of_pool({footage_id})
+    e = AttachMuteVideo(db.nas_root() + "/" + record[1], ('center', 'center'))
+    e.set_start_and_end(footage_duration_sum, e.duration())
+    e.resize({width}, {height})
+    list_of_footage.append(e)
+    footage_duration_sum += e.duration()
+    
+    """)
+
+        if archive == 0:
+            f.ap(f"""
+            
+    db.update_to_archived("media_files", record[0])
+    
+            """)
+
+    @staticmethod
+    def __thumbnail_options(f: ManageFormula):
         # ----------------- Thumbnail Options -----------------
 
         make_thumb = PickerPage(["Yes", "No"]).prompt("Do you wish to create a thumbnail with your content? \n"
@@ -278,6 +345,18 @@ short_base.render(f"{output_tmp}/short.mp4")
                                    "Recommended: 6").prompt()
             font_thickness = InputPage("Input the font thickness you wish to use. (Integer)\n"
                                        "Recommended: 12").prompt()
+            font_pos_x = InputPage("Input the x pixel position you wish to place the text\n"
+                                   "Text is placed from the top left corner of the first character\n"
+                                   "Recommended for reddit thumbnails: 75").prompt()
+            font_pos_y = InputPage("Input the y pixel position you wish to place the text\n"
+                                   "Recommended for reddit thumbnails: 540").prompt()
+            # The maximum total number of words shown in the thumbnail text
+            max_total_words = InputPage("Input the maximum number of words you wish to have in the thumbnail text.\n"
+                                        "Recommended for reddit thumbnails: 15").prompt()
+            # Each line can hold 38ish characters in reddit thumbnails I've tested. The average word is 4.7 characters.
+            words_per_line = InputPage("Input the maximum number of words you wish to have per line in the thumbnail text\n"
+                                       "Recommended for reddit thumbnails: 5").prompt()
+
             highlights = PickerPage(["Highlights", "Random Highlights", "No Highlights"]).prompt("Do you wish for the thumbnail text to have highlights, randomized higlights, or no highlights at all.")
             bg_color = None
             if highlights == 0 or highlights == 1:
@@ -303,8 +382,8 @@ thumb.place_img(img_location, (1920, 1080), (0, 0))
 # thumb text
 ttxt = ThumbnailText(story_text)
 ttxt.set_font_attr("{font}", {font_scale}, {font_thickness}, (0, 0, 0))
-ttxt.set_pos(75, 540)
-ttxt.limit_words(15, 5)  # Each line can hold about 38 characters. average word is 4.7 characters.
+ttxt.set_pos({font_pos_x}, {font_pos_y})
+ttxt.limit_words({max_total_words}, {words_per_line})
             """)
 
             # Determining the thumbnail bg color settings
@@ -356,35 +435,4 @@ ttxt = ThumbnailText(story_text)
 ttxt.limit_words(16, 5)
             
             """)
-
-        # ----------------- DB Upload Options -----------------
-
-        description = InputPage("Input a generic description that will be posted on all your videos?").prompt()
-        account_name = InputPage("Input the associated account name this content will be uploaded to").prompt()
-
-        f.ap(f"""
-        
-print("-> Uploading to DbNas")
-print("-> File:")
-print(output_tmp)
-
-# upload to db nas
-db.create_content(output_tmp, ttxt.text_content, "{description}", "{account_name}")
-
-# clean the tmp dirs
-manager.cleanup(tts_tmp)
-        
-        """)
-
-        # Save the script
-        f.save_generated_script(service_name)
-
-        InputPage.clear()
-        print(f"Created Service File: {service_name}")
-        print(200)
-
-
-    def cycling_images_story(self):
-
-        pass
 

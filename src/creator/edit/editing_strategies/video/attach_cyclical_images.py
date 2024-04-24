@@ -7,10 +7,7 @@ from lib.manage_directory_structure.dir_manager import DirManager
 
 class AttachCyclicalImages(EndStartEdit):
 
-    def __init__(self, source_dir: str, duration_between_img: int, location: tuple):
-        # Get the images
-        images = DirManager.select_dir(source_dir, file_filter="*.jpg")
-
+    def __init__(self, images: list, duration_between_img: int, location: tuple):
         # Then populate a list containing the duration between each img in sec.
         duration_between = []
         for i in range(len(images)):
@@ -20,8 +17,8 @@ class AttachCyclicalImages(EndStartEdit):
         self.location = location
 
     def apply(self, composite_clip: CompositeVideoClip) -> CompositeVideoClip:
-        # You need some sort of looping mechanism. Cuz rn it will just play the seq once and then it will be done.
         self.image_seq = self.image_seq.set_position(self.location)  # apply location
+        self.image_seq = self.image_seq.fx(loop)  # apply loop effect
         output = CompositeVideoClip([composite_clip, self.image_seq])
         return output
 

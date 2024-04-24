@@ -21,8 +21,10 @@ from .editing_strategies.video.attach_looping_video import AttachLoopingVideo
 from .editing_strategies.video.attach_mute_video import AttachMuteVideo
 from .editing_strategies.video.attach_pop_in_video import AttachPopInVideo
 from .editing_strategies.video.attach_video import AttachVideo
+from .editing_strategies.video.attach_cyclical_images import AttachCyclicalImages
 
 
 
 __all__ = ['AttachBlur', 'AttachSubtitles', 'TextParam', 'AttachAudio', 'AttachVideoAudio', 'AttachLoopingAudio',
-           'AttachImage', 'AttachLoopingVideo', 'AttachMuteVideo', 'AttachPopInVideo', 'AttachVideo']
+           'AttachImage', 'AttachLoopingVideo', 'AttachMuteVideo', 'AttachPopInVideo', 'AttachVideo',
+           'AttachCyclicalImages']

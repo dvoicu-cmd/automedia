@@ -12,7 +12,7 @@ class AttachLoopingVideo(EndStartEdit):
 
     def apply(self, composite_clip: CompositeVideoClip) -> CompositeVideoClip:
         self.attached_video = self.attached_video.set_position(self.location)  # apply location
-        self.attached_video = self.attached_video.fx(loop, duration=self.duration())  # apply loop
+        self.attached_video = self.attached_video.fx(loop)  # apply loop
         output = CompositeVideoClip([composite_clip, self.attached_video])
         return output
 
