@@ -16,6 +16,9 @@ class AttachCyclicalImages(EndStartEdit):
         self.image_seq = ImageSequenceClip(images, durations=duration_between)
         self.location = location
 
+    def set_location(self, location: tuple):
+        self.location = location
+
     def apply(self, composite_clip: CompositeVideoClip) -> CompositeVideoClip:
         self.image_seq = self.image_seq.set_position(self.location)  # apply location
         self.image_seq = self.image_seq.fx(loop)  # apply loop effect

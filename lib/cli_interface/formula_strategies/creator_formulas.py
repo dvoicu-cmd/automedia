@@ -126,7 +126,7 @@ while OpenAiAPI.estimate_tts_time(story_text) < min_len:
 
         # ----------------- 6) Final Application of Edits -----------------
 
-        f.ap(f"""
+        f.ap("""
         
 print("-> Got Edits")
 
@@ -141,11 +141,6 @@ print("-> Applying Edits")
 base.apply_edits(edits, narration)
 
 print("-> Applied, Rendering Video:")
-
-        """)
-        f.ap("""
-        
-# render footage to output dir
 base.render(f"{output_tmp}/video.mp4")
 
         """)
@@ -162,10 +157,14 @@ print("-> Creating Short")
 short_canvas = NineBySixteen('1080x1920')
 short_base = VideoSection(canvas=short_canvas)
 narration.set_start_and_end(0, 59)
-subs.set_max_word_per_line(2) # Force 2 words max per line for subs.
+subs.set_max_word_per_line(2)
+
+print("-> Applying Edits")
 short_base.apply_edits(edits, narration)
+
+print("-> Applied, Rendering Video:")
 short_base.render(f"{output_tmp}/short.mp4")
-            
+
             """)
 
         # ----------------- 8) Thumbnail Options -----------------
@@ -263,41 +262,71 @@ db.update_to_archived("media_files", record[0])
 
         # ----------------- 6) Set a cyclical image edit and place it -----------------
 
-        f.ap("""
+        between_time = InputPage("Input the time in seconds, how long each image will be shown for.")
+        img_x = InputPage("Input the x position of the images.\n"
+                          "Your input can be a number or a string like: \"center\", \"top\", \"bottom\", \"left\", \"right\"").prompt()
+        img_y = InputPage("Input the y position of the images.\n"
+                          "Your input can be a number or a string like: \"center\", \"top\", \"bottom\", \"left\", \"right\"").prompt()
+
+        f.ap(f"""
         
 # Make the image cycle
 image_locations = manager.select_dir(content_dir, file_filter="*.jpg")
-img_cycle = AttachCyclicalImages(image_locations, 2, (540, 960))
+img_cycle = AttachCyclicalImages(image_locations, {between_time}, ({img_x}, {img_y}))
 
         """)
 
         # ----------------- 7) Glue it all together and render -----------------
 
         f.ap("""
+        
 # append the edits
 edits.extend(list_of_footage)
-edits.append(img_cycle)
 edits.append(narration)
+edits.append(img_cycle)
 edits.append(subs)
 
 print("-> Applying Edits")
 base.apply_edits(edits, narration)
 
 print("-> Applied, Rendering Video:")
-        """)
-        f.ap("""
-        
-# render footage to output dir
 base.render(f"{output_tmp}/video.mp4")
 
         """)
 
         # ----------------- 8) Optional, make a short version of the video. -----------------
 
-        f.ap("""
+        make_short = PickerPage(["Yes", "No"]).prompt("Do you wish to create a short form version of this video? \n"
+                                                      "This creates a copy of the video in a NineBySixteen format and is cropped to under a one minute")
+        if make_short == 0:
+            f.ap("""
 
+print("-> Creating Short Version")
+# Remove the narration, img_cycle, and subs to modify them for a short version.
+edits.pop()
+edits.pop()
+edits.pop()
 
-        """)
+# Make a short canvas
+short_canvas = NineBySixteen('1080x1920')
+short_base = VideoSection(canvas=short_canvas)
+
+# Force everything to the center and reduce the narration to under one min
+narration.set_start_and_end(0, 59)
+img_cycle.set_location('center', 'center')
+subs.set_location('center', 'center')
+subs.set_max_word_per_line(2)
+
+print("-> Applying Edits")
+edits.append(narration)
+edits.append(img_cycle)
+edits.append(subs)
+short_base.apply_edits(edits, narration)
+
+print("-> Applied, Rendering Video:")
+short_base.render(f"{output_tmp}/short.mp4")
+
+            """)
 
         # ----------------- 9) Optional, make a thumbnail. -----------------
 
@@ -362,11 +391,11 @@ print("-> Created DbNas Connection")
             else:
                 f.ap("canvas = NineBySixteen('720x1280')")
         if v2 == 1:  # 16x9
-            v3 = PickerPage(['High Resolution: 1080x1920', 'Low Resolution: 720x1280']).prompt("Enter a resolution")
+            v3 = PickerPage(['High Resolution: 1920x1080', 'Low Resolution: 1280x720']).prompt("Enter a resolution")
             if v3 == 0:
-                f.ap("canvas = SixteenByNine('1080x1920')")
+                f.ap("canvas = SixteenByNine('1920x1080')")
             else:
-                f.ap("canvas = SixteenByNine('720x1280')")
+                f.ap("canvas = SixteenByNine('1280x720')")
         f.ap('base = VideoSection(canvas=canvas)')
 
     @staticmethod
@@ -389,6 +418,10 @@ narration = AttachAudio(manager.select_dir_one(tts_tmp))
         font = InputPage("SUBS: Input a valid font: \n Recommended: Arial-Bold").prompt()
         font_size = InputPage("SUBS: Input a font size. \n Recommended: 96").prompt()
         font_outline = InputPage("SUBS: Input size of font outline. \n Recommended: 4").prompt()
+        font_loc_x = InputPage("SUBS: Input the x position of the subtitles.\n"
+                               "Your input can be a number or a string like: \"center\", \"top\", \"bottom\", \"left\", \"right\"").prompt()
+        font_loc_y = InputPage("SUBS: Input the y position of the subtitles.\n"
+                               "Your input can be a number or a string like: \"center\", \"top\", \"bottom\", \"left\", \"right\"").prompt()
         whisper_model = InputPage(
             "SUBS: Enter transcription accuracy: tiny, base, small, medium, large \n"
             "Recommended medium for optimal render time and accuracy").prompt()
@@ -403,7 +436,7 @@ txt.set_font_outline('black', {font_outline})
 txt.set_font_color('white', 'transparent')
 subs.set_text(txt)
 subs.set_whisper_model('{whisper_model}')
-subs.set_text_location(('center', 'center'))
+subs.set_text_location(({font_loc_x}, {font_loc_y}))
 subs.set_max_word_per_line({max_word_per_line})
 
             """)
