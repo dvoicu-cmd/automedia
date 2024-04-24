@@ -13,37 +13,30 @@ class CreatorFormulas:
     @staticmethod
     def generic_text_story():
 
-        # 1) Create dir manager and db connection
+        # Steps in a generic multi story text formula
+        # 1) Create dir manager, db connection, and edits list
         # 2) Set up video canvas
         # 3) Set up story content, and multiple stories based on video length and/or specified minimum number of stories
-        # 4) Set background content
-        # 5) Glue it all together and render
-        # 6) Optional, make a short version of the video.
-        # 7) Optional, make a thumbnail.
+        # 4) Set up subtitles and narration
+        # 5) Set background content
+        # 6) Glue it all together and render
+        # 7) Optional, make a short version of the video.
+        # 8) Optional, make a thumbnail.
+        # 9) Upload it to db
 
         f = ManageFormula()
 
         service_name = InputPage("Give a title to the service:").prompt()
 
-        f.ap("""
+        # ----------------- 1) init -----------------
 
-manager = CreatorDirManager()
-output_tmp = manager.create_tmp_dir("am_i_the_a_hole_upload")
-db = DbNasConnection()
+        CreatorFormulas.__init_formula(f)
 
-print("-> Created DbNas Connection")
- 
-        """)
-
-        # ----------------- Canvas Options -----------------
+        # ----------------- 2) Canvas Options -----------------
 
         CreatorFormulas.__canvas_options(f)
 
-        # Set up edits
-        f.ap('# -------- Set up the edits --------')
-        f.ap('edits = []')
-
-        # ----------------- Media Pool Selection Options -----------------
+        # ----------------- 3) Media Pool Selection Options -----------------
 
         # prompt for media_pool_ids
         text_content = InputPage("Input the media pool id for the story content").prompt()
@@ -73,7 +66,7 @@ db.update_to_archived("media_files", record[0])
 
         """)
 
-        # ----------------- Apply Multiple Stories -----------------
+        # ----------------- 3) Apply Multiple Stories -----------------
 
         num_text_content = InputPage("Input the number of stories to load from the media pool").prompt()
 
@@ -97,7 +90,7 @@ while i <= num_story:
             
             """)
 
-        # ----------------- Minimum Video Length Options -----------------
+        # ----------------- 3) Minimum Video Length Options -----------------
 
         have_min_length = PickerPage(["Yes", "No"]).prompt("Do you wish to have a minimum duration for videos")
 
@@ -123,13 +116,15 @@ while OpenAiAPI.estimate_tts_time(story_text) < min_len:
 
             """)
 
+        # ----------------- 4) Apply Subtitles -----------------
+
         CreatorFormulas.__tts_and_subs(f)
 
-        # ----------------- Media Pool Background Footage Selection -----------------
+        # ----------------- 5) Media Pool Background Footage Selection -----------------
 
         CreatorFormulas.__background_footage_options(f)
 
-        # ----------------- Final Application of Edits -----------------
+        # ----------------- 6) Final Application of Edits -----------------
 
         f.ap(f"""
         
@@ -155,7 +150,7 @@ base.render(f"{output_tmp}/video.mp4")
 
         """)
 
-        # ----------------- Shortify Options -----------------
+        # ----------------- 7) Shortify Options -----------------
 
         make_short = PickerPage(["Yes", "No"]).prompt("Do you wish to create a short form version of this video? \n"
                                                      "This creates a copy of the video in a NineBySixteen format and is cropped to under a one minute")
@@ -173,9 +168,11 @@ short_base.render(f"{output_tmp}/short.mp4")
             
             """)
 
+        # ----------------- 8) Thumbnail Options -----------------
+
         CreatorFormulas.__thumbnail_options(f)
 
-        # ----------------- DB Upload Options -----------------
+        # ----------------- 9) DB Upload Options -----------------
 
         description = InputPage("Input a generic description that will be posted on all your videos?").prompt()
         account_name = InputPage("Input the associated account name this content will be uploaded to").prompt()
@@ -205,9 +202,125 @@ manager.cleanup(tts_tmp)
     @staticmethod
     def cycling_images_story():
 
+        # 1) Create dir manager, db connection, and edits list
+        # 2) Set up video canvas
+        # 3) Set up story content
+        # 4) Set up narration and subtitles
+        # 5) Set background content
+        # 6) Set a cyclical image edit and place it
+        # 7) Glue it all together and render
+        # 8) Optional, make a short version of the video.
+        # 9) Optional, make a thumbnail.
+        # 10) Upload to db
+
         f = ManageFormula()
 
         service_name = InputPage("Give a title to the service:").prompt()
+
+        # ----------------- 1) Init -----------------
+
+        CreatorFormulas.__init_formula(f)
+
+        # ----------------- 2) Canvas Options -----------------
+
+        CreatorFormulas.__canvas_options(f)
+
+        # ----------------- 3) Set up story content -----------------
+
+        content = InputPage("Input the media pool id for the text with image content").prompt()
+        archive = PickerPage(["Yes", "No"]).prompt("Do you wish to archive the content after use?")
+
+        f.ap(f"""
+
+media_pool_id = {content}
+        
+            """)
+
+        f.ap("""
+        
+record = db.read_rand_media_file_of_pool(media_pool_id)
+content_dir = manager.read_text(db.nas_root() + "/" + record[1])
+story_text_file = f"{content_dir}/text.txt"
+story_text = manager.read_text(story_text_file)
+        
+        """)
+
+        if archive == 0:
+            f.ap("""
+
+# Archive option selected
+db.update_to_archived("media_files", record[0])
+
+                """)
+
+        # ----------------- 4) Set up narration and subtitles -----------------
+
+        CreatorFormulas.__tts_and_subs(f)
+
+        # ----------------- 5) Set background content -----------------
+
+        CreatorFormulas.__background_footage_options(f)
+
+        # ----------------- 6) Set a cyclical image edit and place it -----------------
+
+        f.ap("""
+        
+# Make the image cycle
+image_locations = manager.select_dir(content_dir, file_filter="*.jpg")
+img_cycle = AttachCyclicalImages(image_locations, 2, (540, 960))
+
+        """)
+
+        # ----------------- 7) Glue it all together and render -----------------
+
+        f.ap("""
+# append the edits
+edits.extend(list_of_footage)
+edits.append(img_cycle)
+edits.append(narration)
+edits.append(subs)
+
+print("-> Applying Edits")
+base.apply_edits(edits, narration)
+
+print("-> Applied, Rendering Video:")
+        """)
+        f.ap("""
+        
+# render footage to output dir
+base.render(f"{output_tmp}/video.mp4")
+
+        """)
+
+        # ----------------- 8) Optional, make a short version of the video. -----------------
+
+        f.ap("""
+
+
+        """)
+
+        # ----------------- 9) Optional, make a thumbnail. -----------------
+
+        CreatorFormulas.__thumbnail_options(f)
+
+        # ----------------- 10) Upload to db. -----------------
+        description = InputPage("Input a generic description that will be posted on all your videos?").prompt()
+        account_name = InputPage("Input the associated account name this content will be uploaded to").prompt()
+
+        f.ap(f"""
+
+print("-> Uploading to DbNas")
+print("-> File:")
+print(output_tmp)
+
+# upload to db nas
+db.create_content(output_tmp, ttxt.text_content, "{description}", "{account_name}")
+
+# clean the tmp dirs
+ manager.cleanup(tts_tmp)
+
+            """)
+
 
         f.save_generated_script(service_name)
 
@@ -215,10 +328,30 @@ manager.cleanup(tts_tmp)
         print(200)
         pass
 
-    # --------------- Common Functionality ---------------
+
+
+    # ----------------------------------------------------------------------------------
+    # ------------------------------ Common Functionality ------------------------------
+    # ----------------------------------------------------------------------------------
+
+
+    @staticmethod
+    def __init_formula(f: ManageFormula):
+        f.ap("""
+
+manager = CreatorDirManager()
+output_tmp = manager.create_tmp_dir("am_i_the_a_hole_upload")
+db = DbNasConnection()
+
+print("-> Created DbNas Connection")
+ 
+        """)
+        f.ap('# -------- Set up the edits --------')
+        f.ap('edits = []')
+
+
     @staticmethod
     def __canvas_options(f: ManageFormula):
-        # ----------------- Canvas Options -----------------
 
         # Pick the canvas
         v2 = PickerPage(['NineBySixteen', 'SixteenByNine']).prompt("Pick a canvas size: width by height")
@@ -238,9 +371,8 @@ manager.cleanup(tts_tmp)
 
     @staticmethod
     def __tts_and_subs(f: ManageFormula):
-        # ----------------- Apply TTS option -----------------
 
-        # Call some tts
+        # Apply TTS Options
         tts_name = InputPage("Give a tts voice: alloy, echo, fable, onyx, nova, or shimmer").prompt()
 
         f.ap(f"""
@@ -252,8 +384,7 @@ narration = AttachAudio(manager.select_dir_one(tts_tmp))
 
             """)
 
-        # ----------------- Apply Subtitle Options -----------------
-
+        # Apply Subtitle Options
         max_word_per_line = InputPage("SUBS: Input the max words per line").prompt()
         font = InputPage("SUBS: Input a valid font: \n Recommended: Arial-Bold").prompt()
         font_size = InputPage("SUBS: Input a font size. \n Recommended: 96").prompt()
@@ -276,7 +407,6 @@ subs.set_text_location(('center', 'center'))
 subs.set_max_word_per_line({max_word_per_line})
 
             """)
-
 
     @staticmethod
     def __background_footage_options(f: ManageFormula):
