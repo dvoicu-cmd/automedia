@@ -236,13 +236,13 @@ media_pool_id = {content}
             """)
 
         f.ap("""
-        
+
 record = db.read_rand_media_file_of_pool(media_pool_id)
-content_dir = manager.read_text(db.nas_root() + "/" + record[1])
-story_text_file = f"{content_dir}/text.txt"
-story_text = manager.read_text(story_text_file)
+content_dir = db.nas_root() + "/" + record[1]
+story_text = manager.read_text(db.nas_root() + "/" + record[1] + "/text.txt")
+image_locations = manager.select_dir(content_dir, file_filter="*.jpg")
         
-        """)
+            """)
 
         if archive == 0:
             f.ap("""
@@ -262,19 +262,46 @@ db.update_to_archived("media_files", record[0])
 
         # ----------------- 6) Set a cyclical image edit and place it -----------------
 
-        between_time = InputPage("Input the time in seconds, how long each image will be shown for.")
+        between_time = InputPage("Input the time in seconds, how long each image will be shown for.").prompt()
         img_x = InputPage("Input the x position of the images.\n"
                           "Your input can be a number or a string like: \"center\", \"top\", \"bottom\", \"left\", \"right\"").prompt()
         img_y = InputPage("Input the y position of the images.\n"
                           "Your input can be a number or a string like: \"center\", \"top\", \"bottom\", \"left\", \"right\"").prompt()
 
-        f.ap(f"""
+        if isinstance(img_x, int) and isinstance(img_y, int):
+            f.ap(f"""
         
 # Make the image cycle
-image_locations = manager.select_dir(content_dir, file_filter="*.jpg")
 img_cycle = AttachCyclicalImages(image_locations, {between_time}, ({img_x}, {img_y}))
 
-        """)
+            """)
+
+        elif isinstance(img_y, int):
+
+            f.ap(f"""
+        
+# Make the image cycle
+img_cycle = AttachCyclicalImages(image_locations, {between_time}, ("{img_x}", {img_y}))
+
+            """)
+
+            pass
+
+        elif isinstance(img_x, int):
+            f.ap(f"""
+        
+# Make the image cycle
+img_cycle = AttachCyclicalImages(image_locations, {between_time}, ({img_x}, "{img_y}"))
+
+            """)
+
+        else:
+            f.ap(f"""
+        
+# Make the image cycle
+img_cycle = AttachCyclicalImages(image_locations, {between_time}, ("{img_x}", "{img_y}"))
+
+            """)
 
         # ----------------- 7) Glue it all together and render -----------------
 
@@ -313,8 +340,8 @@ short_base = VideoSection(canvas=short_canvas)
 
 # Force everything to the center and reduce the narration to under one min
 narration.set_start_and_end(0, 59)
-img_cycle.set_location('center', 'center')
-subs.set_location('center', 'center')
+img_cycle.set_location(('center', 'center'))
+subs.set_text_location(('center', 'center'))
 subs.set_max_word_per_line(2)
 
 print("-> Applying Edits")
@@ -346,7 +373,7 @@ print(output_tmp)
 db.create_content(output_tmp, ttxt.text_content, "{description}", "{account_name}")
 
 # clean the tmp dirs
- manager.cleanup(tts_tmp)
+manager.cleanup(tts_tmp)
 
             """)
 
@@ -369,7 +396,7 @@ db.create_content(output_tmp, ttxt.text_content, "{description}", "{account_name
         f.ap("""
 
 manager = CreatorDirManager()
-output_tmp = manager.create_tmp_dir("am_i_the_a_hole_upload")
+output_tmp = manager.create_tmp_dir()
 db = DbNasConnection()
 
 print("-> Created DbNas Connection")
@@ -407,6 +434,7 @@ print("-> Created DbNas Connection")
         f.ap(f"""
 
 # Call a tts
+manager.new_rand_id()
 tts_tmp = manager.create_tmp_dir()
 story_narration = OpenAiAPI().text_to_speech("{tts_name}", story_text, tts_tmp)
 narration = AttachAudio(manager.select_dir_one(tts_tmp))
@@ -436,10 +464,19 @@ txt.set_font_outline('black', {font_outline})
 txt.set_font_color('white', 'transparent')
 subs.set_text(txt)
 subs.set_whisper_model('{whisper_model}')
-subs.set_text_location(({font_loc_x}, {font_loc_y}))
 subs.set_max_word_per_line({max_word_per_line})
 
             """)
+
+        if isinstance(font_loc_x, int) and isinstance(font_loc_y, int):
+            f.ap(f"subs.set_text_location(({font_loc_x}, {font_loc_y}))")
+        elif isinstance(font_loc_y, int):
+            f.ap(f"subs.set_text_location((\"{font_loc_x}\", {font_loc_y}))")
+        elif isinstance(font_loc_x, int):
+            f.ap(f"subs.set_text_location(({font_loc_x}, \"{font_loc_y}))\"")
+        else:
+            f.ap(f"subs.set_text_location((\"{font_loc_x}\", \"{font_loc_y}\"))")
+
 
     @staticmethod
     def __background_footage_options(f: ManageFormula):

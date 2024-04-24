@@ -125,7 +125,8 @@ manager.cleanup(tmp)
                               "The text data will be fed into the stable diffusion model and give an image in relation to your text data.").prompt()
         number_of_prompts = InputPage("Input the number of prompts you wish to have in a scrape").prompt()
         number_of_images = InputPage("Input the number of images you wish to generate per prompt").prompt()
-        media_pool = InputPage("Input the corresponding media_pool").prompt()
+        media_pool = InputPage("Input the corresponding name of the media_pool you wish to upload your scrapes to.\n"
+                               "ex: \"dummy\"").prompt()
 
         f.ap(f"""
 
@@ -193,8 +194,11 @@ for prompt in prompts:
 for prompt_dir in prompt_dirs:
     print("-----------------------")
     print(prompt_dir)
-    db.create_media_file(prompt_dir, "other", os.path.basename(prompt_dir), desc, media_pool)
-    manager.cleanup(prompt_dir)
+    db.create_media_file(prompt_dir, "image", os.path.basename(prompt_dir), desc, media_pool)
+    try: # Just in case there is stuff left over.
+        manager.cleanup(prompt_dir)
+    except:
+        pass
 
         """)
 

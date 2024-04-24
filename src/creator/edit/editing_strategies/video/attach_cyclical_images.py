@@ -10,10 +10,13 @@ class AttachCyclicalImages(EndStartEdit):
     def __init__(self, images: list, duration_between_img: int, location: tuple):
         # Then populate a list containing the duration between each img in sec.
         duration_between = []
+        duration_total = 0
         for i in range(len(images)):
             duration_between.append(duration_between_img)
+            duration_total = duration_total + duration_between_img
 
         self.image_seq = ImageSequenceClip(images, durations=duration_between)
+        self.image_seq = self.image_seq.set_duration(duration_total)
         self.location = location
 
     def set_location(self, location: tuple):
@@ -21,6 +24,8 @@ class AttachCyclicalImages(EndStartEdit):
 
     def apply(self, composite_clip: CompositeVideoClip) -> CompositeVideoClip:
         self.image_seq = self.image_seq.set_position(self.location)  # apply location
+        print("DURATION for cycles")
+        print(self.duration())
         self.image_seq = self.image_seq.fx(loop)  # apply loop effect
         output = CompositeVideoClip([composite_clip, self.image_seq])
         return output
