@@ -30,7 +30,7 @@ class CreatorFormulas:
 
         # ----------------- 1) init -----------------
 
-        CreatorFormulas.__init_formula(f)
+        CreatorFormulas.__init_formula(f, name=service_name)
 
         # ----------------- 2) Canvas Options -----------------
 
@@ -218,7 +218,7 @@ manager.cleanup(tts_tmp)
 
         # ----------------- 1) Init -----------------
 
-        CreatorFormulas.__init_formula(f)
+        CreatorFormulas.__init_formula(f, name=service_name)
 
         # ----------------- 2) Canvas Options -----------------
 
@@ -264,9 +264,9 @@ db.update_to_archived("media_files", record[0])
 
         between_time = InputPage("Input the time in seconds, how long each image will be shown for.").prompt()
         img_x = InputPage("Input the x position of the images.\n"
-                          "Your input can be a number or a string like: \"center\", \"top\", \"bottom\", \"left\", \"right\"").prompt()
+                          "Your input can be a number or a string like: \"center\", \"top\", \"bottom\"").prompt()
         img_y = InputPage("Input the y position of the images.\n"
-                          "Your input can be a number or a string like: \"center\", \"top\", \"bottom\", \"left\", \"right\"").prompt()
+                          "Your input can be a number or a string like: \"center\", \"top\", \"bottom\"").prompt()
 
         if isinstance(img_x, int) and isinstance(img_y, int):
             f.ap(f"""
@@ -392,11 +392,11 @@ manager.cleanup(tts_tmp)
 
 
     @staticmethod
-    def __init_formula(f: ManageFormula):
-        f.ap("""
+    def __init_formula(f: ManageFormula, name="_"):
+        f.ap(f"""
 
 manager = CreatorDirManager()
-output_tmp = manager.create_tmp_dir()
+output_tmp = manager.create_tmp_dir("{name}") 
 db = DbNasConnection()
 
 print("-> Created DbNas Connection")
@@ -447,9 +447,9 @@ narration = AttachAudio(manager.select_dir_one(tts_tmp))
         font_size = InputPage("SUBS: Input a font size. \n Recommended: 96").prompt()
         font_outline = InputPage("SUBS: Input size of font outline. \n Recommended: 4").prompt()
         font_loc_x = InputPage("SUBS: Input the x position of the subtitles.\n"
-                               "Your input can be a number or a string like: \"center\", \"top\", \"bottom\", \"left\", \"right\"").prompt()
+                               "Your input can be a number or a string like: \"center\", \"top\", \"bottom\"").prompt()
         font_loc_y = InputPage("SUBS: Input the y position of the subtitles.\n"
-                               "Your input can be a number or a string like: \"center\", \"top\", \"bottom\", \"left\", \"right\"").prompt()
+                               "Your input can be a number or a string like: \"center\", \"top\", \"bottom\"").prompt()
         whisper_model = InputPage(
             "SUBS: Enter transcription accuracy: tiny, base, small, medium, large \n"
             "Recommended medium for optimal render time and accuracy").prompt()
