@@ -25,22 +25,27 @@ def verify_cfg():
             InputPage("Input the database username this node will use:"),
             InputPage("Input the password for the user:"),
             InputPage("Input the name of the database:"),
-            InputPage("Input the root file mount location for the nas on this machine: \n"
-                      "Typically the default location is /mnt")
+            # yeah, you don't need this as the make file sets the files to /mnt
+            # InputPage("Input the root file mount location for the nas on this machine: \n"
+            #           "Typically the default location is /mnt")
         ]
 
         result_list = []
         for page in in_list:
-            answer = page.prompt()
+            answer = str(page.prompt())
             result_list.append(answer)
+
+        result_list.append("/mnt")
 
         cfg_db = DbNasConnection()
         cfg_db.make_connection_config(*result_list)
 
     if not os.path.exists('paths.cfg'):
-        service_path = InputPage("There is no configuration set up for managing services. \n"
-                                 "Input the absolute path of the cron system directory. \n"
-                                 "Typically on debian systems this would be: /etc/cron.d").prompt()
+        # eh, this ain't quite needed to prompt for cron's location.
+        # service_path = InputPage("There is no configuration set up for managing services. \n"
+        #                          "Input the absolute path of the cron system directory. \n"
+        #                          "Typically on debian systems this would be: /etc/cron.d").prompt()
+        service_path = "/etc/cron.d"
 
         cwd = os.getcwd()  # save current working directory
         # assuming at, py_services
