@@ -24,10 +24,13 @@ class AttachCyclicalImages(EndStartEdit):
 
     def apply(self, composite_clip: CompositeVideoClip) -> CompositeVideoClip:
         self.image_seq = self.image_seq.set_position(self.location)  # apply location
-        print("DURATION for cycles")
-        print(self.duration())
-        self.image_seq = self.image_seq.fx(loop)  # apply loop effect
+        # Applying the loop effect sets the duration to None.
+        # If you what to re-use the object, store the duration before applying.
+        tmp_duration = self.duration()
+        self.image_seq = self.image_seq.fx(loop)
         output = CompositeVideoClip([composite_clip, self.image_seq])
+        # Before giving the output clip, set the duration back to its original value.
+        self.image_seq = self.image_seq.set_duration(tmp_duration)
         return output
 
     def duration(self) -> int:
