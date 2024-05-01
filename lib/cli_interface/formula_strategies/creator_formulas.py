@@ -443,7 +443,7 @@ narration = AttachAudio(manager.select_dir_one(tts_tmp))
 
         # Apply Subtitle Options
         max_word_per_line = InputPage("SUBS: Input the max words per line").prompt()
-        font = InputPage("SUBS: Input a valid font: \n Recommended: Arial-Bold").prompt()
+        font = InputPage("SUBS: Input a valid font: \n Recommended: Helvetica-Bold").prompt()
         font_size = InputPage("SUBS: Input a font size. \n Recommended: 96").prompt()
         font_outline = InputPage("SUBS: Input size of font outline. \n Recommended: 4").prompt()
         font_loc_x = InputPage("SUBS: Input the x position of the subtitles.\n"

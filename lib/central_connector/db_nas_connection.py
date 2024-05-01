@@ -110,6 +110,14 @@ class DbNasConnection:
             ValueError: If the account already exists
         """
 
+        # Fix any str input's commas
+        username = self.fix_commas(username)
+        email = self.fix_commas(email)
+        password = self.fix_commas(password)
+        platform = self.fix_commas(platform)
+        hash_2fa = self.fix_commas(hash_2fa)
+        description = self.fix_commas(description)
+
         # ______ NAS component ______
 
         path = self.nas_root()
@@ -168,6 +176,14 @@ class DbNasConnection:
         3) Creates moves the content to the nas
         4) if not already done, creates a directory for the specific media pool and/or creates a directory for all media pools
         """
+
+        # Fix any str input's commas
+        content = self.fix_commas(content)
+        media_type = self.fix_commas(media_type)
+        title = self.fix_commas(title)
+        description = self.fix_commas(description)
+        media_pool_parent = self.fix_commas(media_pool_parent)
+
 
         # ______ NAS component ______
 
@@ -238,6 +254,10 @@ class DbNasConnection:
             ValueError: If the media pool exists
         """
 
+        # Fix any string input with commas
+        media_pool_name = self.fix_commas(media_pool_name)
+        description = self.fix_commas(description)
+
         # ______ NAS component ______
         path = self.nas_root()
         path = path + "/active/media_pools"
@@ -282,6 +302,12 @@ class DbNasConnection:
             description (str): The description for the content
             account_parent (str): The related account for this content file
         """
+
+        # Fix any string input with commas
+        file_location_init = self.fix_commas(file_location_init)
+        description = self.fix_commas(description)
+        account_parent = self.fix_commas(account_parent)
+
 
         # ______ NAS component ______
 
@@ -359,6 +385,9 @@ class DbNasConnection:
             id1 (int): id of the first row in the junction table
             id2 (int): id of the second row in the junction table
         """
+        # Fix input with string
+        junction_table = self.fix_commas(junction_table)
+
         # Make connection to database
         self.__make_connection()
 
@@ -430,6 +459,9 @@ class DbNasConnection:
         Returns:
             An array of tuples containing the record(s) for an account (or accounts).
         """
+        # fix string
+        username = self.fix_commas(username)
+
         self.__make_connection()
 
         # Write query
@@ -497,6 +529,9 @@ class DbNasConnection:
         """
         Reads the specific record of a content file given its file_location on the nas (as that is unique)
         """
+        # Fix str
+        file_location = self.fix_commas(file_location)
+
         self.__make_connection()
 
         query = (f"SELECT * FROM content_files "
@@ -512,7 +547,7 @@ class DbNasConnection:
 
     def read_specific_content_file_by_id(self, content_id):
         """
-
+        Reads a specific content file given an id
         """
         self.__make_connection()
         query = (f"SELECT * FROM content_files "
@@ -529,7 +564,7 @@ class DbNasConnection:
 
     def read_all_content_files_of_account(self, account_id):
         """
-
+        reads all the connected content files of an account given the account id.
         """
         self.__make_connection()
 
@@ -576,6 +611,9 @@ class DbNasConnection:
         Returns:
             a tuple or array of tuples containing the records of the media pool(s)
         """
+        # Fix the str input
+        media_pool_name = self.fix_commas(media_pool_name)
+
         self.__make_connection()
 
         table = 'media_pools'
@@ -671,6 +709,9 @@ class DbNasConnection:
         Returns:
             A tuples that contains the entries that match the query.
         """
+        # Fix string input
+        location = self.fix_commas(location)
+
         self.__make_connection()
 
         table = "media_files"
@@ -704,11 +745,10 @@ class DbNasConnection:
 
     def update_to_archived(self, table_name, content_id):
         """
-        Given a table, updates the to_archive column (if it exists) from 0 to 1.
-        Arg:
-            account_id (int): The account id the content
-            media_id (int): The content id for the record
+        Given a table and a specific id, updates the to_archive column (if it exists) from 0 to 1.
         """
+        # Fix str inputs
+        table_name = self.fix_commas(table_name)
 
         self.__make_connection()
 
@@ -726,10 +766,10 @@ class DbNasConnection:
     def update_to_unarchived(self, table_name, content_id):
         """
         Given a table, updates the to_archive column (if it exists) from 1 to 0.
-        Arg:
-            account_id (int): The account id the content
-            media_id (int): The content id for the record
         """
+        # Fix string inputs
+        table_name = self.fix_commas(table_name)
+
         self.__make_connection()
 
         # Check existence
@@ -747,7 +787,7 @@ class DbNasConnection:
 
     def delete_link_account_to_media_pool(self, account_id, media_pool_id):
         """
-
+        Deletes the link junction entry between accounts and media pools
         """
         self.__make_connection()
 
@@ -820,9 +860,6 @@ class DbNasConnection:
 
     # Look, the archive functions should have been one method. Not the best practice I know.
     def __delete_archived_content_file(self, record, to_archive_path):
-        """
-
-        """
         # ______ NAS Component ______
 
 
@@ -846,9 +883,6 @@ class DbNasConnection:
         return
 
     def delete_all_archived_content_files(self):
-        """
-
-        """
 
         # ______ NAS Component ______
         # Create the directory
@@ -920,9 +954,6 @@ class DbNasConnection:
 
 
     def delete_content_file(self, content_id):
-        """
-
-        """
 
         # ______ NAS Component ______
 
@@ -955,9 +986,7 @@ class DbNasConnection:
 
 
     def delete_media_pool(self, media_pool_id):
-        """
 
-        """
         # You need to do the DB components first else you will have files in the dir
 
         # Check existence of media pool
@@ -995,9 +1024,7 @@ class DbNasConnection:
         return
 
     def delete_media_file(self, media_file_id):
-        """
-        He
-        """
+
         # ______ NAS Component ______
         # Remove file from nas
         media_file_record = self.read_specific_media_file_by_id(media_file_id)
@@ -1215,6 +1242,14 @@ class DbNasConnection:
         else:
             return None  # Not in expected format.
 
+    @staticmethod
+    def fix_commas(str_in):
+        """
+        Fixes the inputted string so that queries don't break when the user inputs a ' character
+        :return:
+        """
+        output = str_in.replace("'", "\\'")
+        return output
 
     def __iter_byte_str(self, record):
         """

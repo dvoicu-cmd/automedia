@@ -4,8 +4,19 @@ import datetime
 
 
 def main():
-    upload_media_file_duplicate()
+    test_query()
+
     return
+
+def test_query():
+    db = DbNasConnection()
+    db.create_media_file("/Users/dvoicu/mnt/GoofyTestFiles/bard_db_lecture.txt", "text", "test_text", "I shiddend'dd my''pants", "dummy")
+    pass
+
+def string_fixer():
+
+    pass
+
 
 def delete_account():
     db = DbNasConnection()
