@@ -145,17 +145,10 @@ update:
 	rm -rf $(PARENT_DIR)/automedia-main/src/scraper/py_services
 	mv $(PARENT_DIR)/automedia/src/scraper/py_services $(PARENT_DIR)/automedia-main/src/scraper/py_services
 
+    echo "Remember to do make all after execution to update pip dependencies"
+
 	# rm the old python venv to save space for update
 	rm -rf $(VENV_DIR)
-
-	# run make all on the new make file
-	$(MAKE) -f $(PARENT_DIR)/automedia-main/Makefile all
-
-	# move the venv to the new project
-	mv $(VENV_DIR) $(PARENT_DIR)/automedia-main
-
-	# rm the old project
-	rm -r $(PARENT_DIR)/automedia
 
 	# Rename the new project (context.py bricks without this name)
 	mv -f $(PARENT_DIR)/automedia-main $(PARENT_DIR)/automedia
