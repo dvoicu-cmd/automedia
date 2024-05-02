@@ -16,6 +16,8 @@ PIP_DEPENDENCIES = -r requirements.txt
 CHROME_URL = https://dl.google.com/linux/direct/google-chrome-stable_current_amd64.deb
 # Define the name of the downloaded .deb package
 CHROME_DEB = google-chrome-stable_current_amd64.deb
+# Define update link
+UPDATE_URL = https://github.com/dvoicu-cmd/automedia/archive/refs/heads/main.zip
 
 # Define the rules
 .PHONY: all clean
@@ -103,3 +105,54 @@ clean:
 	apt-get remove -y $(APT_DEPENDENCIES)
 
 
+# ------------------------ UPDATE ------------------------ #
+# Rule to update to install from the latest main branch
+# excepts a personal authorization token
+# ex: TOKEN="<sha hash what not>"
+update:
+	# Set Parent Directory var
+	$(eval THIS_DIR := $(PWD))
+	$(eval PARENT_DIR := "$(shell dirname "$(THIS_DIR)")")
+
+	# Access github api and install main branch zip archive
+	apt-get install -y curl
+
+	curl --output automedia-main.zip -L \
+	-H "Accept: application/vnd.github+json" \
+	-H "Authorization: Bearer $(TOKEN)" \
+	-H "X-GitHub-Api-Version: 2022-11-28" \
+	https://api.github.com/repos/dvoicu-cmd/automedia/zipball/main
+
+	# unzip the archive
+	unzip automedia-main.zip
+	rm -f automedia-main.zip
+	mv dvoicu-cmd-automedia-* $(PARENT_DIR)/automedia-main
+
+	# Replace the py_services to the new proj to keep user information
+	# central
+	rm -rf $(PARENT_DIR)/automedia-main/src/central/py_services
+	mv $(PARENT_DIR)/automedia/src/central/py_services $(PARENT_DIR)/automedia-main/src/central/py_services
+
+	# creator
+	rm -rf $(PARENT_DIR)/automedia-main/src/creator/py_services
+	mv $(PARENT_DIR)/automedia/src/creator/py_services $(PARENT_DIR)/automedia-main/src/creator/py_services
+
+	# publisher
+	rm -rf $(PARENT_DIR)/automedia-main/src/publisher/py_services
+	mv $(PARENT_DIR)/automedia/src/publisher/py_services $(PARENT_DIR)/automedia-main/src/publisher/py_services
+
+	# scraper
+	rm -rf $(PARENT_DIR)/automedia-main/src/scraper/py_services
+	mv $(PARENT_DIR)/automedia/src/scraper/py_services $(PARENT_DIR)/automedia-main/src/scraper/py_services
+
+	# rm the old python venv to save space
+	rm -rf $(VENV_DIR)
+
+	# run make all on the new make file
+	$(MAKE) -f $(PARENT_DIR)/automedia-main/Makefile all
+
+	# rm the old project
+	rm -r $(PARENT_DIR)/automedia
+
+	# Rename the new project (context.py bricks without this name)
+	mv -f $(PARENT_DIR)/automedia-main $(PARENT_DIR)/automedia
