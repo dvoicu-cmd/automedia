@@ -112,8 +112,7 @@ clean:
 update:
 	# Set Parent Directory var
 	$(eval THIS_DIR := $(PWD))
-	$(eval PARENT_DIR := "$(shell dirname "$(THIS_DIR)"))"
-	echo $(PARENT_DIR)
+	$(eval PARENT_DIR := "$(shell dirname "$(THIS_DIR)")")
 
 	# Access github api and install main branch zip archive
 	apt-get install -y curl
@@ -147,12 +146,16 @@ update:
 	mv $(PARENT_DIR)/automedia/src/scraper/py_services $(PARENT_DIR)/automedia-main/src/scraper/py_services
 
 	# move the config.ini file to the new project
-	mv config.ini $(PARENT_DIR)/automedia-main
+	-mv config.ini $(PARENT_DIR)/automedia-main
 
 	# rm the old python venv to save space for update
 	rm -rf $(VENV_DIR)
 
+	# rm the old project.
+	# Btw the program starts to get unstable cuz the makefile has been deleted.
+	rm -r $(PARENT_DIR)/automedia
+
 	# Rename the new project (context.py bricks without this name)
 	mv -f $(PARENT_DIR)/automedia-main $(PARENT_DIR)/automedia
 
-	echo "Remember to do "make all" after execution to update pip dependencies"
+	echo "SUCCESS: Remember to do "make all" after execution to update pip dependencies"
