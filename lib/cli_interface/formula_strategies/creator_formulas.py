@@ -377,14 +377,134 @@ manager.cleanup(tts_tmp)
 
             """)
 
-
         f.save_generated_script(service_name)
 
         print(f"Created Service File: {service_name}")
         print(200)
         pass
 
+    @staticmethod
+    def cycling_images_story_shorts():
+        # 1) Create dir manager, db connection, and edits list
+        # 2) Set up video canvas
+        # 3) Set up story content
+        # 4) Set up narration and subtitles
+        # 5) Set background content
+        # 6) Set a cyclical image edit and place it
+        # 7) Glue it all together and render
+        # 10) Upload to db
 
+        f = ManageFormula()
+
+        service_name = InputPage("Give a title to the service:").prompt()
+
+        # ----------------- 1) Init -----------------
+
+        CreatorFormulas.__init_formula(f, name=service_name)
+
+        # ----------------- 2) Canvas Options -----------------
+
+        # This is automatically set to 9:16
+
+        # ----------------- 3) Set up story content -----------------
+
+        content = InputPage("Input the media pool id for the text with image content").prompt()
+        archive = PickerPage(["Yes", "No"]).prompt("Do you wish to archive the content after use?")
+
+        f.ap(f"""
+
+media_pool_id = {content}
+        
+            """)
+
+        f.ap("""
+
+record = db.read_rand_media_file_of_pool(media_pool_id)
+content_dir = db.nas_root() + "/" + record[1]
+story_text = manager.read_text(db.nas_root() + "/" + record[1] + "/text.txt")
+image_locations = manager.select_dir(content_dir, file_filter="*.jpg")
+        
+            """)
+
+        if archive == 0:
+            f.ap("""
+
+# Archive option selected
+db.update_to_archived("media_files", record[0])
+
+                """)
+
+        # ----------------- 4) Set up narration and subtitles -----------------
+
+        CreatorFormulas.__tts_and_subs(f)
+
+        # ----------------- 5) Set background content -----------------
+
+        CreatorFormulas.__background_footage_options(f)
+
+        # ----------------- 6) Set a cyclical image edit and place it -----------------
+
+        between_time = InputPage("Input the time in seconds, how long each image will be shown for.").prompt()
+        f.ap(f"""
+img_cycle = AttachCyclicalImages(image_locations, {between_time}, ('center', 'center'))
+        """)
+
+        # ----------------- 7) Glue it all together and render -----------------
+
+        f.ap("""
+# append the edits
+edits.extend(list_of_footage)
+
+# Make a short canvas
+short_canvas = NineBySixteen('1080x1920')
+short_base = VideoSection(canvas=short_canvas)
+
+# Force everything to the center and reduce the narration to under one min if it's longer.
+if narration.duration() > 59:
+    narration.set_start_and_end(0, 59)
+
+subs.set_text_location(('center', 'center'))
+subs.set_max_word_per_line(2)
+
+print("-> Applying Edits")
+edits.append(narration)
+edits.append(img_cycle)
+edits.append(subs)
+short_base.apply_edits(edits, narration)
+
+print("-> Applied, Rendering Video:")
+short_base.render(f"{output_tmp}/video.mp4")
+
+        """)
+
+        # ----------------- 8) Upload to db. -----------------
+        description = InputPage("Input a generic description that will be posted on all your videos?").prompt()
+        account_name = InputPage("Input the associated account name this content will be uploaded to").prompt()
+
+        f.ap(f"""
+
+print("-> Uploading to DbNas")
+print("-> File:")
+print(output_tmp)
+
+# NO THUMBNAIL OPTION SELECTED
+# Create post title
+ttxt = ThumbnailText(story_text)
+ttxt.limit_words(16, 5)
+
+# upload to db nas
+db.create_content(output_tmp, ttxt.text_content, "{description}", "{account_name}")
+
+# clean the tmp dirs
+manager.cleanup(tts_tmp)
+
+            """)
+
+        f.save_generated_script(service_name)
+
+        print(f"Created Service File: {service_name}")
+        print(200)
+        pass
 
     # ----------------------------------------------------------------------------------
     # ------------------------------ Common Functionality ------------------------------

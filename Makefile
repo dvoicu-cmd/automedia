@@ -146,7 +146,7 @@ update:
 	mv $(PARENT_DIR)/automedia/src/scraper/py_services $(PARENT_DIR)/automedia-main/src/scraper/py_services
 
 	# move the config.ini file to the new project
-	-mv config.ini $(PARENT_DIR)/automedia-main
+	-mv src/config.ini $(PARENT_DIR)/automedia-main/src
 
 	# rm the old python venv to save space for update
 	rm -rf $(VENV_DIR)

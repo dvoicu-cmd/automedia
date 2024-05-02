@@ -14,11 +14,16 @@ def main():
     v1 = pg.main_menu("Creator")
     if v1 == 'custom':
         # CUSTOM CREATOR FORMULA CREATION
-        v2 = PickerPage(["Text Story", "Cycle Images Story"]).prompt("Select a formula to use")
+        v2 = PickerPage(["Text Story",
+                         "Cycle Images Story",
+                         "Cycle Image Story Shorts"]
+                        ).prompt("Select a formula to use")
         if v2 == 0:
             CreatorFormulas().generic_text_story()
         if v2 == 1:
             CreatorFormulas().cycling_images_story()
+        if v2 == 2:
+            CreatorFormulas().cycling_images_story_shorts()
 
     # end of custom
 
