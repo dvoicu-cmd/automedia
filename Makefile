@@ -145,7 +145,7 @@ update:
 	rm -rf $(PARENT_DIR)/automedia-main/src/scraper/py_services
 	mv $(PARENT_DIR)/automedia/src/scraper/py_services $(PARENT_DIR)/automedia-main/src/scraper/py_services
 
-    echo "Remember to do make all after execution to update pip dependencies"
+	echo "Remember to do make all after execution to update pip dependencies"
 
 	# rm the old python venv to save space for update
 	rm -rf $(VENV_DIR)
