@@ -26,7 +26,7 @@ class YtUpload(Upload):
             auth_secret (str): The 32 character keys for the 2fa authentication code.
         """
 
-        self.driver = Driver(uc=True, headless=True)  # remote_debug="127.0.0.1:9222"
+        self.driver = Driver(uc=True, headless=True, remote_debug="127.0.0.1:9222")  # remote_debug="127.0.0.1:9222"
         self.TIMEOUT = time_out
         self.MAX_TRY = max_try
         self.__login_google(email, password, auth_secret)
@@ -123,6 +123,7 @@ class YtUpload(Upload):
         Executes the upload process given a specific file
         """
         if not os.path.exists(file_path):
+            print(f"YT fail on path: {file_path}")
             raise ValueError(f"Video path does not exists: {file_path}")
 
         try:  # if anything goes wrong, you want to ensure that that driver closes so you don't spawn 50+ driver instances.

@@ -16,7 +16,7 @@ class ScraperFormulas:
         name = InputPage("Input the name of the service").prompt()
         desc = InputPage("Input the description for the scrapes").prompt()
         subreddit = InputPage("Input the subreddit name").prompt()
-        media_pool = InputPage("Input the corresponding media_pool").prompt()
+        media_pool = InputPage("Input the corresponding media_pool name (not id)").prompt()
 
         f.ap(f"""
         

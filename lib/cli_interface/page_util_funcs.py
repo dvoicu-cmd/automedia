@@ -129,6 +129,7 @@ def main_menu(node_name):
         InputPage.clear()
         try:
             # Stupid. Filtering py_services to just display the py files that where created by the formula class.
+            # Fix: Find all files with .py, exclude key files. like context.py then chop the .py part and display.
             ls = ManageFormula().print_script_names()
             srt_pattern = re.compile(r'srt_tmp_[A-Za-z0-9]{5}$')
             tmp_video = re.compile(r'videoTEMP_[A-Za-z0-9]{3}_[A-Za-z0-9]{3}_[A-Za-z0-9]{3}.mp4')

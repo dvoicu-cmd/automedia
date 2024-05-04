@@ -654,7 +654,7 @@ while footage_duration_sum < narration.duration():
         make_thumb = PickerPage(["Yes", "No"]).prompt("Do you wish to create a thumbnail with your content? \n"
                                                       "This only applies to YT uploads")
         if make_thumb == 0:
-            base_image = InputPage("Input the media pool with your base thumbnail image").prompt()
+            base_image = InputPage("Input the media pool's id with your base thumbnail image").prompt()
             archive = PickerPage(["Yes", "No"]).prompt("Do you wish to archive the thumbnail after use?\n"
                                                        "Ensure that you have a constant supply of thumbnail images if you do.")
 

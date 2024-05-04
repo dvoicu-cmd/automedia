@@ -21,6 +21,7 @@ class PublisherFormulas:
         
 db = DbNasConnection()
 manager = PublisherDirManager()
+exec_fail = False
 
 # 0 -> id, 1 -> username, 2 -> email, 3 -> password, 4 -> auth_secrete, 5 -> platform, 6 -> description
 acc_record = db.read_account_by_name('{name}')
@@ -30,7 +31,12 @@ acc_record = acc_record[0] # read_account_by_name returns a tuple of tuples. why
 content_record = db.read_rand_content_file(acc_record[0])  # Reads the content.
 
 # Set up uploader
-yt = YtUpload(acc_record[2], acc_record[3], acc_record[4])
+yt = None
+try:
+    yt = YtUpload(acc_record[2], acc_record[3], acc_record[4])
+except:
+    exec_fail = True
+    pass
 
 yt.set_account(acc_record[1])
 yt.set_title(content_record[2])
@@ -59,12 +65,14 @@ except:
 try:
     yt.exec_upload(f"{db.nas_root()}/{file_path}/video.mp4")
 except:
+    exec_fail = True
     pass
 
 yt.quit() # quit the driver to save memory. Like this is super important.
 
 # Set to archive
-db.update_to_archived('content_files', content_record[0])
+if not exec_fail:
+    db.update_to_archived('content_files', content_record[0])
         
         """)
 
