@@ -304,6 +304,7 @@ class DbNasConnection:
         """
 
         # Fix any string input with commas
+        title = self.fix_commas(title)
         file_location_init = self.fix_commas(file_location_init)
         description = self.fix_commas(description)
         account_parent = self.fix_commas(account_parent)
