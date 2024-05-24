@@ -28,7 +28,9 @@ def main():
                          "Delete Account",
                          "Display specific account record via username",
                          "Display all accounts",
-                         "Display totp now code for account"])
+                         "Display totp now code for account",
+                         "Back"
+                         ])
 
         v2 = p2.prompt("Select what to do with Accounts:")
         if v2 == 0:  # create account
@@ -81,13 +83,18 @@ def main():
             acc_id = InputPage("Input the account id:")
             print(totp_for_account(acc_id.prompt()))
 
+        if v2 == 5:  # Back
+            pass  # Ignore everything and let __main__ reprompt
+
 
     elif v1 == 1:  # MEDIA POOLS
 
         p2 = PickerPage(["Create Media Pool",
                          "Delete Media Pool",
                          "Display specific Media Pool record via name",
-                         "Display all Media Pools"])
+                         "Display all Media Pools",
+                         "Back"])
+
         v2 = p2.prompt("Select what to do with Media Pools:")
 
         if v2 == 0:  # create media pool
@@ -120,9 +127,15 @@ def main():
             else:
                 print(ret)
 
+        if v2 == 4:  # Back
+            pass  # Ignore everything, reprompt
+
     elif v1 == 2:  # MANAGE ACCOUNT & MEDIA POOL LINK
 
-        p2 = PickerPage(["Link", "Unlink", "Show links of a specific Account"])
+        p2 = PickerPage(["Link",
+                         "Unlink",
+                         "Show links of a specific Account",
+                         "Back"])
         v2 = p2.prompt("Select an action to take:")
 
         if v2 == 0:  # link
@@ -142,13 +155,17 @@ def main():
             val = accounts_linked_media_pools(acc_id)
             print(val)
 
+        if v2 == 3:  # Go back
+            pass
+
 
     elif v1 == 3:  # MANAGE SERVICE
 
         p2 = PickerPage(["Create Archiver Service",
                          "Delete Archiver Service",
                          "Display Services",
-                         "Manually Archive"])
+                         "Manually Archive",
+                         "Back"])
 
         v2 = p2.prompt("Select an action:")
         if v2 == 0:  # create archiver service
@@ -173,6 +190,7 @@ def main():
             p3 = PickerPage([
                 "Media_Pool Files",
                 "Account Content Files"
+                "Back"
             ])
 
             v3 = p3.prompt("Select what to immediately archive:")
@@ -186,6 +204,11 @@ def main():
                 DbNasConnection().delete_all_archived_content_files()
                 print(200)
                 pass
+            elif v3 == 2:  # Back
+                pass
+
+        if v2 == 4:  # Back
+            pass  # Reprompt
 
     elif v1 == 4:  # QUIT
         InputPage.clear()

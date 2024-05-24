@@ -33,6 +33,7 @@ def main():
                 raise FileNotFoundError('Invalid config.ini file choice. Somehow...')
         # Re-read the file now
         config.read('config.ini')
+
     module = config['NODE_TYPE']['type']
 
     # Import and run the selected submodule
@@ -40,17 +41,20 @@ def main():
         wd = os.getcwd()
         if module == 'central':
             os.chdir(f'{wd}/central/py_services')
-            print(os.getcwd())
-            central_main()
+            while True:
+                central_main()
         elif module == 'creator':
             os.chdir(f'{wd}/creator/py_services')
-            creator_main()
+            while True:
+                creator_main()
         elif module == 'publisher':
             os.chdir(f'{wd}/publisher/py_services')
-            publisher_main()
+            while True:
+                publisher_main()
         elif module == 'scraper':
             os.chdir(f'{wd}/scraper/py_services')
-            scraper_main()
+            while True:
+                scraper_main()
         else:
             raise ModuleNotFoundError
     except ModuleNotFoundError:
