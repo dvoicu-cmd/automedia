@@ -7,7 +7,7 @@ from src.scraper.__main__ import main as scraper_main
 from src.publisher.__main__ import main as publisher_main
 from src.central.__main__ import main as central_main
 
-from lib.cli_interface.picker_pages import PickerPage
+from lib.cli_interface.page.picker_pages import PickerPage
 
 
 def main():

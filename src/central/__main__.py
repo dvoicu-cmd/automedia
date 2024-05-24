@@ -16,7 +16,9 @@ def main():
     p1 = PickerPage(["Account",
                      "Media Pools",
                      "Link Account & Media Pool",
-                     "Manage Archival Service"])
+                     "Manage Archival Service",
+                     "Quit"
+                     ])
 
     v1 = p1.prompt("Central Node: Pick a menu. \n(use the up or down arrow keys)")  # This will determine what submenu to navigate to.
 
@@ -185,9 +187,12 @@ def main():
                 print(200)
                 pass
 
+    elif v1 == 4:  # QUIT
+        InputPage.clear()
+        quit("Bye")
 
-# --- Account methods ---
 
+# --- Account Helper Methods ---
 
 
 def create_account(username, email, password, platform, hash2fa, description):

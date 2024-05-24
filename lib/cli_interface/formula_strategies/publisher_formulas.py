@@ -2,8 +2,8 @@ import os
 import sys
 
 from lib.manage_formula.manage_formula import ManageFormula
-from lib.cli_interface.input_pages import InputPage
-from lib.cli_interface.picker_pages import PickerPage
+from lib.cli_interface.page.input_pages import InputPage
+from lib.cli_interface.page.picker_pages import PickerPage
 
 
 class PublisherFormulas:

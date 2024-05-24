@@ -2,8 +2,8 @@
 from lib.central_connector.db_nas_connection import DbNasConnection
 from lib.manage_service.manage_service import ManageService
 from lib.manage_formula.manage_formula import ManageFormula
-from .input_pages import InputPage
-from .picker_pages import PickerPage
+from .page.input_pages import InputPage
+from .page.picker_pages import PickerPage
 import os
 import re
 
@@ -103,6 +103,11 @@ def start_service():
 
 
 def main_menu(node_name):
+    """
+    Shared main menu prompt among creator, publisher, and scraper.
+    :param node_name:
+    :return:
+    """
     page = PickerPage(
         [
             f"Create {node_name} Formula",
@@ -111,7 +116,8 @@ def main_menu(node_name):
             f"Display Service Map",
             f"Start Service",
             f"Stop Service",
-            f"Manual Action"
+            f"Manual Action",
+            f"Quit"
         ])
 
     v = page.prompt(f"{node_name} Menu \nselect an option:")
@@ -164,3 +170,7 @@ def main_menu(node_name):
 
     if v == 6:  # Manual action
         return 'manual'  # manual action to be done in __main__.py
+
+    if v == 7:  # Terminate Program
+        InputPage.clear()
+        quit("Bye")
