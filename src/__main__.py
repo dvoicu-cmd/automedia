@@ -41,19 +41,19 @@ def main():
         wd = os.getcwd()
         if module == 'central':
             os.chdir(f'{wd}/central/py_services')
-            while True:
+            while True:  # Main Prompt for central
                 central_main()
         elif module == 'creator':
             os.chdir(f'{wd}/creator/py_services')
-            while True:
+            while True:  # Main Prompt for creator
                 creator_main()
         elif module == 'publisher':
             os.chdir(f'{wd}/publisher/py_services')
-            while True:
+            while True:  # Main Prompt for publisher
                 publisher_main()
         elif module == 'scraper':
             os.chdir(f'{wd}/scraper/py_services')
-            while True:
+            while True:  # Main Prompt for scraper
                 scraper_main()
         else:
             raise ModuleNotFoundError

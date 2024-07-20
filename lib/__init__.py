@@ -10,6 +10,7 @@ from .text_util.util import TextUtils
 from .cli_interface.page.input_pages import InputPage
 from .cli_interface.page.picker_pages import PickerPage
 from .cli_interface.page.display_page import DisplayPage
+from .cli_interface.page.sigint_handling.input_cancelled import InputCancelled
 from .cli_interface.formula_strategies import *
 from .cli_interface.formula_strategies import __all__ as formula_strategies_all
 from .manage_formula.manage_formula import ManageFormula
@@ -19,7 +20,9 @@ from .manage_directory_structure.publisher_dir_manager import PublisherDirManage
 
 # Functionss
 from .cli_interface import page_util_funcs as pg
+from .cli_interface.page.sigint_handling.signal_handler_functions import set_watch_signal
+from .cli_interface.page.sigint_handling.signal_handler_functions import set_watch_signal
 
 __all__ = ['DbNasConnection', 'ManageService', 'Queue', 'TextUtils', 'InputPage', 'PickerPage', 'DisplayPage',
-           'ManageFormula', 'CreatorDirManager', 'ScraperDirManager', 'PublisherDirManager',
-           'pg'] + formula_strategies_all
+           'ManageFormula', 'CreatorDirManager', 'ScraperDirManager', 'PublisherDirManager', 'InputCancelled',
+           'pg', 'set_watch_signal', 'set_watch_signal'] + formula_strategies_all

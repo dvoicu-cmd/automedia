@@ -1213,7 +1213,8 @@ class DbNasConnection:
                                     port=int(cred.get('port')),
                                     user=cred.get('user'),
                                     password=cred.get('password'),
-                                    database=cred.get('database')
+                                    database=cred.get('database'),
+                                    connect_timeout=6
                                     )
         self.conn.autocommit = True
         self.curr = self.conn.cursor()

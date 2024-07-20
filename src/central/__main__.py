@@ -2,6 +2,7 @@ from context import lib
 from context import src
 from lib import *
 from src import *
+import traceback
 
 import os
 from pyotp import TOTP
@@ -15,7 +16,6 @@ def main():
     pg.verify_cfg()
     p1 = PickerPage(["Account",
                      "Media Pools",
-                     "Link Account & Media Pool",
                      "Manage Archival Service",
                      "Quit"
                      ])
@@ -44,44 +44,88 @@ def main():
             ]
 
             result_list = []
-            for page in in_list:
-                answer = page.prompt()
-                result_list.append(answer)
+            # Check for cancels
+            try:
+                for page in in_list:
+                    answer = page.prompt()
+                    result_list.append(answer)
+            except InputCancelled:  # If at any point user sends a sigint signal,
+                InputPage("").print_cancelled_input()
+                return   # Break out and re-prompt the page.
 
+            # Execute specific function
             ret = create_account(*result_list)
+
             # Check if the execution was okay.
             if isinstance(ret, BaseException):
-                raise ret
+                DisplayPage().prompt(pg.str_exception(ret))  # Display what is wrong if something is wrong
             else:
-                print(f"ret value {ret}")
+                if ret == 200:  # Else display a success message
+                    DisplayPage().prompt("Successfully created account record")
+                else:
+                    DisplayPage().prompt(str(ret))  # Extra case just in case something is wrong
+            # Rest of the pages follow a similar idea:
+            # 1) If there are input pages, check for cancel signals
+            # 2) Verify that return value is or is not an error, then display appropriate messaging.
 
         if v2 == 1:  # delete account
-            acc_id = InputPage("Input account id to delete:")
-            ret = delete_account(acc_id.prompt())
+            try:
+                acc_id = InputPage("Input account id to delete:")
+                inputted_id = acc_id.prompt()
+            except InputCancelled:
+                InputPage("").print_cancelled_input()
+                return
+
+            InputPage.clear()
+            print("Querying database...")
+            ret = delete_account(inputted_id)
+
             if isinstance(ret, BaseException):
-                raise ret
+                DisplayPage().prompt(pg.str_exception(ret))
             else:
-                print(f"ret value {ret}")
+                if ret == 200:
+                    DisplayPage().prompt("Successfully deleted account record")
+                else:
+                    DisplayPage().prompt(str(ret))
 
         if v2 == 2:  # display account
-            acc_name = InputPage("Input account name:")
-            ret = display_account(acc_name.prompt())
+            try:
+                acc_name = InputPage("Input account name:")
+                name = acc_name.prompt()
+            except InputCancelled:
+                InputPage("").print_cancelled_input()
+                return
+
+            InputPage.clear()
+            print("Querying database...")
+            ret = display_account(name)
+
             if isinstance(ret, BaseException):
-                raise ret
+                DisplayPage().prompt(pg.str_exception(ret))
             else:
-                print(f"ret value {ret}")
+                DisplayPage().prompt(f"Displaying Account: \n\n {ret}")
 
         if v2 == 3:  # display all accounts
             InputPage.clear()
+            print("Querying database...")
             ret = display_all_accounts_names()
             if isinstance(ret, BaseException):
-                raise ret
+                DisplayPage().prompt(pg.str_exception(ret))
             else:
-                print(ret)
+                DisplayPage().prompt(f"Displaying All Accounts: \n\n {ret}")
 
         if v2 == 4:  # totp now
-            acc_id = InputPage("Input the account id:")
-            print(totp_for_account(acc_id.prompt()))
+            try:
+                acc_id = InputPage("Input the account id:")
+                ret = totp_for_account(acc_id.prompt())
+            except InputCancelled:
+                InputPage("").print_cancelled_input()
+                return
+
+            if isinstance(ret, BaseException):
+                DisplayPage().prompt(pg.str_exception(ret))
+            else:
+                DisplayPage().prompt(f"totp code: {ret}")
 
         if v2 == 5:  # Back
             pass  # Ignore everything and let __main__ reprompt
@@ -98,68 +142,76 @@ def main():
         v2 = p2.prompt("Select what to do with Media Pools:")
 
         if v2 == 0:  # create media pool
-            name = InputPage("Input the media pool name").prompt()
-            desc = InputPage("Input a description").prompt()
+            try:
+                name = InputPage("Input the media pool name").prompt()
+                desc = InputPage("Input a description").prompt()
+            except InputCancelled:
+                InputPage("").print_cancelled_input()
+                return
+
+            InputPage.clear()
+            print("Querying database...")
             ret = create_media_pool(name, desc)
-            print(f"return value, {ret}")
+
+            if isinstance(ret, BaseException):
+                DisplayPage().prompt(pg.str_exception(ret))
+            else:
+                if ret == 200:
+                    DisplayPage().prompt(f"Successfully created media pool {name}")
+                else:
+                    DisplayPage().prompt(ret)
 
         if v2 == 1:  # delete media pool
-            media_id = InputPage("Input media pool id to delete").prompt()
+            try:
+                media_id = InputPage("Input media pool id to delete").prompt()
+            except InputCancelled:
+                InputPage("").print_cancelled_input()
+                return
+
+            InputPage.clear()
+            print("Querying database...")
             ret = delete_media_pool(media_id)
+
             if isinstance(ret, BaseException):
-                raise ret
+                DisplayPage().prompt(pg.str_exception(ret))
             else:
-                print(f"return value, {ret}")
+                if ret == 200:
+                    DisplayPage().prompt(f"Successfully deleted media pool")
+                else:
+                    DisplayPage().prompt(ret)
 
         if v2 == 2:  # display media pool
-            media_pool_name = InputPage("Input media pool name").prompt()
+            try:
+                media_pool_name = InputPage("Input media pool name").prompt()
+            except InputCancelled:
+                InputPage("").print_cancelled_input()
+                return
+
+            InputPage.clear()
+            set_watch_signal()
+            print("Querying database...")
             ret = display_media_pool(media_pool_name)
+
+
             if isinstance(ret, BaseException):
-                raise ret
+                DisplayPage().prompt(pg.str_exception(ret))
             else:
-                print(f"return value\n {ret}")
+                DisplayPage().prompt(f"Displaying media pool: \n\n {ret}")
 
         if v2 == 3:  # display all media pools
             InputPage.clear()
+            print("Querying database...")
             ret = display_all_media_pool_names()
+
             if isinstance(ret, BaseException):
-                raise ret
+                DisplayPage().prompt(pg.str_exception(ret))
             else:
-                print(ret)
+                DisplayPage().prompt(f"Displaying all media pools: \n\n {ret}")
 
         if v2 == 4:  # Back
             pass  # Ignore everything, reprompt
 
-    elif v1 == 2:  # MANAGE ACCOUNT & MEDIA POOL LINK
-
-        p2 = PickerPage(["Link",
-                         "Unlink",
-                         "Show links of a specific Account",
-                         "Back"])
-        v2 = p2.prompt("Select an action to take:")
-
-        if v2 == 0:  # link
-            acc_id = InputPage("Input account id").prompt()
-            pool_id = InputPage("Input media pool id").prompt()
-            result = link_account_to_media_pool(acc_id, pool_id)  # Got an infinite loop here
-            print(f"ret value {result}")
-
-        if v2 == 1:  # unlink
-            acc_id = InputPage("Input account id").prompt()
-            pool_id = InputPage("Input media pool id").prompt()
-            result = unlink_account_to_media_pool(acc_id, pool_id)  # And here
-            print(f"ret value {result}")
-
-        if v2 == 2:  # display links
-            acc_id = InputPage("Input account id").prompt()
-            val = accounts_linked_media_pools(acc_id)
-            print(val)
-
-        if v2 == 3:  # Go back
-            pass
-
-
-    elif v1 == 3:  # MANAGE SERVICE
+    elif v1 == 2:  # MANAGE SERVICE
 
         p2 = PickerPage(["Create Archiver Service",
                          "Delete Archiver Service",
@@ -168,49 +220,81 @@ def main():
                          "Back"])
 
         v2 = p2.prompt("Select an action:")
+
+
         if v2 == 0:  # create archiver service
             InputPage.clear()
-            prompt_values = pg.start_service()
+            try:
+                prompt_values = pg.start_service()
+            except InputCancelled:
+                InputPage("").print_cancelled_input()
+                return
+
             ret = create_archiver_service(prompt_values[0], prompt_values[1])
-            print(f"ret value {ret}")
+            if isinstance(ret, BaseException):
+                DisplayPage().prompt(pg.str_exception(ret))
+            else:
+                if ret == 200:
+                    DisplayPage().prompt(f"Successfully created archiver service.")
+                else:
+                    DisplayPage().prompt(ret)
 
         if v2 == 1:  # delete archiver service
-            name = InputPage("Input service name to delete:").prompt()
+            try:
+                name = InputPage("Input service name to delete:").prompt()
+            except InputCancelled:
+                InputPage("").print_cancelled_input()
+                return
+
             ret = delete_archiver_service(name)
-            # raise ret
-            print(f"ret value {ret}")
+            if isinstance(ret, BaseException):
+                DisplayPage().prompt(pg.str_exception(ret))
+            else:
+                if ret == 200:
+                    DisplayPage().prompt(f"Successfully deleted archiver service.")
+                else:
+                    DisplayPage().prompt(ret)
 
         if v2 == 2:  # display service
             InputPage.clear()
             ret = display_services()
-            print(f"Service Map:\n\n {ret}")
+            if isinstance(ret, BaseException):
+                DisplayPage().prompt(pg.str_exception(ret))
+            else:
+                DisplayPage().prompt(f"Displaying all services: \n\n {ret}")
 
         if v2 == 3:  # manually archive
             InputPage.clear()
             p3 = PickerPage([
                 "Media_Pool Files",
-                "Account Content Files"
+                "Account Content Files",
                 "Back"
             ])
 
             v3 = p3.prompt("Select what to immediately archive:")
             if v3 == 0:  # Media pools
                 InputPage.clear()
-                DbNasConnection().delete_all_archived_media_files()
-                print(200)
-                pass
+                print("Archiving media pools...")
+                try:
+                    DbNasConnection().delete_all_archived_media_files()
+                    DisplayPage().prompt("Successfully archived media files")
+                except Exception as e:
+                    DisplayPage().prompt(pg.str_exception(e))
             elif v3 == 1:  # Accounts
                 InputPage.clear()
-                DbNasConnection().delete_all_archived_content_files()
-                print(200)
-                pass
+                print("Archiving account videos...")
+                try:
+                    DbNasConnection().delete_all_archived_content_files()
+                    DisplayPage().prompt("Successfully archived account files")
+                except Exception as e:
+                    DisplayPage().prompt(pg.str_exception(e))
             elif v3 == 2:  # Back
                 pass
 
         if v2 == 4:  # Back
             pass  # Reprompt
 
-    elif v1 == 4:  # QUIT
+    elif v1 == 3:  # QUIT
         InputPage.clear()
         quit("Bye")
 
@@ -388,7 +472,6 @@ def totp_for_account(acc_id: int):
         hash2fa = record[4]
         tp = TOTP(hash2fa)
         return tp.now()
-
     except Exception as e:
         return e
 

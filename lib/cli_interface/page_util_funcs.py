@@ -2,13 +2,15 @@
 from lib.central_connector.db_nas_connection import DbNasConnection
 from lib.manage_service.manage_service import ManageService
 from lib.manage_formula.manage_formula import ManageFormula
+from lib.cli_interface.page.sigint_handling.input_cancelled import InputCancelled
 from .page.input_pages import InputPage
 from .page.picker_pages import PickerPage
+import traceback
 import os
 import re
 
 """
-General wrapper functions for the cli user input
+General wrapper and helper functions for the cli user input
 """
 
 
@@ -73,33 +75,37 @@ def start_service():
     """
     grabs the cli input for starting a service
     :return:
+    :raises: InputCancelled exception when an input page detects a sigint. Up to caller to handle it.
     """
-    page = InputPage("Input the service you wish to start. (Exclude the .py extension)")
-    service_name = page.prompt()
+    try:
+        page = InputPage("Input the service you wish to start. (Exclude the .py extension)")
+        service_name = page.prompt()
 
-    # Loop to add on_calendar values
-    contd = True
-    on_cal_list = []
-    while contd:
-        page = InputPage("Input cron interval to schedule this service. \n"
-                         "Cron timers use the format: {minute} {hour} {day #} {month} {day of the week}\n"
-                         "*	--> any value \n"
-                         ", --> value list separator\n"
-                         "- --> range of values\n"
-                         "/	--> step values.")
-        on_cal_list.append(page.prompt())
+        # Loop to add on_calendar values
+        contd = True
+        on_cal_list = []
+        while contd:
+            page = InputPage("Input cron interval to schedule this service. \n"
+                             "Cron timers use the format: {minute} {hour} {day #} {month} {day of the week}\n"
+                             "*	--> any value \n"
+                             ", --> value list separator\n"
+                             "- --> range of values\n"
+                             "/	--> step values.")
+            on_cal_list.append(page.prompt())
 
-        # prompt if user wishes to add more on_calendar values
-        continue_loop = PickerPage([
-            "Add another cron time",
-            "Save file"
-        ])
-        result = continue_loop.prompt()
-        if result == 1:
-            contd = False
+            # prompt if user wishes to add more on_calendar values
+            continue_loop = PickerPage([
+                "Add another cron time",
+                "Save file"
+            ])
+            result = continue_loop.prompt()
+            if result == 1:
+                contd = False
 
-    # Call the on manager service method
-    return [service_name, on_cal_list]
+        # Call the on manager service method
+        return [service_name, on_cal_list]
+    except InputCancelled as e:
+        raise e
 
 
 def main_menu(node_name):
@@ -174,3 +180,14 @@ def main_menu(node_name):
     if v == 7:  # Terminate Program
         InputPage.clear()
         quit("Bye")
+
+
+def str_exception(ret):
+    """
+    Gets an exception object into a string stack strace
+    :param ret:
+    :return:
+    """
+    tb_exception = traceback.TracebackException.from_exception(ret)
+    traceback_str = ''.join(tb_exception.format())
+    return traceback_str
