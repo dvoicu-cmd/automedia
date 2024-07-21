@@ -4,6 +4,7 @@ import sys
 from lib.manage_formula.manage_formula import ManageFormula
 from lib.cli_interface.page.input_pages import InputPage
 from lib.cli_interface.page.picker_pages import PickerPage
+from lib.cli_interface.page.display_page import DisplayPage
 
 
 class PublisherFormulas:
@@ -77,3 +78,5 @@ if not exec_fail:
         """)
 
         f.save_generated_script(service_name)
+
+        DisplayPage().prompt(f"Successfully created new formula: {service_name}")

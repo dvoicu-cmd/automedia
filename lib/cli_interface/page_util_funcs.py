@@ -163,7 +163,7 @@ def main_menu(node_name):
     if v == 3:  # Display Service Map
         InputPage.clear()
         try:
-            DisplayPage().prompt(f"Displaying all services: {ManageService().print_map()}")
+            DisplayPage().prompt(f"Displaying all services: \n\n {ManageService().print_map()}")
         except Exception as e:
             DisplayPage().prompt(str_exception(e))
 
