@@ -13,3 +13,5 @@ class DisplayPage(CliPage):
         self.clear()
         PickerPage(["continue"]).prompt(msg)  # Display
 
+
+

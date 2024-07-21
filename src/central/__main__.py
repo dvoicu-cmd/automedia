@@ -4,7 +4,6 @@ from lib import *
 from src import *
 import traceback
 
-import os
 from pyotp import TOTP
 
 """
@@ -13,7 +12,11 @@ Methods for interacting with central
 
 
 def main():
-    pg.verify_cfg()
+    try:
+        pg.verify_cfg()
+    except InputCancelled:
+        InputPage('').print_cancelled_input(msg="Cancelled critical configuration. Re-prompting...", wait_time=2.5)
+        return
     p1 = PickerPage(["Account",
                      "Media Pools",
                      "Manage Archival Service",
@@ -261,7 +264,7 @@ def main():
             if isinstance(ret, BaseException):
                 DisplayPage().prompt(pg.str_exception(ret))
             else:
-                DisplayPage().prompt(f"Displaying all services: \n\n {ret}")
+                DisplayPage().prompt(f"Displaying all archiving services: \n\n {ret}")
 
         if v2 == 3:  # manually archive
             InputPage.clear()

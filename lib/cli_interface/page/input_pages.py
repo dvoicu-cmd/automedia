@@ -13,7 +13,7 @@ class InputPage(CliPage):
 
     def prompt(self):
         self.clear()
-        i = ""
+        i = ""  # i -> the input received
 
         # Attempt input
         set_watch_signal()
@@ -33,8 +33,8 @@ class InputPage(CliPage):
             return int(i)  # return as an integer if it is an integer
         return i  # else return as a str
 
-    def print_cancelled_input(self):
+    def print_cancelled_input(self, msg='Cancelled', wait_time=0.5):
         self.clear()
-        print("Cancelled")
-        time.sleep(0.5)
+        print(msg)
+        time.sleep(wait_time)
         self.clear()

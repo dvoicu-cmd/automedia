@@ -5,6 +5,7 @@ from lib.manage_formula.manage_formula import ManageFormula
 from lib.cli_interface.page.sigint_handling.input_cancelled import InputCancelled
 from .page.input_pages import InputPage
 from .page.picker_pages import PickerPage
+from .page.display_page import DisplayPage
 import traceback
 import os
 import re
@@ -74,7 +75,7 @@ def verify_cfg():
 def start_service():
     """
     grabs the cli input for starting a service
-    :return:
+    :return: An array size 2. The first item is a string with the name of the service and second item is the list of oncalendar values
     :raises: InputCancelled exception when an input page detects a sigint. Up to caller to handle it.
     """
     try:
@@ -131,11 +132,18 @@ def main_menu(node_name):
         return 'custom'  # Do something custom in the __main__.py file
 
     if v == 1:  # Delete a formula
-        value = InputPage("Input the name of the formula to delete").prompt()
+        try:
+            value = InputPage("Input the name of the formula to delete").prompt()
+        except InputCancelled:
+            InputPage("").print_cancelled_input()
+            return
+
         try:
             ManageFormula().delete_generated_script(value)
+            DisplayPage().prompt(f"Successfully deleted formula: {value}")
         except Exception as e:
-            raise e
+            DisplayPage().prompt(str_exception(e))
+
 
     if v == 2:  # Display all formulas
         InputPage.clear()
@@ -147,32 +155,38 @@ def main_menu(node_name):
             tmp_video = re.compile(r'videoTEMP_[A-Za-z0-9]{3}_[A-Za-z0-9]{3}_[A-Za-z0-9]{3}.mp4')
             ls_to_filter = ['cache', 'log', 'output', '__pycache__', 'timer_map.pickle', '__init__.py', 'context.py', 'cred.cfg', 'paths.cfg']
             filtered_list = [item for item in ls if item not in ls_to_filter or srt_pattern.match(item) or tmp_video.match(item)]  # Filter out the list
-            print(f"All files in py_services: \n {filtered_list}")
+
+            DisplayPage().prompt(f"All formulas: \n\n {filtered_list}")
         except Exception as e:
-            raise e
+            DisplayPage().prompt(str_exception(e))
 
     if v == 3:  # Display Service Map
         InputPage.clear()
         try:
-            print(ManageService().print_map())
+            DisplayPage().prompt(f"Displaying all services: {ManageService().print_map()}")
         except Exception as e:
-            raise e
+            DisplayPage().prompt(str_exception(e))
 
     if v == 4:  # Start Service
         InputPage.clear()
         try:
             out = start_service()
             ManageService().create(out[0], out[1])
+            DisplayPage().prompt(f"Successfully started service: {out[0]}")
         except Exception as e:
-            raise e
+            if isinstance(e, InputCancelled):
+                InputPage("").print_cancelled_input()
+            else:
+                DisplayPage().prompt(str_exception(e))
 
     if v == 5:  # Stop service
         InputPage.clear()
         try:
             value = InputPage("Input the name of the service you wish to stop").prompt()
             ManageService().delete(value)
+            DisplayPage().prompt(f"Successfully stopped the service: {value}")
         except Exception as e:
-            raise e
+            DisplayPage().prompt(str_exception(e))
 
     if v == 6:  # Manual action
         return 'manual'  # manual action to be done in __main__.py

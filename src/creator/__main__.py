@@ -4,11 +4,6 @@ from src import *
 from lib import *
 
 
-"""
-Wrapper functions
-"""
-
-
 def main():
     pg.verify_cfg()
     v1 = pg.main_menu("Creator")
@@ -18,12 +13,18 @@ def main():
                          "Cycle Images Story",
                          "Cycle Image Story Shorts"]
                         ).prompt("Select a formula to use")
-        if v2 == 0:
-            CreatorFormulas().generic_text_story()
-        if v2 == 1:
-            CreatorFormulas().cycling_images_story()
-        if v2 == 2:
-            CreatorFormulas().cycling_images_story_shorts()
+        try:
+            if v2 == 0:
+                CreatorFormulas().generic_text_story()
+            if v2 == 1:
+                CreatorFormulas().cycling_images_story()
+            if v2 == 2:
+                CreatorFormulas().cycling_images_story_shorts()
+        except Exception as e:
+            if isinstance(e, InputCancelled):
+                InputPage("").print_cancelled_input()
+            else:
+                DisplayPage().prompt(pg.str_exception(e))
 
     # end of custom
 
@@ -38,8 +39,10 @@ def main():
             db = DbNasConnection()
             db.create_content(*inputs)
         except Exception as e:
-            raise e
-        print(200)
+            if isinstance(e, InputCancelled):
+                InputPage("").print_cancelled_input()
+            else:
+                DisplayPage.prompt(pg.str_exception(e))
 
 
 

@@ -77,4 +77,3 @@ if not exec_fail:
         """)
 
         f.save_generated_script(service_name)
-        print(200)

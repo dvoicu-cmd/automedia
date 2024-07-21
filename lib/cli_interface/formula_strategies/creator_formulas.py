@@ -193,9 +193,6 @@ manager.cleanup(tts_tmp)
         # Save the script
         f.save_generated_script(service_name)
 
-        InputPage.clear()
-        print(f"Created Service File: {service_name}")
-        print(200)
 
 
     @staticmethod
@@ -378,9 +375,6 @@ manager.cleanup(tts_tmp)
             """)
 
         f.save_generated_script(service_name)
-
-        print(f"Created Service File: {service_name}")
-        print(200)
         pass
 
     @staticmethod
@@ -501,9 +495,6 @@ manager.cleanup(tts_tmp)
             """)
 
         f.save_generated_script(service_name)
-
-        print(f"Created Service File: {service_name}")
-        print(200)
         pass
 
     # ----------------------------------------------------------------------------------

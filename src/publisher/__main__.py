@@ -12,83 +12,99 @@ def main():
     if v1 == 'custom':
         # CUSTOM PUBLISHER FORMULA CREATION
         v2 = PickerPage(["YT Formula"]).prompt("Select a formula to use")
-        if v2 == 0:
-            PublisherFormulas().yt_formula()
+        try:
+            if v2 == 0:
+                PublisherFormulas().yt_formula()
+        except Exception as e:
+            if isinstance(e, InputCancelled):
+                InputPage("").print_cancelled_input()
+            else:
+                DisplayPage().prompt(pg.str_exception(e))
 
     if v1 == 'manual':
 
         v2 = PickerPage(["Random Content File", "Specific Content File"]).prompt("Manually Publishing a Content File.\nSelect an option.")
         if v2 == 0:  # random content file
-            account_id = InputPage("Publishing Random Content File.\nInput the account id").prompt()
-            # init objs
-            lp = LocalPublish()
-            db_nas = DbNasConnection()
+            try:
+                account_id = InputPage("Publishing Random Content File.\nInput the account id").prompt()
+                # init objs
+                lp = LocalPublish()
+                db_nas = DbNasConnection()
 
-            # get the record
-            record = db_nas.read_rand_content_file(account_id)
+                # get the record
+                record = db_nas.read_rand_content_file(account_id)
 
-            # get the file path for the content file
-            lp.set_src_path(record[1])
+                # get the file path for the content file
+                lp.set_src_path(record[1])
 
-            # set the destination to be just outside the project
-            cwd = os.getcwd()
-            cd_to_desired_root(cwd, "automedia")
-            os.chdir('..')
-            output_dir = os.getcwd()
-            os.chdir(cwd)
+                # set the destination to be just outside the project
+                cwd = os.getcwd()
+                cd_to_desired_root(cwd, "automedia")
+                os.chdir('..')
+                output_dir = os.getcwd()
+                os.chdir(cwd)
 
-            # exec publish
-            lp.exec_upload(output_dir)
+                # exec publish
+                lp.exec_upload(output_dir)
 
-            # archive
-            db_nas.update_to_archived('content_files', record[0])
+                # archive
+                db_nas.update_to_archived('content_files', record[0])
 
-            print(200)
+                # Display success
+                DisplayPage().prompt("Published new content locally")
+
+            except Exception as e:
+                if isinstance(e, InputCancelled):
+                    InputPage("").print_cancelled_input()
+                else:
+                    DisplayPage().prompt(pg.str_exception(e))
+
+
 
 
         if v2 == 1:  # specific content file
-            account_id = InputPage("Publishing Specific Content File.\nInput the account id").prompt()
-            # init objs
-            lp = LocalPublish()
-            db_nas = DbNasConnection()
-
-            # get the record
             try:
+                account_id = InputPage("Publishing Specific Content File.\nInput the account id").prompt()
+                # init objs
+                lp = LocalPublish()
+                db_nas = DbNasConnection()
+
+                # get all records
                 record_all = db_nas.read_all_content_files_of_account(account_id)
-            except Exception as e:
-                raise e
 
-            # format the string
-            records_str = ''
-            for record in record_all:
-                records_str = records_str + record + "\n"
+                # format the string
+                records_str = ''
+                for record in record_all:
+                    records_str = records_str + record + "\n"
 
-            publish_id = InputPage(records_str+"\n\nAbove are all associated content files.\nInput the id of the one you wish to publish locally.").prompt()
+                publish_id = InputPage(records_str+"\n\nAbove are all associated content files.\nInput the id of the one you wish to publish locally.").prompt()
 
-            record = None
-            try:
                 record = db_nas.read_specific_content_file_by_id(publish_id)
+
+
+                # get the file path for the content file
+                lp.set_src_path(record[1])
+
+                # set the destination to be just outside the project
+                cwd = os.getcwd()
+                cd_to_desired_root(cwd, "automedia")
+                os.chdir('..')
+                output_dir = os.getcwd()
+                os.chdir(cwd)
+
+                # exec publish
+                lp.exec_upload(output_dir)
+
+                # archive
+                db_nas.update_to_archived('content_files', record[0])
+
+                DisplayPage().prompt("Published new content locally")
+
             except Exception as e:
-                raise e
-
-
-            # get the file path for the content file
-            lp.set_src_path(record[1])
-
-            # set the destination to be just outside the project
-            cwd = os.getcwd()
-            cd_to_desired_root(cwd, "automedia")
-            os.chdir('..')
-            output_dir = os.getcwd()
-            os.chdir(cwd)
-
-            # exec publish
-            lp.exec_upload(output_dir)
-
-            # archive
-            db_nas.update_to_archived('content_files', record[0])
-
-            print(200)
+                if isinstance(e, InputCancelled):
+                    InputPage("").print_cancelled_input()
+                else:
+                    DisplayPage().prompt(pg.str_exception(e))
 
 
 if __name__ == '__main__':

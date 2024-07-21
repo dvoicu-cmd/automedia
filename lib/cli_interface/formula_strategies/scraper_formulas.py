@@ -46,7 +46,6 @@ manager.cleanup(tmp)
         """)
 
         f.save_generated_script(name)
-        print(200)
 
     @staticmethod
     def open_ai_text():
@@ -111,7 +110,6 @@ manager.cleanup(tmp)
 
         """)
         f.save_generated_script(name)
-        print(200)
 
     @staticmethod
     def open_ai_text_and_img():
@@ -203,7 +201,6 @@ for prompt_dir in prompt_dirs:
         """)
 
         f.save_generated_script(name)
-        print(200)
 
 
 
