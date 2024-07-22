@@ -153,7 +153,8 @@ def main_menu(node_name):
             ls = ManageFormula().print_script_names()
             srt_pattern = re.compile(r'srt_tmp_[A-Za-z0-9]{5}$')
             tmp_video = re.compile(r'videoTEMP_[A-Za-z0-9]{3}_[A-Za-z0-9]{3}_[A-Za-z0-9]{3}.mp4')
-            ls_to_filter = ['cache', 'log', 'output', '__pycache__', 'timer_map.pickle', '__init__.py', 'context.py', 'cred.cfg', 'paths.cfg']
+            ls_to_filter = ['cache', 'log', 'output', '__pycache__', 'timer_map.pickle', '__init__.py', 'context.py',
+                            'cred.cfg', 'paths.cfg', '.DS_Store']
             filtered_list = [item for item in ls if item not in ls_to_filter or srt_pattern.match(item) or tmp_video.match(item)]  # Filter out the list
 
             DisplayPage().prompt(f"All formulas: \n\n {filtered_list}")

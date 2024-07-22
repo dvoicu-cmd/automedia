@@ -11,8 +11,9 @@ def main():
         # CUSTOM CREATOR FORMULA CREATION
         v2 = PickerPage(["Text Story",
                          "Cycle Images Story",
-                         "Cycle Image Story Shorts"]
-                        ).prompt("Select a formula to use")
+                         "Cycle Image Story Shorts",
+                         "Back"
+                         ]).prompt("Select a formula to use")
         try:
             if v2 == 0:
                 CreatorFormulas().generic_text_story()
@@ -20,6 +21,8 @@ def main():
                 CreatorFormulas().cycling_images_story()
             if v2 == 2:
                 CreatorFormulas().cycling_images_story_shorts()
+            if v2 == 3:
+                pass
         except Exception as e:
             if isinstance(e, InputCancelled):
                 InputPage("").print_cancelled_input()

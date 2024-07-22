@@ -11,10 +11,14 @@ def main():
     v1 = pg.main_menu("Publisher")
     if v1 == 'custom':
         # CUSTOM PUBLISHER FORMULA CREATION
-        v2 = PickerPage(["YT Formula"]).prompt("Select a formula to use")
+        v2 = PickerPage(["YT Formula", "Local Formula", "Back"]).prompt("Select a formula to use")
         try:
             if v2 == 0:
                 PublisherFormulas().yt_formula()
+            if v2 == 1:
+                PublisherFormulas().local_formula()
+            if v2 == 2:
+                pass
         except Exception as e:
             if isinstance(e, InputCancelled):
                 InputPage("").print_cancelled_input()

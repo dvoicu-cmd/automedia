@@ -80,3 +80,59 @@ if not exec_fail:
         f.save_generated_script(service_name)
 
         DisplayPage().prompt(f"Successfully created new formula: {service_name}")
+
+
+    @staticmethod
+    def local_formula():
+        f = ManageFormula()
+        service_name = InputPage("Input the name of the service").prompt()
+        number_records = InputPage("Input the number of media files to pull per service call.").prompt()
+        account_id = InputPage("Input the account id to pull media files from").prompt()
+        dir_name = InputPage("Input a name for the directory to export to.").prompt()
+
+        f.ap(f"""
+# init objs
+lp = LocalPublish()
+db_nas = DbNasConnection()
+# set the destination to be just outside the project
+cwd = os.getcwd()
+cd_to_desired_root(cwd, "automedia")
+os.chdir('..')
+outside_dir_path = os.getcwd()
+output_dir = outside_dir_path+"/automedia_exports"
+specific_target_dir = output_dir+"{dir_name}"
+
+# make the exports directory if it does not exist
+try:
+    os.mkdir(output_dir)
+except FileExistsError:
+    pass
+    
+# make the export dir for this service if it does not exist
+try:
+    os.mkdir(specific_target_dir)
+except FileExistsError:
+    pass
+    
+# Change back.
+os.chdir(cwd)
+
+# Start pulling records
+i = 0
+
+for i in range({number_records}):
+    # get the record
+    record = db_nas.read_rand_content_file({account_id})
+    # get the file path for the content file
+    lp.set_src_path(record[1])
+    # exec publish
+    lp.exec_upload(specific_target_dir)
+    # archive
+    db_nas.update_to_archived('content_files', record[0])
+
+        """)
+
+        f.save_generated_script(service_name)
+
+        DisplayPage().prompt(f"Successfully created new formula: {service_name}")
+        pass
