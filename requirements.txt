@@ -41,7 +41,7 @@ typing-extensions>=4.8.0
 annotated-types>=0.4.0
 pydantic-core==2.10.1
 anyio<5,>=3.4.0
-idna>=3.7
+#idna>=3.7
 sniffio>=1.1
 pick~=2.2.0
 

@@ -863,10 +863,13 @@ class DbNasConnection:
     def __delete_archived_content_file(self, record, to_archive_path):
         # ______ NAS Component ______
 
-
-        location_on_server = record[1]
-        local_path = f"{self.nas_root()}/{location_on_server}"
-        shutil.move(local_path, to_archive_path)
+        try:
+            location_on_server = record[1]
+            local_path = f"{self.nas_root()}/{location_on_server}"
+            shutil.move(local_path, to_archive_path)
+        except FileNotFoundError:
+            # if this gets thrown, then the record being read is a dummy record. Ignore it and delete the record.
+            pass
 
         # ______ DB Component ______
 
