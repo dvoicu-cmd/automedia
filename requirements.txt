@@ -22,9 +22,9 @@ pyttsx3  # Additional dependencies needed: espeak ffmpeg libespeak1
 
 # -- creating --
 moviepy~=1.0.3
-numpy>=1.24.4
+numpy<=1.26.4
 imageio~=2.33.1
-opencv-python~=4.9.0.80
+opencv-python~=4.10.0.82
 openai-whisper  #v20231117, so unconventional pip gave up
 
 # Additional packages outside of pip: ffmpeg (if not installed by imageio), imagemagick
@@ -33,15 +33,15 @@ openai-whisper  #v20231117, so unconventional pip gave up
 
 
 # -- fastapi --
-fastapi~=0.109.0
-starlette~=0.35.1
+# fastapi~=0.109.0
+# starlette~=0.35.1
 
 # additional req
 typing-extensions>=4.8.0
 annotated-types>=0.4.0
 pydantic-core==2.10.1
 anyio<5,>=3.4.0
-idna>=2.8
+idna>=3.7
 sniffio>=1.1
 pick~=2.2.0
 
