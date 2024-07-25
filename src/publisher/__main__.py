@@ -49,6 +49,8 @@ def main():
                     # get the record
                     try:
                         record = db_nas.read_rand_content_file(account_id)
+                        if record is None:
+                            break  # break out the loop if you have an empty record.
                     except Exception as e:
                         triggered_exception = True
                         stored_exception = e
