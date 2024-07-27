@@ -952,7 +952,10 @@ class DbNasConnection:
         # Finally, delete the directory
         local_path = self.nas_root()
         local_path = f"{local_path}/active/created_videos/{account_record[1]}"
-        os.rmdir(local_path)
+        try:
+            os.rmdir(local_path)
+        except OSError:  # If for some reason, there are still files present, force that delete.
+            shutil.rmtree(local_path)
 
         return
 

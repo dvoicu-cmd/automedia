@@ -1,7 +1,7 @@
 import os
 
 """
-A class that contains a bunch of static methods for general utility purposes in the automedia project.
+A class that contains a bunch of static methods for general text utility purposes in the automedia project.
 """
 
 
