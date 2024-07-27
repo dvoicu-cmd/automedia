@@ -1012,7 +1012,11 @@ class DbNasConnection:
         # First the directory
         path = self.nas_root()
         path = f"{path}/active/media_pools/{media_pool_record[1]}"
-        os.rmdir(path)
+        try:
+            os.rmdir(path)
+        except OSError:  # If for some reason, there are still files present, force that delete.
+            # For cases when there are hidden files.
+            shutil.rmtree(path)
 
         # ______ DB Component ______
         # Then the db records

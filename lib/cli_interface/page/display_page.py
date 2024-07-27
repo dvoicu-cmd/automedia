@@ -18,14 +18,9 @@ class DisplayPage(CliPage):
         wrapped_title = textwrap.fill(title, terminal_width)
         return wrapped_title
 
-    def prompt(self, msg='', condense_text=False):
+    def prompt(self, msg=''):
         self.clear()
-        terminal_height = os.get_terminal_size().lines
-        terminal_width = os.get_terminal_size().columns
-        if terminal_height < 10 or terminal_width < 10 or len(msg) > 1000 or condense_text:
-            input(f"{msg}\n\n Press Enter to continue.")
-        else:
-            PickerPage(["continue"]).prompt(msg)  # Display
+        input(f"{msg}\n\n Press Enter to continue.")
 
 
 
