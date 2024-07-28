@@ -147,15 +147,12 @@ class ManageService:
         service_path = paths.get('python_scripts_path')
         specific_service_script = service_path + "/" + py_file + ".py"
 
-        try:
-            # Open the file and read the contents
-            with open(specific_service_script, 'r') as file:
-                service_code = file.read()
+        # Open the file and read the contents
+        with open(specific_service_script, 'r') as file:
+            service_code = file.read()
 
-            # Execute the service
-            exec(service_code)
-        except Exception as e:
-            return e
+        # Execute the service
+        exec(service_code)
 
 
 
