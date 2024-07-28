@@ -210,6 +210,8 @@ def manual_execution():
         input(f"\n\n Successfully Executed {service}. \nPress Enter to continue.")
     except FileNotFoundError:
         DisplayPage().prompt(f"No such service: {service}")
+    except TypeError as e:
+        DisplayPage().prompt(f"A TypeError was thrown. Most likely a media pool is empty. \n\n {str_exception(e)}")
     except Exception as e:
         DisplayPage().prompt(str_exception(e))
 
