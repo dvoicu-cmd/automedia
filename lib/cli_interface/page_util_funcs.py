@@ -197,6 +197,24 @@ def main_menu(node_name):
         quit("Bye")
 
 
+def manual_execution():
+    """
+    Common page for manually executing pages
+    :return:
+    """
+    service = InputPage("Input what service you would like to start.").prompt()
+    InputPage("").clear()
+    try:
+        print(f"Starting Execution of: {service}")
+        ManageService().run_py_service(service)
+        input(f"\n\n Successfully Executed {service}. \nPress Enter to continue.")
+    except FileNotFoundError:
+        DisplayPage().prompt(f"No such service: {service}")
+    except Exception as e:
+        DisplayPage().prompt(str_exception(e))
+
+
+
 def str_exception(ret):
     """
     Gets an exception object into a string stack strace

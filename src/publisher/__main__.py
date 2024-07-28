@@ -28,9 +28,10 @@ def main():
     if v1 == 'manual':
 
         v2 = PickerPage(["Random Content Files",
-                         "Multiple Content Files",
-                         "Specific Content File",
-                         ]).prompt("Manually Publishing a Content File.\nSelect an option.")
+                         "Multiple Content Files",  # "Specific Content File" option maybe?
+                         "Manual Execution",
+                         "Back"
+                         ]).prompt("Manual Publisher Function.\nSelect an option.")
         if v2 == 0:  # random content files
             try:
                 account_id = InputPage("Publishing Random Content File.\nInput the account id").prompt()
@@ -77,7 +78,7 @@ def main():
                 else:
                     DisplayPage().prompt(pg.str_exception(e))
 
-        if v2 == 1:  # specific content file
+        if v2 == 1:  # multiple content file
             try:
                 account_id = InputPage("Publishing Specific Content File.\nInput the account id").prompt()
                 # init objs
@@ -116,6 +117,12 @@ def main():
                     InputPage("").print_cancelled_input()
                 else:
                     DisplayPage().prompt(pg.str_exception(e))
+
+        if v2 == 2:  # Manual Execution
+            pg.manual_execution()
+
+        if v2 == 3:  # Back
+            pass
 
 
 def export_dir():

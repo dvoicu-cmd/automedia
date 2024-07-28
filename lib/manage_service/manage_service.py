@@ -140,20 +140,22 @@ class ManageService:
         """
         Manually runs the py file in a py_services package
         :return:
+        :raises: FileNotFoundError if the service does not exist.
         """
-        service_name = py_file
-
-        paths = self.service_config.read()
-
-        # Get the python run time used by service files
-        python_runtime = paths.get('python_runtime_path')
-
         # Get the specific script file to run
+        paths = self.service_config.read()
         service_path = paths.get('python_scripts_path')
-        specific_service_script = service_path + "/" + service_name + ".py"
+        specific_service_script = service_path + "/" + py_file + ".py"
 
         try:
-            subprocess.run([python_runtime, specific_service_script], check=True)
-            print("Script executed successfully")
-        except subprocess.CalledProcessError as e:
-            print(f"Error running the script: {e}")
+            # Open the file and read the contents
+            with open(specific_service_script, 'r') as file:
+                service_code = file.read()
+
+            # Execute the service
+            exec(service_code)
+        except Exception as e:
+            return e
+
+
+
