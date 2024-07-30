@@ -13,17 +13,19 @@ class PublisherFormulas:
 
     def create_formula(self, formula_method: str, *args):
         match formula_method:
-            case "yt":
-                self.yt_formula()
+            case "yt_formula":
+                self.__yt_formula(*args)
+            case "local_formula":
+                self.__local_formula(*args)
             case _:
                 pass
 
     @staticmethod
-    def yt_formula():
+    def __yt_formula(service_name, name):
         f = ManageFormula()
 
-        service_name = InputPage("Input the name of the service").prompt()
-        name = InputPage("Input the name of the account you want to set up a YT publisher for").prompt()
+        # service_name = InputPage("Input the name of the service").prompt()
+        # name = InputPage("Input the name of the account you want to set up a YT publisher for").prompt()
 
         f.ap(f"""
         
@@ -86,16 +88,13 @@ if not exec_fail:
 
         f.save_generated_script(service_name)
 
-        DisplayPage().prompt(f"Successfully created new formula: {service_name}")
-
-
     @staticmethod
-    def local_formula():
+    def __local_formula(service_name, number_records, account_id, dir_name):
         f = ManageFormula()
-        service_name = InputPage("Input the name of the service").prompt()
-        number_records = InputPage("Input the number of media files to pull per service call.").prompt()
-        account_id = InputPage("Input the account id to pull media files from").prompt()
-        dir_name = InputPage("Input a name for the directory to export to.").prompt()
+        # service_name = InputPage("Input the name of the service").prompt()
+        # number_records = InputPage("Input the number of media files to pull per service call.").prompt()
+        # account_id = InputPage("Input the account id to pull media files from").prompt()
+        # dir_name = InputPage("Input a name for the directory to export to.").prompt()
 
         f.ap(f"""
 # init objs
@@ -142,6 +141,3 @@ for i in range({number_records}):
         """)
 
         f.save_generated_script(service_name)
-
-        DisplayPage().prompt(f"Successfully created new formula: {service_name}")
-        pass
