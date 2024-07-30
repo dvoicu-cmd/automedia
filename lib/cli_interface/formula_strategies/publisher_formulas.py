@@ -11,6 +11,13 @@ class PublisherFormulas:
     def __init__(self):
         pass
 
+    def create_formula(self, formula_method: str, *args):
+        match formula_method:
+            case "yt":
+                self.yt_formula()
+            case _:
+                pass
+
     @staticmethod
     def yt_formula():
         f = ManageFormula()

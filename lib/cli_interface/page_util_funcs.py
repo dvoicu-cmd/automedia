@@ -154,10 +154,13 @@ def main_menu(node_name):
             srt_pattern = re.compile(r'srt_tmp_[A-Za-z0-9]{5}$')
             tmp_video = re.compile(r'videoTEMP_[A-Za-z0-9]{3}_[A-Za-z0-9]{3}_[A-Za-z0-9]{3}.mp4')
             ls_to_filter = ['cache', 'log', 'output', '__pycache__', 'timer_map.pickle', '__init__.py', 'context.py',
-                            'cred.cfg', 'paths.cfg', '.DS_Store']
+                            'cred.cfg', 'paths.cfg', '.DS_Store', 'formula_properties']
             filtered_list = [item for item in ls if item not in ls_to_filter or srt_pattern.match(item) or tmp_video.match(item)]  # Filter out the list
 
-            DisplayPage().prompt(f"All formulas: \n\n {filtered_list}")
+            py_files = [file for file in filtered_list if file.endswith('.py')]  # id the .py files left after filtering
+            py_removed_list = [file.rstrip('.py') for file in py_files]  # remove the .py for display.
+
+            DisplayPage().prompt(f"All formulas: \n\n {py_removed_list}")
         except Exception as e:
             DisplayPage().prompt(str_exception(e))
 
@@ -202,8 +205,13 @@ def manual_execution():
     Common page for manually executing pages
     :return:
     """
-    service = InputPage("Input what service you would like to start.").prompt()
-    InputPage("").clear()
+    try:
+        service = InputPage("Input what service you would like to start.").prompt()
+        InputPage("").clear()
+    except InputCancelled:
+        InputPage("").print_cancelled_input()
+        return
+
     try:
         print(f"Starting Execution of: {service}")
         ManageService().run_py_service(service)
@@ -212,9 +220,6 @@ def manual_execution():
         DisplayPage().prompt(f"No such service: {service}")
     except TypeError as e:
         DisplayPage().prompt(f"A TypeError was thrown. Most likely a media pool is empty. \n\n {str_exception(e)}")
-    except InputCancelled:
-        InputPage("").print_cancelled_input()
-        pass
     except Exception as e:
         DisplayPage().prompt(str_exception(e))
 

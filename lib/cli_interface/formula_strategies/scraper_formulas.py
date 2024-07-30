@@ -10,6 +10,13 @@ class ScraperFormulas:
     def __init__(self):
         pass
 
+    def create_formula(self, formula_method: str, *args):
+        match formula_method:
+            case "reddit_scrape":
+                self.reddit_scrape()
+            case _:
+                pass
+
     @staticmethod
     def reddit_scrape():
         f = ManageFormula()
