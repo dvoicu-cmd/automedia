@@ -1,7 +1,6 @@
-from .interface_formulas import InterfaceFormula
 
 
-class CentralFormulas():
+class CentralFormulas:
 
     def __init__(self):
         pass
