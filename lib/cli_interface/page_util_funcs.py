@@ -115,87 +115,117 @@ def main_menu(node_name):
     :param node_name:
     :return:
     """
-    page = PickerPage(
-        [
+
+    page_new = PickerPage([
+        f"Manage {node_name} Formulas",
+        f"Manage Formula Services",
+        f"Manual Actions",
+        f"Quit"
+    ])
+
+    v1 = page_new.prompt(f"{node_name} Menu \nselect an option:")
+    if v1 == 0:  # NODE FORMULAS PAGE
+
+        formula_page = PickerPage([
             f"Create {node_name} Formula",
             f"Delete {node_name} Formula",
+            f"Update {node_name} Formula",
             f"Display All Formulas",
-            f"Display Service Map",
-            f"Start Service",
-            f"Stop Service",
-            f"Manual Action",
-            f"Quit"
+            f"Back"
         ])
 
-    v = page.prompt(f"{node_name} Menu \nselect an option:")
-    if v == 0:  # Create formula
-        return 'custom'  # Do something custom in the __main__.py file
+        v2 = formula_page.prompt("Manage Formula")
+        if v2 == 0:  # Create Formula
+            return 'custom'  # Do something custom in the __main__.py file
 
-    if v == 1:  # Delete a formula
-        try:
-            value = InputPage("Input the name of the formula to delete").prompt()
-        except InputCancelled:
-            InputPage("").print_cancelled_input()
-            return
-
-        try:
-            ManageFormula().delete_generated_script(value)
-            DisplayPage().prompt(f"Successfully deleted formula: {value}")
-        except Exception as e:
-            DisplayPage().prompt(str_exception(e))
-
-
-    if v == 2:  # Display all formulas
-        InputPage.clear()
-        try:
-            # Stupid. Filtering py_services to just display the py files that where created by the formula class.
-            # Fix: Find all files with .py, exclude key files. like context.py then chop the .py part and display.
-            ls = ManageFormula().print_script_names()
-            srt_pattern = re.compile(r'srt_tmp_[A-Za-z0-9]{5}$')
-            tmp_video = re.compile(r'videoTEMP_[A-Za-z0-9]{3}_[A-Za-z0-9]{3}_[A-Za-z0-9]{3}.mp4')
-            ls_to_filter = ['cache', 'log', 'output', '__pycache__', 'timer_map.pickle', '__init__.py', 'context.py',
-                            'cred.cfg', 'paths.cfg', '.DS_Store', 'formula_properties']
-            filtered_list = [item for item in ls if item not in ls_to_filter or srt_pattern.match(item) or tmp_video.match(item)]  # Filter out the list
-
-            py_files = [file for file in filtered_list if file.endswith('.py')]  # id the .py files left after filtering
-            py_removed_list = [file.rstrip('.py') for file in py_files]  # remove the .py for display.
-
-            DisplayPage().prompt(f"All formulas: \n\n {py_removed_list}")
-        except Exception as e:
-            DisplayPage().prompt(str_exception(e))
-
-    if v == 3:  # Display Service Map
-        InputPage.clear()
-        try:
-            DisplayPage().prompt(f"Displaying all services: \n\n {ManageService().print_map()}")
-        except Exception as e:
-            DisplayPage().prompt(str_exception(e))
-
-    if v == 4:  # Start Service
-        InputPage.clear()
-        try:
-            out = start_service()
-            ManageService().create(out[0], out[1])
-            DisplayPage().prompt(f"Successfully started service: {out[0]}")
-        except Exception as e:
-            if isinstance(e, InputCancelled):
+        if v2 == 1:  # Delete Formula
+            try:
+                value = InputPage("Input the name of the formula to delete").prompt()
+            except InputCancelled:
                 InputPage("").print_cancelled_input()
-            else:
+                return
+
+            try:
+                ManageFormula().delete_generated_script(value)
+                DisplayPage().prompt(f"Successfully deleted formula: {value}")
+            except Exception as e:
                 DisplayPage().prompt(str_exception(e))
 
-    if v == 5:  # Stop service
-        InputPage.clear()
-        try:
-            value = InputPage("Input the name of the service you wish to stop").prompt()
-            ManageService().delete(value)
-            DisplayPage().prompt(f"Successfully stopped the service: {value}")
-        except Exception as e:
-            DisplayPage().prompt(str_exception(e))
+        if v2 == 2:  # Update Formula
+            # WIP
+            pass
 
-    if v == 6:  # Manual action
+        if v2 == 3:  # Display All Formulas
+            InputPage.clear()
+            try:
+                # Stupid. Filtering py_services to just display the py files that where created by the formula class.
+                # Fix: Find all files with .py, exclude key files. like context.py then chop the .py part and display.
+                ls = ManageFormula().print_script_names()
+                srt_pattern = re.compile(r'srt_tmp_[A-Za-z0-9]{5}$')
+                tmp_video = re.compile(r'videoTEMP_[A-Za-z0-9]{3}_[A-Za-z0-9]{3}_[A-Za-z0-9]{3}.mp4')
+                ls_to_filter = ['cache', 'log', 'output', '__pycache__', 'timer_map.pickle', '__init__.py',
+                                'context.py',
+                                'cred.cfg', 'paths.cfg', '.DS_Store', 'formula_properties']
+                filtered_list = [item for item in ls if
+                                 item not in ls_to_filter or srt_pattern.match(item) or tmp_video.match(
+                                     item)]  # Filter out the list
+
+                py_files = [file for file in filtered_list if
+                            file.endswith('.py')]  # id the .py files left after filtering
+                py_removed_list = [file.rstrip('.py') for file in py_files]  # remove the .py for display.
+
+                DisplayPage().prompt(f"All formulas: \n\n {py_removed_list}")
+            except Exception as e:
+                DisplayPage().prompt(str_exception(e))
+
+        if v2 == 4:  # Back
+            pass
+
+    if v1 == 1:  # FORMULA SERVICES PAGE
+
+        services_page = PickerPage([
+            f"Start Service",
+            f"Stop Service",
+            f"Display Services",
+            f"Back"
+        ])
+
+        v2 = services_page.prompt("Service Menu")
+        if v2 == 0:  # Start
+            InputPage.clear()
+            try:
+                out = start_service()
+                ManageService().create(out[0], out[1])
+                DisplayPage().prompt(f"Successfully started service: {out[0]}")
+            except Exception as e:
+                if isinstance(e, InputCancelled):
+                    InputPage("").print_cancelled_input()
+                else:
+                    DisplayPage().prompt(str_exception(e))
+
+        if v2 == 1:  # Stop
+            InputPage.clear()
+            try:
+                value = InputPage("Input the name of the service you wish to stop").prompt()
+                ManageService().delete(value)
+                DisplayPage().prompt(f"Successfully stopped the service: {value}")
+            except Exception as e:
+                DisplayPage().prompt(str_exception(e))
+
+        if v2 == 2:  # Display Services
+            InputPage.clear()
+            try:
+                DisplayPage().prompt(f"Displaying all services: \n\n {ManageService().print_map()}")
+            except Exception as e:
+                DisplayPage().prompt(str_exception(e))
+
+        if v2 == 3:  # Back
+            pass
+
+    if v1 == 2:  # MANUAL ACTIONS PAGE
         return 'manual'  # manual action to be done in __main__.py
 
-    if v == 7:  # Terminate Program
+    if v1 == 3:  # QUIT
         InputPage.clear()
         quit("Bye")
 

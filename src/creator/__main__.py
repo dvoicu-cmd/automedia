@@ -16,7 +16,7 @@ def main():
                          ]).prompt("Select a formula to use")
         try:
             if v2 == 0:
-                # HERE. You wanna have the input pages in the main.
+                service_name = InputPage("Give a title to the service:").prompt()
                 CreatorFormulas().generic_text_story()
             if v2 == 1:
                 CreatorFormulas().cycling_images_story()

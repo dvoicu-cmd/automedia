@@ -11,11 +11,8 @@ class CreatorFormulas:
         pass
 
     def create_formula(self, formula_method: str, *args):
-        match formula_method:
-            case "txt":
-                self.generic_text_story()
-            case _:
-                pass
+        if formula_method == "generic_text_story":
+            self.generic_text_story()
 
     @staticmethod
     def generic_text_story():

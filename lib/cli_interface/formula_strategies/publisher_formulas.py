@@ -12,13 +12,10 @@ class PublisherFormulas:
         pass
 
     def create_formula(self, formula_method: str, *args):
-        match formula_method:
-            case "yt_formula":
-                self.__yt_formula(*args)
-            case "local_formula":
-                self.__local_formula(*args)
-            case _:
-                pass
+        if formula_method == "yt_formula":
+            self.__yt_formula(*args)
+        if formula_method == "local_formula":
+            self.__local_formula(*args)
 
     @staticmethod
     def __yt_formula(service_name, name):
