@@ -129,12 +129,13 @@ def main_menu(node_name):
         formula_page = PickerPage([
             f"Create {node_name} Formula",
             f"Delete {node_name} Formula",
-            f"Update {node_name} Formula",
+            f"Update Formula Values",
+            f"Rename Formula"
             f"Display All Formulas",
             f"Back"
         ])
 
-        v2 = formula_page.prompt("Manage Formula")
+        v2 = formula_page.prompt("Manage Formula.\nselect an option:")
         if v2 == 0:  # Create Formula
             return 'custom'  # Do something custom in the __main__.py file
 
@@ -151,11 +152,38 @@ def main_menu(node_name):
             except Exception as e:
                 DisplayPage().prompt(str_exception(e))
 
-        if v2 == 2:  # Update Formula
-            # WIP
+        if v2 == 2:  # Update Formula Values
+            try:
+                value = InputPage("Input the name of the formula you wish to update").prompt()
+            except InputCancelled:
+                InputPage("").print_cancelled_input()
+                return
+
             pass
 
-        if v2 == 3:  # Display All Formulas
+        if v2 == 3:
+            old_name = ""
+            new_name = ""
+            try:
+                old_name = InputPage("Input the name of the formula you wish to rename").prompt()
+                new_name = InputPage("Input the new name of the formula.").prompt()
+                ManageFormula().rename_generated_script(old_name, new_name)
+            except InputCancelled:
+                InputPage("").print_cancelled_input()
+                return
+            except FileNotFoundError:
+                DisplayPage().prompt(f"The formula {old_name} does not exist.")
+                return
+            except FileExistsError:
+                DisplayPage().prompt(f"The new name {new_name} conflicts")
+                return
+            except Exception as e:  # Generic case exception
+                DisplayPage().prompt(str_exception(e))
+                return
+            DisplayPage().prompt("Successfully renamed formula.")
+
+
+        if v2 == 4:  # Display All Formulas
             InputPage.clear()
             try:
                 # Stupid. Filtering py_services to just display the py files that where created by the formula class.
@@ -178,7 +206,7 @@ def main_menu(node_name):
             except Exception as e:
                 DisplayPage().prompt(str_exception(e))
 
-        if v2 == 4:  # Back
+        if v2 == 5:  # Back
             pass
 
     if v1 == 1:  # FORMULA SERVICES PAGE
@@ -190,7 +218,7 @@ def main_menu(node_name):
             f"Back"
         ])
 
-        v2 = services_page.prompt("Service Menu")
+        v2 = services_page.prompt("Service Menu.\nselect an option:")
         if v2 == 0:  # Start
             InputPage.clear()
             try:
