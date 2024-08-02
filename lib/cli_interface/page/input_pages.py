@@ -11,17 +11,24 @@ class InputPage(CliPage):
     def __init__(self, title: str):
         self.title = title
 
-    def prompt(self):
+    def prompt(self, default_value=""):
         self.clear()
         i = ""  # i -> the input received
 
         # Attempt input
         set_watch_signal()
         try:
-            i = input(f"{self.title}\n\n")
+            if not default_value == "":  # Default value implementation
+                i = input(f"{self.title}\n\nLeave blank for a default value of: {default_value}")
+            else:  # Regular prompt
+                i = input(f"{self.title}\n\n")
         except InputCancelled as e:
             reset_signal()
             raise e  # Throw exception out and have who ever called it handle this exception.
+
+        # return the default value if nothing was inputted by the user.
+        if not default_value == "" and i == "":
+            return default_value
 
         # Attempt to convert the input into an integer
         try:

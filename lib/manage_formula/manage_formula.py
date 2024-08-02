@@ -55,6 +55,11 @@ print(f"------------ Elapsed Time: {elapsed_time} ------------")
         self.append_code(code)
 
     def save_generated_script(self, formula_name):
+        """
+        Saves the created formula. If the formula already exists, overwrite it instead
+        :param formula_name:
+        :return:
+        """
         script_content = self.template_top + '\n'
         script_content += self.template_bottom
 
@@ -62,20 +67,36 @@ print(f"------------ Elapsed Time: {elapsed_time} ------------")
 
         save_location = f"{cwd}/{formula_name}.py"
 
-        with open(save_location, "w") as file:
-            file.write(script_content)
+        if os.path.exists(save_location):
+            raise FileExistsError
+        else:  # Create new script
+            with open(save_location, "w") as file:
+                file.write(script_content)
+        # Save the properties file
+        self.__save_properties(formula_name)
 
-    @staticmethod
-    def update_generated_script(formula_name: str):
+
+    def update_generated_script(self, formula_name: str):
         """
-        update the contents of a generated formula by overwriting the formula.
+        update the contents of a generated formula by overwriting the formula. Like save_generated_scripts, but checks
+        if the formula file exists.
         :param formula_name:
         :return:
         """
-        # Get the formula
-        path = f"{os.getcwd()}/{formula_name}.py"  # assumes py_services of current node
+        script_content = self.template_top + '\n'
+        script_content += self.template_bottom
 
+        cwd = os.getcwd()
 
+        save_location = f"{cwd}/{formula_name}.py"
+
+        if not os.path.exists(save_location):
+            raise FileNotFoundError
+        else:  # Overwrite script
+            with open(save_location, "w") as file:
+                file.write(script_content)
+        # Save the properties file
+        self.__save_properties(formula_name)
 
         pass
 
@@ -105,14 +126,19 @@ print(f"------------ Elapsed Time: {elapsed_time} ------------")
         pass
 
     @staticmethod
-    def delete_generated_script(service_name):
-        """Static method to shortcut delete the py service script"""
-        path = f"{os.getcwd()}/{service_name}.py"
+    def delete_generated_script(formula_name):
+        """
+        Static method to delete the py service script
+        """
+        path = f"{os.getcwd()}/{formula_name}.py"
         os.remove(path)
+        ManageFormula.__remove_properties(formula_name)
 
     @staticmethod
     def print_script_names():
-        """Print all files in the py_service dir"""
+        """
+        Print all files in the py_service dir
+        """
         d = f"{os.getcwd()}"  # Directory
         return os.listdir(d)  # Return lmao
 
@@ -129,6 +155,14 @@ print(f"------------ Elapsed Time: {elapsed_time} ------------")
         """
         # Add the key and value
         self.properties['ATTRIBUTES'][property_name] = value
+
+    def set_property_attr(self, attr_dict: dict):
+        """
+        Sets the attribute map. Typically used when updating a formula
+        :param attr_dict:
+        :return:
+        """
+        self.properties['ATTRIBUTES'] = attr_dict
 
     def set_properties_type(self, node_type: str, strategy: str):
         """
@@ -149,7 +183,7 @@ print(f"------------ Elapsed Time: {elapsed_time} ------------")
         :return:
         """
         prop = ManageFormula.__read_properties_file(formula_name)
-        print(f"prop read attributes of {formula_name}: {prop['ATTRIBUTES']}")
+        print(f"prop read attributes of {formula_name}: {prop['ATTRIBUTES']}")  # I need to see if this returns the dict I want.
         return prop['ATTRIBUTES']
 
     @staticmethod
@@ -212,11 +246,6 @@ print(f"------------ Elapsed Time: {elapsed_time} ------------")
         :param new_formula_name:
         :return:
         """
-        pass
-
-    @staticmethod
-    def __update_property_attr(formula_name: str, updated_attributes: dict):
-        prop = ManageFormula.__read_properties_file(formula_name)
         pass
 
     @staticmethod

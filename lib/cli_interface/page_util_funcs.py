@@ -2,6 +2,7 @@
 from lib.central_connector.db_nas_connection import DbNasConnection
 from lib.manage_service.manage_service import ManageService
 from lib.manage_formula.manage_formula import ManageFormula
+from lib.cli_interface.formula_strategies.interface_formulas import InterfaceFormula
 from lib.cli_interface.page.sigint_handling.input_cancelled import InputCancelled
 from .page.input_pages import InputPage
 from .page.picker_pages import PickerPage
@@ -158,6 +159,21 @@ def main_menu(node_name):
             except InputCancelled:
                 InputPage("").print_cancelled_input()
                 return
+
+            try:
+                # Read formula file
+                mf = ManageFormula()
+                formula_type = mf.read_properties_type(value)
+                attr = mf.read_properties_attr(value)
+                # Reprompt the specific method.
+                InterfaceFormula().create_formula(formula_type.get("node_type"),
+                                                  formula_type.get("strategy"),
+                                                  attr)
+                # The formulas don't gotta change.
+                #TODO Test this shit
+                mf.update_generated_script(value)
+            except Exception as e:
+                DisplayPage().prompt(str_exception(e))
 
             pass
 
