@@ -14,17 +14,12 @@ def main():
         v2 = PickerPage(["YT Formula", "Local Formula", "Back"]).prompt("Select a formula to use")
         try:
             if v2 == 0:
-                service_name = InputPage("Input the name of the service").prompt()
-                name = InputPage("Input the name of the account you want to set up a YT publisher for").prompt()
-                PublisherFormulas().create_formula("yt_formula", service_name, name)
-                DisplayPage().prompt(f"Successfully created new formula: {service_name}")
+                PublisherFormulas().create_formula("yt_formula")
+                DisplayPage().prompt(f"Successfully created new formula.")
             if v2 == 1:
-                service_name = InputPage("Input the name of the service").prompt()
-                number_records = InputPage("Input the number of media files to pull per service call.").prompt()
-                account_id = InputPage("Input the account id to pull media files from").prompt()
-                dir_name = InputPage("Input a name for the directory to export to.").prompt()
-                PublisherFormulas().create_formula("local_formula", service_name, number_records, account_id, dir_name)
-                DisplayPage().prompt(f"Successfully created new formula: {service_name}")
+                PublisherFormulas().create_formula("local_formula")
+                DisplayPage().prompt(f"Successfully created new formula.")
+
             if v2 == 2:
                 pass
         except Exception as e:

@@ -1,4 +1,6 @@
 # Getting the ide to stfu
+import pdb
+
 from lib.central_connector.db_nas_connection import DbNasConnection
 from lib.manage_service.manage_service import ManageService
 from lib.manage_formula.manage_formula import ManageFormula
@@ -131,7 +133,7 @@ def main_menu(node_name):
             f"Create {node_name} Formula",
             f"Delete {node_name} Formula",
             f"Update Formula Values",
-            f"Rename Formula"
+            f"Rename Formula",
             f"Display All Formulas",
             f"Back"
         ])
@@ -165,19 +167,18 @@ def main_menu(node_name):
                 mf = ManageFormula()
                 formula_type = mf.read_properties_type(value)
                 attr = mf.read_properties_attr(value)
+
                 # Reprompt the specific method.
                 InterfaceFormula().create_formula(formula_type.get("node_type"),
                                                   formula_type.get("strategy"),
                                                   attr)
-                # The formulas don't gotta change.
-                #TODO Test this shit
-                mf.update_generated_script(value)
+                DisplayPage().prompt("Successfully updated formula")
             except Exception as e:
                 DisplayPage().prompt(str_exception(e))
 
             pass
 
-        if v2 == 3:
+        if v2 == 3:  # Rename formula
             old_name = ""
             new_name = ""
             try:

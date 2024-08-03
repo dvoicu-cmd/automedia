@@ -1,5 +1,6 @@
 import os
 import sys
+import pdb
 
 from lib.manage_formula.manage_formula import ManageFormula
 from lib.cli_interface.page.input_pages import InputPage
@@ -11,18 +12,21 @@ class PublisherFormulas:
     def __init__(self):
         pass
 
-    def create_formula(self, formula_method: str, *args):
+    def create_formula(self, formula_method: str, attr_map={}):
         if formula_method == "yt_formula":
-            self.__yt_formula(*args)
+            self.__yt_formula(attr_map=attr_map)
         if formula_method == "local_formula":
-            self.__local_formula(*args)
+            self.__local_formula(attr_map=attr_map)
+
+    # -------------------------------------- Formulas --------------------------------------
 
     @staticmethod
-    def __yt_formula(service_name, name):
+    def __yt_formula(attr_map={}):
         f = ManageFormula()
+        f.set_properties_type("publisher", "yt_formula")
 
-        # service_name = InputPage("Input the name of the service").prompt()
-        # name = InputPage("Input the name of the account you want to set up a YT publisher for").prompt()
+        service_name = InputPage("Input the name of the service").prompt(default_value=attr_map.get('service_name'), default_lock=True)
+        name = InputPage("Input the name of the account you want to set up a YT publisher for").prompt(default_value=attr_map.get('name'))
 
         f.ap(f"""
         
@@ -86,12 +90,23 @@ if not exec_fail:
         f.save_generated_script(service_name)
 
     @staticmethod
-    def __local_formula(service_name, number_records, account_id, dir_name):
+    def __local_formula(attr_map={}):
+
         f = ManageFormula()
-        # service_name = InputPage("Input the name of the service").prompt()
-        # number_records = InputPage("Input the number of media files to pull per service call.").prompt()
-        # account_id = InputPage("Input the account id to pull media files from").prompt()
-        # dir_name = InputPage("Input a name for the directory to export to.").prompt()
+        f.set_properties_type("publisher", "local_formula")
+
+        formula_name = InputPage("Input the name of the formula").prompt(default_value=attr_map.get("formula_name"), default_lock=True)
+        f.spa("formula_name", f"{formula_name}")
+
+        number_records = InputPage("Input the number of media files to pull per service call.").prompt(default_value=attr_map.get("number_records"))
+        f.spa("number_records", f"{number_records}")
+
+        account_id = InputPage("Input the account id to pull media files from").prompt(default_value=attr_map.get("account_id"))
+        f.spa("account_id", f"{account_id}")
+
+        dir_name = InputPage("Input a name for the directory to export to.").prompt(default_value=attr_map.get("dir_name"))
+        f.spa("dir_name", f"{dir_name}")
+
 
         f.ap(f"""
 # init objs
@@ -137,4 +152,4 @@ for i in range({number_records}):
 
         """)
 
-        f.save_generated_script(service_name)
+        f.save_generated_script(formula_name)

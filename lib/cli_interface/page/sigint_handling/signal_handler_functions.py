@@ -1,6 +1,7 @@
 from .input_cancelled import InputCancelled
 import signal
 
+
 def signal_handler(sig, frame):
     """
     Raises the InputCancelled exception when an interrupt signal is raised.

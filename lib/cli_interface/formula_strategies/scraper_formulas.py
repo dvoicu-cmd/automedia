@@ -10,7 +10,7 @@ class ScraperFormulas:
     def __init__(self):
         pass
 
-    def create_formula(self, formula_method: str, *args):
+    def create_formula(self, formula_method: str, attr_map: dict):
         if formula_method == "reddit_scrape":
             self.reddit_scrape()
 

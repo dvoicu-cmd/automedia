@@ -10,7 +10,7 @@ class CreatorFormulas:
     def __init__(self):
         pass
 
-    def create_formula(self, formula_method: str, *args):
+    def create_formula(self, formula_method: str, attr_map: dict):
         if formula_method == "generic_text_story":
             self.generic_text_story()
 

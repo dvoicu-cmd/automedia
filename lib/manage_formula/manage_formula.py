@@ -1,5 +1,6 @@
 import configparser
 import os
+import pdb
 
 
 class ManageFormula:
@@ -61,44 +62,13 @@ print(f"------------ Elapsed Time: {elapsed_time} ------------")
         :return:
         """
         script_content = self.template_top + '\n'
-        script_content += self.template_bottom
+        save_location = f"{os.getcwd()}/{formula_name}.py"
 
-        cwd = os.getcwd()
+        with open(save_location, "w") as file:
+            file.write(script_content)
 
-        save_location = f"{cwd}/{formula_name}.py"
-
-        if os.path.exists(save_location):
-            raise FileExistsError
-        else:  # Create new script
-            with open(save_location, "w") as file:
-                file.write(script_content)
         # Save the properties file
         self.__save_properties(formula_name)
-
-
-    def update_generated_script(self, formula_name: str):
-        """
-        update the contents of a generated formula by overwriting the formula. Like save_generated_scripts, but checks
-        if the formula file exists.
-        :param formula_name:
-        :return:
-        """
-        script_content = self.template_top + '\n'
-        script_content += self.template_bottom
-
-        cwd = os.getcwd()
-
-        save_location = f"{cwd}/{formula_name}.py"
-
-        if not os.path.exists(save_location):
-            raise FileNotFoundError
-        else:  # Overwrite script
-            with open(save_location, "w") as file:
-                file.write(script_content)
-        # Save the properties file
-        self.__save_properties(formula_name)
-
-        pass
 
     @staticmethod
     def rename_generated_script(old_formula_name, new_formula_name):
@@ -156,13 +126,18 @@ print(f"------------ Elapsed Time: {elapsed_time} ------------")
         # Add the key and value
         self.properties['ATTRIBUTES'][property_name] = value
 
-    def set_property_attr(self, attr_dict: dict):
+    def set_property_attr(self, attr_name: str, attr_value: str):
         """
         Sets the attribute map. Typically used when updating a formula
-        :param attr_dict:
+        """
+        self.properties['ATTRIBUTES'][f"{attr_name}"] = attr_value
+
+    def spa(self, attr_name: str, attr_value: str):
+        """
+        shorthand of set_property_attr
         :return:
         """
-        self.properties['ATTRIBUTES'] = attr_dict
+        self.set_property_attr(attr_name, attr_value)
 
     def set_properties_type(self, node_type: str, strategy: str):
         """
@@ -182,9 +157,13 @@ print(f"------------ Elapsed Time: {elapsed_time} ------------")
         Reads the attributes key values from the saved properties file of the given formula
         :return:
         """
+
         prop = ManageFormula.__read_properties_file(formula_name)
-        print(f"prop read attributes of {formula_name}: {prop['ATTRIBUTES']}")  # I need to see if this returns the dict I want.
-        return prop['ATTRIBUTES']
+        attr_name = [option for option in prop['ATTRIBUTES']]  # Taken from the docs.
+        output_attr_map = {}
+        for key in attr_name:
+            output_attr_map[f"{key}"] = prop.get('ATTRIBUTES', key)
+        return output_attr_map
 
     @staticmethod
     def read_properties_type(formula_name: str):
@@ -236,7 +215,7 @@ print(f"------------ Elapsed Time: {elapsed_time} ------------")
         :return:
         """
         prop_dir = f"{os.getcwd()}/formula_properties"
-        os.rmdir(f"{prop_dir}/{formula_name}.cfg")
+        os.remove(f"{prop_dir}/{formula_name}.cfg")
 
     @staticmethod
     def __rename_properties(old_formula_name, new_formula_name):
