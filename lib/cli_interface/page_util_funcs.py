@@ -4,6 +4,7 @@ import pdb
 from lib.central_connector.db_nas_connection import DbNasConnection
 from lib.manage_service.manage_service import ManageService
 from lib.manage_formula.manage_formula import ManageFormula
+from lib.manage_directory_structure.dir_manager import DirManager
 from lib.cli_interface.formula_strategies.interface_formulas import InterfaceFormula
 from lib.cli_interface.page.sigint_handling.input_cancelled import InputCancelled
 from .page.input_pages import InputPage
@@ -84,7 +85,7 @@ def start_service():
     :raises: InputCancelled exception when an input page detects a sigint. Up to caller to handle it.
     """
     try:
-        page = InputPage("Input the service you wish to start. (Exclude the .py extension)")
+        page = InputPage("Input the name of the formula you wish to start a service for.")
         service_name = page.prompt()
 
         # Loop to add on_calendar values
@@ -101,10 +102,10 @@ def start_service():
 
             # prompt if user wishes to add more on_calendar values
             continue_loop = PickerPage([
-                "Add another cron time",
-                "Save file"
+                "Yes, Add another cron time.",
+                "No, Save the service."
             ])
-            result = continue_loop.prompt()
+            result = continue_loop.prompt("Do you wish to add another time interval?")
             if result == 1:
                 contd = False
 
@@ -205,10 +206,11 @@ def main_menu(node_name):
         if v2 == 4:  # Display All Formulas
             InputPage.clear()
             try:
-                # Stupid. Filtering py_services to just display the py files that where created by the formula class.
-                # Fix: Find all files with .py, exclude key files. like context.py then chop the .py part and display.
-                ls = ManageService().read_script_path()
-                # All this filtering ain't needed anymore but whatever, does not hurt to keep it.
+                # Stupid but you gotta do what you gotta do.
+                # Filtering py_services to just display the py files that where created by the formula class.
+                path = ManageService().read_script_path()
+                ls = DirManager.select_dir_basename(path)
+
                 srt_pattern = re.compile(r'srt_tmp_[A-Za-z0-9]{5}$')
                 tmp_video = re.compile(r'videoTEMP_[A-Za-z0-9]{3}_[A-Za-z0-9]{3}_[A-Za-z0-9]{3}.mp4')
                 ls_to_filter = ['cache', 'log', 'output', '__pycache__', 'timer_map.pickle', '__init__.py',

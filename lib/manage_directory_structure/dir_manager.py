@@ -74,6 +74,21 @@ class DirManager:
         files = glob.glob(pattern)
         return files
 
+    @staticmethod
+    def select_dir_basename(dir_path, file_filter="*"):
+        """
+        calls select_dir but gives only the files name and not the full path.
+        :param dir_path:
+        :param file_filter:
+        :return:
+        """
+        file_paths = DirManager.select_dir(dir_path, file_filter)
+        file_base_names = []
+        for file in file_paths:
+            base_name = os.path.basename(file)
+            file_base_names.append(base_name)
+        return file_base_names
+
     def select_dir_one(self, dir_path):
         """
         Returns the file path in a dir with only one file in it
