@@ -81,6 +81,14 @@ class ManageService:
         self.timer_map.deserialize()
         return self.timer_map.json_return()
 
+    def read_script_path(self):
+        """
+        Returns the absolute path to the script location
+        :return:
+        """
+        path_dict = self.service_config.read()
+        return path_dict.get('python_scripts_path')
+
     # --------- Writing Files --------- #
 
     def __write_cron_file(self, py_file, on_calendar_list):

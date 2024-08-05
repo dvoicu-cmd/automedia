@@ -110,9 +110,9 @@ class DirManager:
         if not os.path.exists(f"{wd}/output"):
             # Output will contain any tmp directories to separates critical sections for each py_service
             os.mkdir(f"{wd}/output")
-        if not os.path.exists(f"{wd}/cache"):
-            # Cache will contain any left over dirs that have failed to be processed.
-            os.mkdir(f"{wd}/cache")
+        # if not os.path.exists(f"{wd}/cache"):
+        #     # Cache will contain any left over dirs that have failed to be processed.
+        #     os.mkdir(f"{wd}/cache")
 
     @abstractmethod
     def save_cache(self, *args):

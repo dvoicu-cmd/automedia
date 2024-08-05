@@ -118,7 +118,7 @@ cd_to_desired_root(cwd, "automedia")
 os.chdir('..')
 outside_dir_path = os.getcwd()
 output_dir = outside_dir_path+"/automedia_exports"
-specific_target_dir = output_dir+"{dir_name}"
+specific_target_dir = output_dir+"/{dir_name}"
 
 # make the exports directory if it does not exist
 try:

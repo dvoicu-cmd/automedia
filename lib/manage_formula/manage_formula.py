@@ -1,6 +1,7 @@
 import configparser
 import os
 import pdb
+from lib.manage_service.manage_service import ManageService
 
 
 class ManageFormula:
@@ -62,7 +63,7 @@ print(f"------------ Elapsed Time: {elapsed_time} ------------")
         :return:
         """
         script_content = self.template_top + '\n'
-        save_location = f"{os.getcwd()}/{formula_name}.py"
+        save_location = f"{ManageService().read_script_path()}/{formula_name}.py"
 
         with open(save_location, "w") as file:
             file.write(script_content)
@@ -78,8 +79,8 @@ print(f"------------ Elapsed Time: {elapsed_time} ------------")
         :param new_formula_name:
         :return:
         """
-        old_path = f"{os.getcwd()}/{old_formula_name}.py"
-        new_path = f"{os.getcwd()}/{new_formula_name}.py"
+        old_path = f"{ManageService().read_script_path()}/{old_formula_name}.py"
+        new_path = f"{ManageService().read_script_path()}/{new_formula_name}.py"
         # Get the formula.
 
         # Does not exist, raise exception.
@@ -100,17 +101,9 @@ print(f"------------ Elapsed Time: {elapsed_time} ------------")
         """
         Static method to delete the py service script
         """
-        path = f"{os.getcwd()}/{formula_name}.py"
+        path = f"{ManageService().read_script_path()}/{formula_name}.py"
         os.remove(path)
         ManageFormula.__remove_properties(formula_name)
-
-    @staticmethod
-    def print_script_names():
-        """
-        Print all files in the py_service dir
-        """
-        d = f"{os.getcwd()}"  # Directory
-        return os.listdir(d)  # Return lmao
 
 
     # -------------- Properties Functionality --------------
@@ -186,7 +179,7 @@ print(f"------------ Elapsed Time: {elapsed_time} ------------")
         :param formula_name:
         :return:
         """
-        prop_dir = f"{os.getcwd()}/formula_properties/{formula_name}.cfg"
+        prop_dir = f"{ManageService().read_script_path()}/formula_properties/{formula_name}.cfg"
         config = configparser.ConfigParser()
         file = config.read(prop_dir)
         if len(file) == 0:
@@ -200,7 +193,7 @@ print(f"------------ Elapsed Time: {elapsed_time} ------------")
         :return:
         """
         # Check if the properties dir exists in the py_services. If it does not exist, create it
-        prop_dir = f"{os.getcwd()}/formula_properties"
+        prop_dir = f"{ManageService().read_script_path()}/formula_properties"
         if not os.path.exists(prop_dir):
             os.mkdir(prop_dir)
 
@@ -214,7 +207,7 @@ print(f"------------ Elapsed Time: {elapsed_time} ------------")
         Removes the properties file of a formula.
         :return:
         """
-        prop_dir = f"{os.getcwd()}/formula_properties"
+        prop_dir = f"{ManageService().read_script_path()}/formula_properties"
         os.remove(f"{prop_dir}/{formula_name}.cfg")
 
     @staticmethod

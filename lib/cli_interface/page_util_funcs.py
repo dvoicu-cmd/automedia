@@ -62,10 +62,12 @@ def verify_cfg():
 
         os.chdir(cwd)  # change dir back
 
+        scripts_path = f"{cwd}"  # It's too far gone. You need to have the formula scripts in py_services.
+
         paths_list = [
             service_path,  # append the service dir
             venv_path,  # append the default expected location of the python virtual environment
-            cwd  # Input the current directory to read from the python scripts in py_services
+            scripts_path  # Input the formula_scripts dir as the location where the scripts are located.
         ]
 
         # Create paths.cfg file
@@ -90,11 +92,11 @@ def start_service():
         on_cal_list = []
         while contd:
             page = InputPage("Input cron interval to schedule this service. \n"
-                             "Cron timers use the format: {minute} {hour} {day #} {month} {day of the week}\n"
+                             "Cron timers use the format: {minute} {hour} {day #} {month} {day of the week} \n\n"
                              "*	--> any value \n"
                              ", --> value list separator\n"
                              "- --> range of values\n"
-                             "/	--> step values.")
+                             "/	--> step values.\n")
             on_cal_list.append(page.prompt())
 
             # prompt if user wishes to add more on_calendar values
@@ -205,7 +207,8 @@ def main_menu(node_name):
             try:
                 # Stupid. Filtering py_services to just display the py files that where created by the formula class.
                 # Fix: Find all files with .py, exclude key files. like context.py then chop the .py part and display.
-                ls = ManageFormula().print_script_names()
+                ls = ManageService().read_script_path()
+                # All this filtering ain't needed anymore but whatever, does not hurt to keep it.
                 srt_pattern = re.compile(r'srt_tmp_[A-Za-z0-9]{5}$')
                 tmp_video = re.compile(r'videoTEMP_[A-Za-z0-9]{3}_[A-Za-z0-9]{3}_[A-Za-z0-9]{3}.mp4')
                 ls_to_filter = ['cache', 'log', 'output', '__pycache__', 'timer_map.pickle', '__init__.py',
