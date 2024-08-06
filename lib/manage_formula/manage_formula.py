@@ -1,6 +1,5 @@
 import configparser
 import os
-import pdb
 from lib.manage_service.manage_service import ManageService
 
 

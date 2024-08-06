@@ -1,8 +1,6 @@
-import subprocess
 import os
 from .service_configurator import ServiceConfigurator
 from .timer_map import TimerMap
-from lib.manage_directory_structure.dir_manager import DirManager
 
 
 class ManageService:
@@ -161,6 +159,15 @@ class ManageService:
 
         # Execute the service
         exec(service_code)
+
+    def rename_py_service(self, old_service_name, new_service_name):
+        """
+        Renames the service. Typically called by manage formula.
+        :param old_service_name:
+        :param new_service_name:
+        :return:
+        """
+        pass
 
 
 
