@@ -6,7 +6,6 @@ from lib.manage_formula.manage_formula import ManageFormula
 from lib.cli_interface.page.input_pages import InputPage
 from lib.cli_interface.page.picker_pages import PickerPage
 from lib.cli_interface.page.display_page import DisplayPage
-import lib.cli_interface.page_util_funcs as pg
 
 
 class PublisherFormulas:
@@ -96,7 +95,7 @@ if not exec_fail:
         f = ManageFormula()
         f.set_properties_type("publisher", "local_formula")
 
-        formula_name = pg.formula_name(f, attr_map)
+        formula_name = PublisherFormulas.formula_name(f, attr_map)
 
         number_records = InputPage("Input the number of media files to pull per service call.").prompt(default_value=attr_map.get("number_records"))
         f.spa("number_records", f"{number_records}")
@@ -153,3 +152,16 @@ for i in range({number_records}):
         """)
 
         f.save_generated_script(formula_name)
+
+    # Fix this shit eventually so that this is universal among all formulas.
+    @staticmethod
+    def formula_name(formula: ManageFormula, attr_map={}):
+        """
+        Calls a common input for formula naming. This is done so that the name attribute is consistent among all formulas.
+        :return: String of the inputted name.
+        """
+        name = InputPage("Input the name of the formula").prompt(default_value=attr_map.get("formula_name"),
+                                                                 default_lock=True)
+        formula.spa("formula_name", f"{name}")
+        return name
+

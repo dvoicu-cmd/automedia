@@ -159,15 +159,3 @@ class ManageService:
 
         # Execute the service
         exec(service_code)
-
-    def rename_py_service(self, old_service_name, new_service_name):
-        """
-        Renames the service. Typically called by manage formula.
-        :param old_service_name:
-        :param new_service_name:
-        :return:
-        """
-        pass
-
-
-
