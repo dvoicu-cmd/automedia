@@ -5,7 +5,7 @@ from lib.central_connector.db_nas_connection import DbNasConnection
 from lib.manage_service.manage_service import ManageService
 from lib.manage_formula.manage_formula import ManageFormula
 from lib.manage_directory_structure.dir_manager import DirManager
-from lib.cli_interface.formula_strategies.interface_formulas import InterfaceFormula
+from lib.cli_interface.formula_strategies.formula_selector import FormulaSelector
 from lib.cli_interface.page.sigint_handling.input_cancelled import InputCancelled
 from .page.input_pages import InputPage
 from .page.picker_pages import PickerPage
@@ -172,9 +172,9 @@ def main_menu(node_name):
                 attr = mf.read_properties_attr(value)
 
                 # Reprompt the specific method.
-                InterfaceFormula().create_formula(formula_type.get("node_type"),
-                                                  formula_type.get("strategy"),
-                                                  attr)
+                FormulaSelector().create_formula(formula_type.get("node_type"),
+                                                 formula_type.get("strategy"),
+                                                 attr)
                 DisplayPage().prompt("Successfully updated formula")
             except Exception as e:
                 DisplayPage().prompt(str_exception(e))

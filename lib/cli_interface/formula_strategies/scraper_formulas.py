@@ -1,14 +1,11 @@
-import os
-import sys
+from .formulas_interface import InterfaceFormulas
 
 from lib.manage_formula.manage_formula import ManageFormula
 from lib.cli_interface.page.input_pages import InputPage
 from lib.cli_interface.page.picker_pages import PickerPage
 
 
-class ScraperFormulas:
-    def __init__(self):
-        pass
+class ScraperFormulas(InterfaceFormulas):
 
     def create_formula(self, formula_method: str, attr_map: dict):
         if formula_method == "reddit_scrape":

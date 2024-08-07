@@ -1,5 +1,4 @@
-import os
-import sys
+from .formulas_interface import InterfaceFormulas
 
 from lib.manage_formula.manage_formula import ManageFormula
 from lib.cli_interface.page.input_pages import InputPage
