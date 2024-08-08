@@ -134,16 +134,19 @@ print(f"------------ Elapsed Time: {elapsed_time} ------------")
     # -------------- Properties Functionality --------------
 
 
-    def set_property_attr(self, attr_name: str, attr_value: str):
+    def set_property_attr(self, attr_name: str, attr_value):
         """
         Adds a property to the attributes in the formula's property.cfg file
         :param attr_name: Name of the property (Key)
         :param attr_value: Value of the property (Value)
         :return:
         """
-        self.properties['ATTRIBUTES'][f"{attr_name}"] = attr_value
+        if isinstance(attr_value, str):
+            self.properties['ATTRIBUTES'][f"{attr_name}"] = attr_value
+        elif isinstance(attr_value, int):
+            self.properties['ATTRIBUTES'][f"{attr_name}"] = str(attr_value)
 
-    def spa(self, attr_name: str, attr_value: str):
+    def spa(self, attr_name: str, attr_value):
         """
         shorthand of set_property_attr
         :return:
@@ -173,14 +176,21 @@ print(f"------------ Elapsed Time: {elapsed_time} ------------")
         attr_name = [option for option in prop['ATTRIBUTES']]  # Gets all the keys under attribute section.
         output_attr_map = {}
         for key in attr_name:
-            output_attr_map[f"{key}"] = prop.get('ATTRIBUTES', key)
+            try:  # Store as int.
+                output_attr_map[f"{key}"] = int(prop.get('ATTRIBUTES', key))
+            except ValueError:  # if err, it is a string
+                output_attr_map[f"{key}"] = prop.get('ATTRIBUTES', key)
         return output_attr_map
 
     @staticmethod
-    def __update_property_attr(formula_name: str, attr_name: str, new_attr_value: str):
+    def __update_property_attr(formula_name: str, attr_name: str, new_attr_value):
         """
         Attempts to update a specified property value.
         """
+        # Convert to string if its an int.
+        if isinstance(new_attr_value, int):
+            new_attr_value = str(new_attr_value)
+
         # Create a ConfigParser object
         config = configparser.ConfigParser()
         prop_dir = f"{ManageService().read_script_path()}/formula_properties"

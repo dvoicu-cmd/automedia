@@ -16,12 +16,14 @@ def main():
                          ]).prompt("Select a formula to use")
         try:
             if v2 == 0:
-                service_name = InputPage("Give a title to the service:").prompt()
                 CreatorFormulas().generic_text_story()
+                DisplayPage().prompt("Created text story formula.")
             if v2 == 1:
                 CreatorFormulas().cycling_images_story()
+                DisplayPage().prompt("Created cycling image formula.")
             if v2 == 2:
                 CreatorFormulas().cycling_images_story_shorts()
+                DisplayPage().prompt("Created cycling image story shorts formula.")
             if v2 == 3:
                 pass
         except Exception as e:

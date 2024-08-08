@@ -660,7 +660,7 @@ subs.set_max_word_per_line({max_word_per_line})
 
     @staticmethod
     def __background_footage_options(f: ManageFormula, attr_map={}):
-        background_footage_id = InputPage("Input the media pool id from which you wish to pull background footage from").prompt(default_value="background_footage_id")
+        background_footage_id = InputPage("Input the media pool id from which you wish to pull background footage from").prompt(default_value=attr_map.get("background_footage_id"))
         f.spa("background_footage_id", background_footage_id)
 
 

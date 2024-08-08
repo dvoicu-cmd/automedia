@@ -69,7 +69,10 @@ class InputPage(CliPage):
 
     @staticmethod
     def shorten_string(text, max_length=150):
-        if len(text) > max_length:
-            return text[:max_length - 3] + "..."
-        else:
+        try:
+            if len(text) > max_length:
+                return text[:max_length - 3] + "..."
+            else:
+                return text
+        except TypeError:  # If for some reason, text is not returned, just return the text.
             return text
