@@ -7,17 +7,32 @@ from lib.cli_interface.page.picker_pages import PickerPage
 
 class ScraperFormulas(InterfaceFormulas):
 
-    def create_formula(self, formula_method: str, attr_map: dict):
+    def create_formula(self, formula_method: str, attr_map={}):
         if formula_method == "reddit_scrape":
-            self.reddit_scrape()
+            self.reddit_scrape(attr_map=attr_map)
+        if formula_method == "open_ai_text":
+            self.open_ai_text(attr_map=attr_map)
+        if formula_method == "open_ai_text_and_img":
+            self.open_ai_text_and_img(attr_map=attr_map)
 
     @staticmethod
-    def reddit_scrape():
+    def reddit_scrape(attr_map={}):
         f = ManageFormula()
-        name = InputPage("Input the name of the service").prompt()
-        desc = InputPage("Input the description for the scrapes").prompt()
-        subreddit = InputPage("Input the subreddit name").prompt()
-        media_pool = InputPage("Input the corresponding media_pool name (not id)").prompt()
+        f.set_properties_type("scraper", "reddit_scrape")
+
+        name = InterfaceFormulas().formula_name(f, attr_map)
+
+        desc = InputPage("Input the description for the scrapes."
+                         ).prompt(default_value=attr_map.get("desc"))
+        f.spa("desc", desc)
+
+        subreddit = InputPage("Input the subreddit name to scrape from."
+                              ).prompt(default_value=attr_map.get("subreddit"))
+        f.spa("subreddit", subreddit)
+
+        media_pool = InputPage("Input the corresponding media_pool name to upload scrapes to."
+                               ).prompt(default_value=attr_map.get("media_pool"))
+        f.spa("media_pool", media_pool)
 
         f.ap(f"""
         
@@ -49,16 +64,36 @@ manager.cleanup(tmp)
         f.save_generated_script(name)
 
     @staticmethod
-    def open_ai_text():
+    def open_ai_text(attr_map={}):
         f = ManageFormula()
-        name = InputPage("Input the name of the service").prompt()
-        desc = InputPage("Input the description for the scrapes").prompt()
+        f.set_properties_type("scraper", "open_ai_text")
+
+        name = InterfaceFormulas().formula_name(f, attr_map)
+
+        desc = InputPage("Input the description for the scrapes"
+                         ).prompt(default_value=attr_map.get("desc"))
+        f.spa("desc", desc)
+
         model = InputPage("Input the model you wish to use. \n"
-                          "Accepted values: gpt-4, gpt-4 turbo, gpt-3.5-turbo").prompt()
-        system_prompt = InputPage("Input a system prompt for the model.")
-        ai_prompt = InputPage("Input a text prompt you wish to give to the model").prompt()
-        number_of_prompts = InputPage("Input the number of prompts you wish to have in a scrape").prompt()
-        media_pool = InputPage("Input the corresponding media_pool").prompt()
+                          "Accepted values: gpt-4, gpt-4 turbo, gpt-3.5-turbo"
+                          ).prompt(default_value=attr_map.get("model"))
+        f.spa("model", model)
+
+        system_prompt = InputPage("Input a system prompt for the model."
+                                  ).prompt(default_value=attr_map.get("system_prompt"))
+        f.spa("system_prompt", system_prompt)
+
+        ai_prompt = InputPage("Input a text prompt you wish to give to the model"
+                              ).prompt(default_value=attr_map.get("ai_prompt"))
+        f.spa("ai_prompt", ai_prompt)
+
+        number_of_prompts = InputPage("Input the number of prompts you wish to have in a scrape"
+                                      ).prompt(default_value=attr_map.get("number_of_prompts"))
+        f.spa("number_of_prompts", number_of_prompts)
+
+        media_pool = InputPage("Input the corresponding name of the media_pool you wish to upload your scrapes to."
+                               ).prompt(default_value=attr_map.get("media_pool"))
+        f.spa("media_pool", media_pool)
 
         f.ap(f"""
 manager = ScraperDirManager()
@@ -110,22 +145,47 @@ for file in files:
 manager.cleanup(tmp)
 
         """)
+
         f.save_generated_script(name)
 
     @staticmethod
-    def open_ai_text_and_img():
+    def open_ai_text_and_img(attr_map={}):
         f = ManageFormula()
-        name = InputPage("Input the name of the service").prompt()
-        desc = InputPage("Input the description for the scrapes").prompt()
+        f.set_properties_type("scraper", "open_ai_text_and_img")
+
+        name = InterfaceFormulas().formula_name(f, attr_map)
+
+        desc = InputPage("Input the description for the scrapes"
+                         ).prompt(default_value=attr_map.get("desc"))
+        f.spa("desc", desc)
+
         llm_model = InputPage("Input the model you wish to use. \n"
-                          "Accepted values: gpt-4, gpt-4 turbo, gpt-3.5-turbo").prompt()
-        system_prompt = InputPage("Input a system prompt for the model.").prompt()
+                          "Accepted values: gpt-4, gpt-4 turbo, gpt-3.5-turbo"
+                              ).prompt(default_value=attr_map.get("llm_model"))
+        f.spa("llm_model", llm_model)
+
+        system_prompt = InputPage("Input a system prompt for the model."
+                                  ).prompt(default_value=attr_map.get("system_prompt"))
+        f.spa("system_prompt", system_prompt)
+
         ai_prompt = InputPage("Input a text prompt you wish to give to the model.\n"
-                              "The text data will be fed into the stable diffusion model and give an image in relation to your text data.").prompt()
-        number_of_prompts = InputPage("Input the number of prompts you wish to have in a scrape").prompt()
-        number_of_images = InputPage("Input the number of images you wish to generate per prompt").prompt()
+                              "The text data will be fed into the stable diffusion model and give an image in relation to your text data."
+                              ).prompt(default_value=attr_map.get("ai_prompt"))
+        f.spa("ai_prompt", ai_prompt)
+
+        number_of_prompts = InputPage("Input the number of prompts you wish to have in a scrape."
+                                      ).prompt(default_value=attr_map.get("number_of_prompts"))
+        f.spa("number_of_prompts", number_of_prompts)
+
+        number_of_images = InputPage("Input the number of images you wish to generate per prompt"
+                                     ).prompt(default_value=attr_map.get("number_of_images"))
+        f.spa("number_of_images", number_of_images)
+
         media_pool = InputPage("Input the corresponding name of the media_pool you wish to upload your scrapes to.\n"
-                               "ex: \"dummy\"").prompt()
+                               "ex: \"dummy\""
+                               ).prompt(default_value=attr_map.get("media_pool"))
+        f.spa("media_pool", media_pool)
+
 
         f.ap(f"""
 

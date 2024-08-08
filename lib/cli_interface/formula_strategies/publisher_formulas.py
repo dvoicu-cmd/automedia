@@ -9,19 +9,21 @@ class PublisherFormulas(InterfaceFormulas):
 
     def create_formula(self, formula_method: str, attr_map={}):
         if formula_method == "yt_formula":
-            self.__yt_formula(attr_map=attr_map)
+            self.yt_formula(attr_map=attr_map)
         if formula_method == "local_formula":
-            self.__local_formula(attr_map=attr_map)
+            self.local_formula(attr_map=attr_map)
 
     # -------------------------------------- Formulas --------------------------------------
 
     @staticmethod
-    def __yt_formula(attr_map={}):
+    def yt_formula(attr_map={}):
         f = ManageFormula()
         f.set_properties_type("publisher", "yt_formula")
 
-        service_name = InputPage("Input the name of the service").prompt(default_value=attr_map.get('service_name'), default_lock=True)
-        name = InputPage("Input the name of the account you want to set up a YT publisher for").prompt(default_value=attr_map.get('name'))
+        service_name = InterfaceFormulas().formula_name(f, attr_map)
+
+        yt_account_name = InputPage("Input the name of the account you want to set up a YT publisher for").prompt(default_value=attr_map.get("name"))
+        f.spa("name", yt_account_name)
 
         f.ap(f"""
         
@@ -30,7 +32,7 @@ manager = PublisherDirManager()
 exec_fail = False
 
 # 0 -> id, 1 -> username, 2 -> email, 3 -> password, 4 -> auth_secrete, 5 -> platform, 6 -> description
-acc_record = db.read_account_by_name('{name}')
+acc_record = db.read_account_by_name('{yt_account_name}')
 acc_record = acc_record[0] # read_account_by_name returns a tuple of tuples. why, idk
 
 # 0 -> id, 1 -> file location, 2 -> title, 3 -> description, 4 -> to archive, rest of the attributes are not important...
@@ -85,21 +87,20 @@ if not exec_fail:
         f.save_generated_script(service_name)
 
     @staticmethod
-    def __local_formula(attr_map={}):
-
+    def local_formula(attr_map={}):
         f = ManageFormula()
         f.set_properties_type("publisher", "local_formula")
 
         formula_name = InterfaceFormulas.formula_name(f, attr_map)
 
         number_records = InputPage("Input the number of media files to pull per service call.").prompt(default_value=attr_map.get("number_records"))
-        f.spa("number_records", f"{number_records}")
+        f.spa("number_records", number_records)
 
         account_id = InputPage("Input the account id to pull media files from").prompt(default_value=attr_map.get("account_id"))
-        f.spa("account_id", f"{account_id}")
+        f.spa("account_id", account_id)
 
         dir_name = InputPage("Input a name for the directory to export to.").prompt(default_value=attr_map.get("dir_name"))
-        f.spa("dir_name", f"{dir_name}")
+        f.spa("dir_name", dir_name)
 
 
         f.ap(f"""

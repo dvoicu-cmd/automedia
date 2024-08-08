@@ -9,12 +9,16 @@ class CreatorFormulas:
     def __init__(self):
         pass
 
-    def create_formula(self, formula_method: str, attr_map: dict):
+    def create_formula(self, formula_method: str, attr_map={}):
         if formula_method == "generic_text_story":
-            self.generic_text_story()
+            self.generic_text_story(attr_map=attr_map)
+        if formula_method == "cycling_images_story":
+            self.cycling_images_story(attr_map=attr_map)
+        if formula_method == "cycling_images_story_shorts":
+            self.cycling_images_story_shorts(attr_map=attr_map)
 
     @staticmethod
-    def generic_text_story():
+    def generic_text_story(attr_map={}):
 
         # Steps in a generic multi story text formula
         # 1) Create dir manager, db connection, and edits list
@@ -28,8 +32,10 @@ class CreatorFormulas:
         # 9) Upload it to db
 
         f = ManageFormula()
+        f.set_properties_type("creator", "generic_text_story")
 
-        service_name = InputPage("Give a title to the service:").prompt()
+
+        service_name = InterfaceFormulas.formula_name(f, attr_map)
 
         # ----------------- 1) init -----------------
 
@@ -37,7 +43,7 @@ class CreatorFormulas:
 
         # ----------------- 2) Canvas Options -----------------
 
-        CreatorFormulas.__canvas_options(f)
+        CreatorFormulas.__canvas_options(f, attr_map)
 
         # ----------------- 3) Media Pool Selection Options -----------------
 
@@ -199,7 +205,7 @@ manager.cleanup(tts_tmp)
 
 
     @staticmethod
-    def cycling_images_story():
+    def cycling_images_story(attr_map={}):
 
         # 1) Create dir manager, db connection, and edits list
         # 2) Set up video canvas
@@ -381,7 +387,7 @@ manager.cleanup(tts_tmp)
         pass
 
     @staticmethod
-    def cycling_images_story_shorts():
+    def cycling_images_story_shorts(attr_map={}):
         # 1) Create dir manager, db connection, and edits list
         # 2) Set up video canvas
         # 3) Set up story content
@@ -521,19 +527,19 @@ print("-> Created DbNas Connection")
 
 
     @staticmethod
-    def __canvas_options(f: ManageFormula):
+    def __canvas_options(f: ManageFormula, attr_map={}):
 
         # Pick the canvas
-        v2 = PickerPage(['NineBySixteen', 'SixteenByNine']).prompt("Pick a canvas size: width by height")
-        if v2 == 0:  # 9x16
-            v3 = PickerPage(['High Resolution: 1080x1920', 'Low Resolution: 720x1280']).prompt("Enter a resolution")
-            if v3 == 0:
+        aspect_ratio = PickerPage(['NineBySixteen', 'SixteenByNine']).prompt("Pick a canvas size: width by height")
+        if aspect_ratio == 0:  # 9x16
+            resolution = PickerPage(['High Resolution: 1080x1920', 'Low Resolution: 720x1280']).prompt("Enter a resolution")
+            if resolution == 0:
                 f.ap("canvas = NineBySixteen('1080x1920')")
             else:
                 f.ap("canvas = NineBySixteen('720x1280')")
-        if v2 == 1:  # 16x9
-            v3 = PickerPage(['High Resolution: 1920x1080', 'Low Resolution: 1280x720']).prompt("Enter a resolution")
-            if v3 == 0:
+        if aspect_ratio == 1:  # 16x9
+            resolution = PickerPage(['High Resolution: 1920x1080', 'Low Resolution: 1280x720']).prompt("Enter a resolution")
+            if resolution == 0:
                 f.ap("canvas = SixteenByNine('1920x1080')")
             else:
                 f.ap("canvas = SixteenByNine('1280x720')")
