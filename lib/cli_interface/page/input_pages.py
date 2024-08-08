@@ -36,7 +36,7 @@ class InputPage(CliPage):
                     i = input(f"{self.title}\n\n")
                 # Default value present, prompt to user
                 else:
-                    i = input(f"{self.title}\n\nLeave blank for a default value of: {default_value}\n\n")
+                    i = input(f"{self.title}\n\nLeave blank for a default value of: {self.shorten_string(default_value)}\n\n")
 
             # If there is a lock, but there is no default value present, just do a regular prompt.
             elif default_value == "" or default_value is None:
@@ -66,3 +66,10 @@ class InputPage(CliPage):
         print(msg)
         time.sleep(wait_time)
         self.clear()
+
+    @staticmethod
+    def shorten_string(text, max_length=150):
+        if len(text) > max_length:
+            return text[:max_length - 3] + "..."
+        else:
+            return text

@@ -9,7 +9,7 @@ class PickerPage(CliPage):
     def prompt(self, title='', suggested_index=-1):
         if 0 <= suggested_index < len(self.choices):  # Display suggestion
             suggested_choice = self.choices[suggested_index]
-            p = Picker(self.choices, title=f"{title}    Suggested choice: {suggested_choice}")
+            p = Picker(self.choices, title=f"{title}  -  Suggested choice: \"{suggested_choice}\"")
             p.start()
             return p.index
         else:  # Original implementation
