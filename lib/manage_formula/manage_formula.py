@@ -1,6 +1,8 @@
 import configparser
 import os
+import re
 from lib.manage_service.manage_service import ManageService
+from lib.manage_directory_structure.dir_manager import DirManager
 
 
 class ManageFormula:
@@ -198,7 +200,6 @@ print(f"------------ Elapsed Time: {elapsed_time} ------------")
         else:
             raise NameError
 
-
     @staticmethod
     def read_properties_type(formula_name: str):
         """
@@ -226,6 +227,17 @@ print(f"------------ Elapsed Time: {elapsed_time} ------------")
         if len(file) == 0:
             raise FileNotFoundError('Failed to read config file')
         return config
+
+    @staticmethod
+    def read_all_formula_names():
+        """
+        Lists all the formulas
+        :return: A list of strings containing all the formula names
+        """
+        prop_dir = f"{ManageService().read_script_path()}/formula_properties"
+        formula_property_cfgs = DirManager.select_dir_basename(prop_dir)
+        names = [re.sub(r'\.cfg$', '', cfg) for cfg in formula_property_cfgs]
+        return names
 
     def __save_properties(self, formula_name: str):
         """

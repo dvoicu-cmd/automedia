@@ -206,25 +206,27 @@ def main_menu(node_name):
         if v2 == 4:  # Display All Formulas
             InputPage.clear()
             try:
-                # Stupid but you gotta do what you gotta do.
+                names = ManageFormula.read_all_formula_names()
+
+                # Old implementation for displaying all the files. This was stupid.
                 # Filtering py_services to just display the py files that where created by the formula class.
-                path = ManageService().read_script_path()
-                ls = DirManager.select_dir_basename(path)
+                # path = ManageService().read_script_path()
+                # ls = DirManager.select_dir_basename(path)
+                #
+                # srt_pattern = re.compile(r'srt_tmp_[A-Za-z0-9]{5}$')
+                # tmp_video = re.compile(r'videoTEMP_[A-Za-z0-9]{3}_[A-Za-z0-9]{3}_[A-Za-z0-9]{3}.mp4')
+                # ls_to_filter = ['cache', 'log', 'output', '__pycache__', 'timer_map.pickle', '__init__.py',
+                #                 'context.py',
+                #                 'cred.cfg', 'paths.cfg', '.DS_Store', 'formula_properties']
+                # filtered_list = [item for item in ls if
+                #                  item not in ls_to_filter or srt_pattern.match(item) or tmp_video.match(
+                #                      item)]  # Filter out the list
+                #
+                # py_files = [file for file in filtered_list if
+                #             file.endswith('.py')]  # id the .py files left after filtering
+                # py_removed_list = [file.rstrip('.py') for file in py_files]  # remove the .py for display.
 
-                srt_pattern = re.compile(r'srt_tmp_[A-Za-z0-9]{5}$')
-                tmp_video = re.compile(r'videoTEMP_[A-Za-z0-9]{3}_[A-Za-z0-9]{3}_[A-Za-z0-9]{3}.mp4')
-                ls_to_filter = ['cache', 'log', 'output', '__pycache__', 'timer_map.pickle', '__init__.py',
-                                'context.py',
-                                'cred.cfg', 'paths.cfg', '.DS_Store', 'formula_properties']
-                filtered_list = [item for item in ls if
-                                 item not in ls_to_filter or srt_pattern.match(item) or tmp_video.match(
-                                     item)]  # Filter out the list
-
-                py_files = [file for file in filtered_list if
-                            file.endswith('.py')]  # id the .py files left after filtering
-                py_removed_list = [file.rstrip('.py') for file in py_files]  # remove the .py for display.
-
-                DisplayPage().prompt(f"All formulas: \n\n {py_removed_list}")
+                DisplayPage().prompt(f"All formulas: \n\n {names}")
             except Exception as e:
                 DisplayPage().prompt(str_exception(e))
 

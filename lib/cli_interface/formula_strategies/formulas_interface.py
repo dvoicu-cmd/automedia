@@ -17,5 +17,6 @@ class InterfaceFormulas:
         """
         name = InputPage("Input the name of the formula").prompt(default_value=attr_map.get("formula_name"),
                                                                  default_lock=True)
+
         formula.spa("formula_name", f"{name}")
         return name
