@@ -231,7 +231,7 @@ print(f"------------ Elapsed Time: {elapsed_time} ------------")
     @staticmethod
     def read_all_formula_names():
         """
-        Lists all the formulas
+        Lists all the formulas found in the formula_properties dir.
         :return: A list of strings containing all the formula names
         """
         prop_dir = f"{ManageService().read_script_path()}/formula_properties"
