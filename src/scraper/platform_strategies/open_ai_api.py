@@ -34,13 +34,35 @@ class OpenAiAPI:
         :return: The message in a text file
         """
 
-        response = self.client.chat.completions.create(
-            model=model,
-            messages=[
-                {"role": "system", "content": system_msg},
-                {"role": "user", "content": user_msg}
-            ],
-        )
+        attempts = 3
+        response = None
+
+        while attempts >= 0:
+            try:
+                response = self.client.chat.completions.create(
+                    model=model,
+                    messages=[
+                        {"role": "system", "content": system_msg},
+                        {"role": "user", "content": user_msg}
+                    ],
+                )
+                break
+            except openai.BadRequestError as e:
+                if attempts <= 0:
+                    raise e
+                else:
+                    attempts = attempts - 1
+                    continue
+            except openai.RateLimitError as e:
+                if attempts <= 0:
+                    raise e
+                else:
+                    print("HIT RATE LIMIT, HALTING PROGRAM FOR 1 MIN")
+                    time.sleep(65)
+                    print(f"CONTINUING AI PROMPT. {attempts} ATTEMPTS LEFT")
+                    attempts = attempts - 1
+                    continue
+
         str_response = response.choices[0].message.content
         if to_file:
             self.dm.dl_text(str_response, f"llm_txt_{user_msg[:10]}", path_dir_output)
@@ -76,10 +98,15 @@ class OpenAiAPI:
                 else:
                     attempts = attempts - 1
                     continue
-            except openai.RateLimitError:
-                print("HIT RATE LIMIT, HALTING PROGRAM FOR 1 MIN")
-                time.sleep(65)
-                continue
+            except openai.RateLimitError as e:
+                if attempts <= 0:
+                    raise e
+                else:
+                    print("HIT RATE LIMIT, HALTING PROGRAM FOR 1 MIN")
+                    time.sleep(65)
+                    print(f"CONTINUING AI PROMPT. {attempts} ATTEMPTS LEFT")
+                    attempts = attempts - 1
+                    continue
 
         image_url = response.data[0].url
         if not name:

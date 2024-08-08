@@ -15,11 +15,14 @@ def main():
         try:
             if v2 == 0:
                 ScraperFormulas().reddit_scrape()
+                DisplayPage().prompt("Successfully created reddit scraper formula.")
             if v2 == 1:
                 ScraperFormulas().open_ai_text()
+                DisplayPage().prompt("Successfully created ai text formula.")
             if v2 == 2:
                 ScraperFormulas().open_ai_text_and_img()
-            if v2 == 3:
+                DisplayPage().prompt("Successfully created ai text and image formula.")
+            if v2 == 3:  # Back
                 pass
         except Exception as e:
             if isinstance(e, InputCancelled):
