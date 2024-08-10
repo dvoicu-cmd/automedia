@@ -136,7 +136,7 @@ def main_menu(node_name):
             f"Create {node_name} Formula",
             f"Delete {node_name} Formula",
             f"Update Formula Values",
-            f"Rename Formula",
+            f"Rename Formula",  # Maybe add a feature for implementing a view option for attributes of formulas.
             f"Display All Formulas",
             f"Back"
         ])

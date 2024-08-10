@@ -82,6 +82,10 @@ class OpenAiAPI:
         attempts = 3
         response = None
 
+        # Cut off prompt if it is more 4000 characters
+        if len(prompt) >= 4000:
+            prompt = prompt[:3950]
+
         while attempts >= 0:
             try:
                 response = self.client.images.generate(
