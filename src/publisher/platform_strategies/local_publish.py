@@ -14,4 +14,7 @@ class LocalPublish(Upload):
         self.src_path = src_path
 
     def exec_upload(self, file_path_dst):
-        shutil.copytree(self.src_path, file_path_dst)
+        try:
+            shutil.copytree(self.src_path, file_path_dst)
+        except FileExistsError:  # If the dir already exists, just move instead the files.
+            shutil.move(self.src_path, file_path_dst)
