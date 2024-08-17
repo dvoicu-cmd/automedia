@@ -81,6 +81,12 @@ nfs_exports:
 	echo "/mnt/archive $(IP_RANGE)(rw,sync,no_subtree_check,insecure,no_root_squash)" | tee -a /etc/exports >/dev/null
 	systemctl reboot
 
+# Rule that sets the nfs exports for publisher dirs.
+publisher_nfs_exports:
+	echo "/home/user/automedia_exports $(IP_RANGE)(rw,sync,no_subtree_check,insecure,no_root_squash)" | tee -a /etc/exports >/dev/null
+	systemctl reboot
+
+
 # Rule to clean the nfs exports
 clean_nfs_exports:
 	-umount /mnt/activate

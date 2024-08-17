@@ -139,7 +139,8 @@ for i in range({number_records}):
     if record is None:
         break  # break out the loop if you have an empty record.
     # get the file path for the content file
-    lp.set_src_path(record[1])
+    path = ""+db_nas.nas_root()+"/"+record[1]
+    lp.set_src_path(path)
     # exec publish
     lp.exec_upload(specific_target_dir)
     # archive
