@@ -39,6 +39,8 @@ class YtUpload(Upload):
         self.for_kids = False
         self.paid_promo = False
         self.thumbnail_config = {"set_thumbnail": False, "path": None}
+        self.schedule_config = {"schedule_upload": False, "schedule_time": None, "schedule_date": None}
+        self.screenshot_path = "/"
 
     def set_title(self, title):
         """
@@ -120,9 +122,39 @@ class YtUpload(Upload):
         self.thumbnail_config["set_thumbnail"] = False
         self.thumbnail_config["path"] = None
 
+
+    def enable_schedule(self, schedule_time, schedule_date):
+        """
+        Configs exec_upload to schedule an upload
+        :return:
+        """
+        self.schedule_config["schedule_upload"] = True
+        self.schedule_config["schedule_time"] = schedule_time
+        self.schedule_config["schedule_date"] = schedule_date
+
+    def disable_schedule(self):
+        """
+        Configs exec_upload to not schedule an upload
+        :return:
+        """
+        self.schedule_config["schedule_upload"] = False
+        self.schedule_config["schedule_time"] = None
+        self.schedule_config["schedule_date"] = None
+
+    def set_screenshot_location(self, log_path):
+        if os.path.exists(log_path) and os.path.isdir(log_path):
+            self.screenshot_path = log_path
+
+    def take_screenshot(self):
+
+        self.driver.get_screenshot_as_file()
+
+
+
     def exec_upload(self, file_path):
         """
         Executes the upload process given a specific file
+        :param file_path: The file to upload
         """
         if not os.path.exists(file_path):
             print(f"YT fail on path: {file_path}")

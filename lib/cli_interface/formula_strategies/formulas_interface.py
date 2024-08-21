@@ -27,3 +27,17 @@ class InterfaceFormulas:
             DisplayPage().prompt("WARNING. Formula exists and continuing will overwrite the existing formula.")
 
         return name
+
+    @staticmethod
+    def formula_input(attr_name: str, prompt: str, f: ManageFormula, attr_map={}):
+        """
+        Shorthand to prompt for an attribute and save attr values of a formula.
+        :param attr_name: String name for the attribute to save
+        :param prompt: msg to prompt
+        :param f: manage formula object
+        :param attr_map: the attribute map.
+        :return:
+        """
+        attribute_to_save = InputPage(prompt).prompt(default_value=attr_map.get(attr_name))
+        f.spa(attr_name, attribute_to_save)
+        return attribute_to_save

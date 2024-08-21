@@ -10,6 +10,8 @@ class PublisherFormulas(InterfaceFormulas):
     def create_formula(self, formula_method: str, attr_map={}):
         if formula_method == "yt_formula":
             self.yt_formula(attr_map=attr_map)
+        if formula_method == "yt_schedule":
+            self.yt_schedule(attr_map=attr_map)
         if formula_method == "local_formula":
             self.local_formula(attr_map=attr_map)
 
@@ -85,6 +87,28 @@ if not exec_fail:
         """)
 
         f.save_generated_script(service_name)
+
+    @staticmethod
+    def yt_schedule(attr_map={}):
+        f = ManageFormula()
+        f.set_properties_type("publisher", "yt_schedule")
+        service_name = InterfaceFormulas().formula_name(f, attr_map)
+
+        yt_account_name = InterfaceFormulas.formula_input("yt_account_name",
+                                                          "Input the name of the account you want to set up a YT publisher for",
+                                                          f, attr_map)
+
+        number_videos = InterfaceFormulas.formula_input("number_videos",
+                                                        "Input the number of videos you wish to schedule an upload. This will schedule a video per day.",
+                                                        f, attr_map)
+
+        time_to_schedule = InterfaceFormulas. formula_input("time_to_schedule",
+                                                            "Input the time for an upload to be scheduled. \nAccepted format: TT:TT AA, ex: 12:30 AM, 6:00 PM",
+                                                            f, attr_map)
+
+        # Takes these in, and schedules in advance 1 video per day ahead.
+
+        pass
 
     @staticmethod
     def local_formula(attr_map={}):
