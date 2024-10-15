@@ -75,7 +75,7 @@ manager.cleanup(tmp)
         f.spa("desc", desc)
 
         model = InputPage("Input the model you wish to use. \n"
-                          "Accepted values: gpt-4, gpt-4 turbo, gpt-3.5-turbo"
+                          "Accepted values: gpt-4, gpt-4 turbo, gpt-4o-mini, gpt-4o, gpt-3.5-turbo"
                           ).prompt(default_value=attr_map.get("model"))
         f.spa("model", model)
 

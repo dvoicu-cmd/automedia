@@ -4,6 +4,35 @@ from lib.manage_formula.manage_formula import ManageFormula
 from lib.cli_interface.page.input_pages import InputPage
 from lib.cli_interface.page.picker_pages import PickerPage
 
+# Important common var names in formulas:
+# -------
+# output_tmp | the output directory for the created contents.
+# for example in a formula code: base.render(f"{output_tmp}/video.mp4") exports a video to the tmp output
+# -------
+# story_text | contains the text content for the video.
+# -------
+# ttxt | is the thumbnail text.
+# -------
+# manager | Is the manager object that manages the scripts directory output contents.
+# -------
+# output_tmp | Is the absolute path for the output directory.
+
+
+# Other important common items:
+# -------
+# video.mp4 | The output content that is long
+# -------
+# short.mp4 | The output content that is short and horizontal
+# -------
+# thumbnail.jpg | The thumbnail output
+# -------
+# title.txt | The title for the video
+# -------
+# desc.txt | The description for the video
+# -------
+# thumbnail.txt | The thumbnail text
+# get any of these files by using the abs path of the manager dir like so: f"{output_tmp}/video.mp4"
+
 
 class CreatorFormulas:
     def __init__(self):
@@ -393,6 +422,9 @@ short_base.render(f"{output_tmp}/short.mp4")
         CreatorFormulas.__thumbnail_options(f, attr_map)
 
         # ----------------- 10) Upload to db. -----------------
+
+        # Change to be prompt instead.
+
         description = InputPage("Input a generic description that will be posted on all your videos?").prompt(default_value=attr_map.get("description"))
         f.spa("description", description)
 
@@ -663,15 +695,12 @@ subs.set_max_word_per_line({max_word_per_line})
         background_footage_id = InputPage("Input the media pool id from which you wish to pull background footage from").prompt(default_value=attr_map.get("background_footage_id"))
         f.spa("background_footage_id", background_footage_id)
 
-
-
         width = 0
         height = 0
 
         background_expected_aspect = PickerPage(['NineBySixteen', 'SixteenByNine']).prompt(
             "What is the expected aspect ratio of the media pool's content?", suggested_index=attr_map.get("background_expected_aspect"))
         f.spa("background_expected_aspect", background_expected_aspect)
-
 
         if background_expected_aspect == 0:
             width = 1920
@@ -859,4 +888,81 @@ ttxt = ThumbnailText(story_text)
 ttxt.limit_words(16, 5)
             
             """)
+
+
+# -------------------- Generate Text Functions --------------------
+
+    @staticmethod
+    def __generate_title_text(f: ManageFormula, attr_map={}):
+        """
+        Appends a prompt for a llm to specifically make title text and stores it in the output tmp.
+        :param f:
+        :param attr_map:
+        :return: adds in the
+        """
+        f.ap("""
+# -------------- Make Title Text --------------
+
+# Set llm variables
+model = "gpt-4"
+system_prompt = "You will be given prompts containing the transcription for some video content. This will include all of the text content spoken and displayed in the video. What I want you to do make a title from this video's transcription. Specifically output a very short eye catching title that tells viewers what the video is about and makes them want to click. Here are some examples. Using | or - to split to larger topics "_____ is the king of it all | rules to Power". Short but sweat: "Crabs vs. The beach". Nice and long description: "Placing 100,000 Grass Blocks To Start The Zoo!". Your title must be around 8 words with 4 words to give or take. Get as many related keywords as you can to maximize search engine results as we want to reach as many people as possible. You will be limited to a total character limit of 100. Under no circumstances do you go over the stated character limit."
+ai_prompt = story_text
+
+
+# Prompt by taking the story text
+llm_tmp_str = OpenAiAPI().text_llm(model, system_prompt, ai_prompt, to_file=False)
+
+# Save string
+TextUtils.write_txt(f"{output_tmp}/title.txt", llm_tmp_str)
+
+# ----------------------------
+        """)
+
+    @staticmethod
+    def __generate_description_text(f: ManageFormula, attr_map={}):
+
+        f.ap("""
+
+# -------------- Make Description Text Here --------------
+
+# Set llm variables
+model = "gpt-4"
+system_prompt = "You will be given prompts containing the transcription for some video content. This will include all of the text content spoken and displayed in the video. What I want you to do is make a description from this video's transcription. Specifically output the following format: first make around 500 characters worth of descriptive text, then have 4 line breaks, followed by any related hashtags you can attach to this video. Don't include any hashtags in your initial description section before the 4 line breaks. Get as many related keywords as you can to maximize search engine results in both your inital descriptive text and your hashtags as we want to reach as many people possible. You will be limited to a total character limit of 2000. Under no circumstances do you go over the stated character limit."
+ai_prompt = story_text
+
+
+# Prompt by taking the story text
+llm_tmp_str = OpenAiAPI().text_llm(model, system_prompt, ai_prompt, to_file=False)
+
+# Save string
+TextUtils.write_txt(f"{output_tmp}/desc.txt", llm_tmp_str)
+
+# ----------------------------
+
+        """)
+
+    @staticmethod
+    def __generate_thumbnail_text(f: ManageFormula, attr_map={}):
+
+        f.ap("""
+        
+# -------------- Make Thumbnail Text Here --------------
+
+# Set llm variables
+model = "gpt-4"
+system_prompt = "You will be given prompts containing the transcription for some video content on youtube. This will include all of the text content spoken and displayed in the video. What I want you to do is make some thumbnail text from this video's transcription. Make short simple statments that will catch the viewers eyes like: "this happend..." or "IT'S HERE", or "WTF, this ____  happend!", or "[x] situation is..." or "Done!". You want around 1 to 5 words in your thumbnail text. This will be displayed in large text to the viewr on youtube. Get as many related keywords as you can to maximize search engine results. You will be limited to a total character limit of 20. Under no circumstances do you go over the stated character limit."
+ai_prompt = story_text
+
+
+# Prompt by taking the story text
+llm_tmp_str = OpenAiAPI().text_llm(model, system_prompt, ai_prompt, to_file=False)
+
+# Save string
+TextUtils.write_txt(f"{output_tmp}/thumb.txt", llm_tmp_str)
+
+# ----------------------------
+
+
+        """)
+
 
