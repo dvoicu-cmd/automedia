@@ -298,8 +298,8 @@ def manual_execution():
         print(f"Starting Execution of: {service}")
         ManageService().run_py_service(service)
         input(f"\n\n Successfully Executed {service}. \nPress Enter to continue.")
-    except FileNotFoundError:
-        DisplayPage().prompt(f"No such service: {service}")
+    except FileNotFoundError as e:
+        DisplayPage().prompt(f"No such service: {service}. \n\n {str_exception(e)}")
     except TypeError as e:
         DisplayPage().prompt(f"A TypeError was thrown. Most likely a media pool is empty. \n\n {str_exception(e)}")
     except Exception as e:

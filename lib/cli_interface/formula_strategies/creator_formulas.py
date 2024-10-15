@@ -192,7 +192,7 @@ base.render(f"{output_tmp}/video.mp4")
         # ----------------- 7) Shortify Options -----------------
 
         make_short = PickerPage(["Yes", "No"]).prompt("Do you wish to create a short form version of this video? \n"
-                                                     "This creates a copy of the video in a NineBySixteen format and is cropped to under a one minute"
+                                                     "This creates a copy of the video in a NineBySixteen (Vertical Video | | ) format and is cropped to under a one minute"
                                                       , suggested_index=attr_map.get("make_short"))
         f.spa("make_short", make_short)
 
@@ -424,6 +424,9 @@ short_base.render(f"{output_tmp}/short.mp4")
         # ----------------- 10) Upload to db. -----------------
 
         # Change to be prompt instead.
+        CreatorFormulas.__generate_description_text(f, attr_map)
+        CreatorFormulas.__generate_title_text(f, attr_map)
+        CreatorFormulas.__generate_thumbnail_text(f, attr_map)
 
         description = InputPage("Input a generic description that will be posted on all your videos?").prompt(default_value=attr_map.get("description"))
         f.spa("description", description)
@@ -550,8 +553,8 @@ short_base.render(f"{output_tmp}/video.mp4")
         """)
 
         # ----------------- 8) Upload to db. -----------------
-        description = InputPage("Input a generic description that will be posted on all your videos?").prompt(default_value=attr_map.get("description"))
-        f.spa("description", description)
+        # description = InputPage("Input a generic description that will be posted on all your videos?").prompt(default_value=attr_map.get("description"))
+        # f.spa("description", description)
 
 
         account_name = InputPage("Input the associated account name this content will be uploaded to").prompt(default_value=attr_map.get("account_name"))
@@ -569,7 +572,7 @@ ttxt = ThumbnailText(story_text)
 ttxt.limit_words(16, 5)
 
 # upload to db nas
-db.create_content(output_tmp, ttxt.text_content, "{description}", "{account_name}")
+db.create_content(output_tmp, ttxt.text_content, "", "{account_name}")
 
 # clean the tmp dirs
 manager.cleanup(tts_tmp)
@@ -602,7 +605,7 @@ print("-> Created DbNas Connection")
     def __canvas_options(f: ManageFormula, attr_map={}):
         # Pick the canvas
         resolution = 0
-        aspect_ratio = PickerPage(['NineBySixteen', 'SixteenByNine']).prompt("Pick a canvas size: width by height", suggested_index=attr_map.get("aspect_ratio"))
+        aspect_ratio = PickerPage(['NineBySixteen (Vertical Video | | )', 'SixteenByNine (Horizontal Video ---)']).prompt("Pick a canvas size: width by height", suggested_index=attr_map.get("aspect_ratio"))
         if aspect_ratio == 0:  # 9x16
             resolution = PickerPage(['High Resolution: 1080x1920', 'Low Resolution: 720x1280']).prompt("Enter a resolution", suggested_index=attr_map.get("resolution"))
             if resolution == 0:
@@ -698,7 +701,7 @@ subs.set_max_word_per_line({max_word_per_line})
         width = 0
         height = 0
 
-        background_expected_aspect = PickerPage(['NineBySixteen', 'SixteenByNine']).prompt(
+        background_expected_aspect = PickerPage(['NineBySixteen (Vertical Video | | )', 'SixteenByNine (Horizontal Video ---)']).prompt(
             "What is the expected aspect ratio of the media pool's content?", suggested_index=attr_map.get("background_expected_aspect"))
         f.spa("background_expected_aspect", background_expected_aspect)
 
@@ -905,7 +908,7 @@ ttxt.limit_words(16, 5)
 
 # Set llm variables
 model = "gpt-4"
-system_prompt = "You will be given prompts containing the transcription for some video content. This will include all of the text content spoken and displayed in the video. What I want you to do make a title from this video's transcription. Specifically output a very short eye catching title that tells viewers what the video is about and makes them want to click. Here are some examples. Using | or - to split to larger topics "_____ is the king of it all | rules to Power". Short but sweat: "Crabs vs. The beach". Nice and long description: "Placing 100,000 Grass Blocks To Start The Zoo!". Your title must be around 8 words with 4 words to give or take. Get as many related keywords as you can to maximize search engine results as we want to reach as many people as possible. You will be limited to a total character limit of 100. Under no circumstances do you go over the stated character limit."
+system_prompt = "You will be given prompts containing the transcription for some video content. This will include all of the text content spoken and displayed in the video. What I want you to do make a title from this video's transcription. Specifically output a very short eye catching title that tells viewers what the video is about and makes them want to click. Here are some examples. Using | or - to split to larger topics '_____ is the king of it all | rules to power'. Short but sweat: 'Crabs vs. The beach'. Nice and long description: 'Placing 100,000 Grass Blocks To Start The Zoo!'. Your title must be around 8 words with 4 words to give or take. Get as many related keywords as you can to maximize search engine results as we want to reach as many people as possible. You will be limited to a total character limit of 100. Under no circumstances do you go over the stated character limit. Do not include any double quotes or single quotes characters in your output."
 ai_prompt = story_text
 
 
@@ -927,7 +930,7 @@ TextUtils.write_txt(f"{output_tmp}/title.txt", llm_tmp_str)
 
 # Set llm variables
 model = "gpt-4"
-system_prompt = "You will be given prompts containing the transcription for some video content. This will include all of the text content spoken and displayed in the video. What I want you to do is make a description from this video's transcription. Specifically output the following format: first make around 500 characters worth of descriptive text, then have 4 line breaks, followed by any related hashtags you can attach to this video. Don't include any hashtags in your initial description section before the 4 line breaks. Get as many related keywords as you can to maximize search engine results in both your inital descriptive text and your hashtags as we want to reach as many people possible. You will be limited to a total character limit of 2000. Under no circumstances do you go over the stated character limit."
+system_prompt = "You will be given prompts containing the transcription for some video content. This will include all of the text content spoken and displayed in the video. What I want you to do is make a description from this video's transcription. Specifically output the following format: first make around 150 words worth of descriptive text, then have 4 line breaks, followed by any related hashtags you can attach to this video. Don't include any hashtags in your initial description section before the 4 line breaks. Avoid saying starting your description with 'The video describes ...' or 'He describes this...'. Get as many related keywords as you can to maximize search engine results in both your inital descriptive text and your hashtags as we want to reach as many people possible. You will be limited to a total character limit of 2000. Under no circumstances do you go over the stated character limit. Distribute to the best of your ability the number of character evenly between the descriptive text and the hashtags, giving 1000 characters to the description and 1000 characters to the hashtags. Do not include any double quotes or single quotes characters in your output."
 ai_prompt = story_text
 
 
@@ -950,7 +953,7 @@ TextUtils.write_txt(f"{output_tmp}/desc.txt", llm_tmp_str)
 
 # Set llm variables
 model = "gpt-4"
-system_prompt = "You will be given prompts containing the transcription for some video content on youtube. This will include all of the text content spoken and displayed in the video. What I want you to do is make some thumbnail text from this video's transcription. Make short simple statments that will catch the viewers eyes like: "this happend..." or "IT'S HERE", or "WTF, this ____  happend!", or "[x] situation is..." or "Done!". You want around 1 to 5 words in your thumbnail text. This will be displayed in large text to the viewr on youtube. Get as many related keywords as you can to maximize search engine results. You will be limited to a total character limit of 20. Under no circumstances do you go over the stated character limit."
+system_prompt = "You will be given prompts containing the transcription for some video content on youtube. This will include all of the text content spoken and displayed in the video. What I want you to do is make some thumbnail text from this video's transcription. Make one and only one short simple statment that will catch the viewers eyes like: 'this happend...' or 'IT'S HERE', or 'WTF, this ____  happend!', or '[x] situation is...' or 'Done!'. You want around 1 to 5 words in your thumbnail text. This will be displayed in large text to the viewr on youtube. Get as many related keywords as you can to maximize search engine results. You will be limited to a total character limit of 20. Under no circumstances do you go over the stated character limit. Do not include any double quotes or single quotes characters in your output."
 ai_prompt = story_text
 
 

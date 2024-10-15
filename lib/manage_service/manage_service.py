@@ -152,6 +152,7 @@ class ManageService:
         paths = self.service_config.read()
         service_path = paths.get('python_scripts_path')
         specific_service_script = service_path + "/" + py_file + ".py"
+        # specific_service_script = specific_service_script.replace(" ", "\ ")
 
         # Open the file and read the contents
         with open(specific_service_script, 'r') as file:
