@@ -14,6 +14,8 @@ class ScraperFormulas(InterfaceFormulas):
             self.open_ai_text(attr_map=attr_map)
         if formula_method == "open_ai_text_and_img":
             self.open_ai_text_and_img(attr_map=attr_map)
+        if formula_method == "open_ai_thumb":
+            self.open_ai_thumb(attr_map=attr_map)
 
     @staticmethod
     def reddit_scrape(attr_map={}):
@@ -264,4 +266,112 @@ for prompt_dir in prompt_dirs:
         f.save_generated_script(name)
 
 
+    @staticmethod
+    def open_ai_thumb(attr_map={}):
+
+        f = ManageFormula()
+        f.set_properties_type("scraper", "open_ai_thumb")
+
+        name = InterfaceFormulas().formula_name(f, attr_map)
+
+        desc = InputPage("Input the description for the scrapes"
+                         ).prompt(default_value=attr_map.get("desc"))
+        f.spa("desc", desc)
+
+        have_background = PickerPage(["Yes", "No"]).prompt("Would you like to place a background image for your thumbnail? Must be of 1920x1080 for good results"
+                                                          ,suggested_index=attr_map.get("have_background"))
+        f.spa("have_background", have_background)
+
+        if have_background == 0:
+            background_media_pool = InputPage("Input the media pool id for your background images"
+                                              ).prompt(default_value=attr_map.get("background_media_pool"))
+            f.spa("background_media_pool", background_media_pool)
+        else:
+            background_media_pool = None
+
+        # AI Image
+        ai_prompt = InputPage("Input a text prompt you wish to give to the model to generate the thumbnail image.\n"
+                              ).prompt(default_value=attr_map.get("ai_prompt"))
+        f.spa("ai_prompt", ai_prompt)
+
+        img_scale = InputPage("Input the length and width of the image you would like\n"
+                              "Note: AI image are rendered in 1024x1024 ie: a square, and the thumbnail is 1920x1080\n"
+                              ).prompt(default_value=attr_map.get("img_scale"))
+        f.spa("img_scale", img_scale)
+
+        # Positioning of img
+        img_pos_x = InputPage("Input the x pixel position you wish to place the image\n"
+                              "The image is placed from the top left corner of the image\n"
+                              "Note: x axis is horizontal and there are 1920 pixels move from 0  -> \n"
+                              f"Your img scale: {img_scale}"
+                              ).prompt(default_value=attr_map.get("img_pos_x"))
+        f.spa("img_pos_x", img_pos_x)
+
+        img_pos_y = InputPage("Input the y pixel position you wish to place the image\n"
+                              "The image is placed from the top left corner of the image\n"
+                              "Note: y axis is vertical and there are 1080 pixels to move from 0  \\|/ \n"
+                              f"Your img scale: {img_scale}"
+                              ).prompt(default_value=attr_map.get("img_pos_y"))
+        f.spa("img_pos_y", img_pos_y)
+
+        # Outputting.
+        media_pool_out = InputPage("Input the name of the associated media pool you want to upload the thumbnails to."
+                                   ).prompt(default_value=attr_map.get("media_pool_out"))
+        f.spa("media_pool_out", media_pool_out)
+
+        f.ap(f"""
+
+# Init
+name = "{name}"
+manager = ScraperDirManager()
+db = DbNasConnection()
+output_tmp = manager.create_tmp_dir("{name}")
+
+# Make thumbnail
+canvas = SixteenByNine('1920x1080')
+thumb = MakeThumbnail(canvas=canvas)
+
+        """)
+
+        # Making background image if selected.
+        if have_background == 0:
+            f.ap(f"""
+
+# Getting base image then attaching it to thumbnail.
+bg_image_record = db.read_rand_media_file_of_pool({background_media_pool})
+img_location = db.nas_root() + "/" + bg_image_record[1]
+thumb.place_img(img_location, (1920, 1080), (0, 0))
+
+            """)
+
+        # Now generate the AI image to place
+        f.ap(f"""
+
+#Make AI image and place
+OpenAiAPI().stable_diffusion("{ai_prompt}", output_tmp, name=f"img")
+img_location = output_tmp + "/img.jpg"
+thumb.place_img(img_location, ({img_scale}, {img_scale}), ({img_pos_x}, {img_pos_y}))
+
+
+        """)
+
+        f.ap("""
+
+# Write thumbnail.    
+thumb.write(2, f"{output_tmp}", f"{name}_{manager.get_rand_id()}")
+thumb_location = f"{output_tmp}/{name}_{manager.get_rand_id()}"
+
+        """)
+
+        f.ap(f"""
+
+#Output the content and clean up        
+db.create_media_file(thumb_location, "image", os.path.basename(output_tmp), "{desc}", "{media_pool_out}")
+manager.cleanup(output_tmp)
+
+""")
+
+        f.save_generated_script(name)
+
+        pass
 

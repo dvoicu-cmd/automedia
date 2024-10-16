@@ -57,7 +57,7 @@ class CreatorFormulas:
         # 5) Set background content
         # 6) Glue it all together and render
         # 7) Optional, make a short version of the video.
-        # 8) Optional, make a thumbnail.
+        # 8) Optional, make a thumbnail + Gen desc and title.
         # 9) Upload it to db
 
         f = ManageFormula()
@@ -214,19 +214,21 @@ short_base.render(f"{output_tmp}/short.mp4")
 
             """)
 
-        # ----------------- 8) Thumbnail Options -----------------
+        # ----------------- 8) Thumbnail, Desc, and Title Options -----------------
 
+        CreatorFormulas.__generate_description_text(f, attr_map)
+        CreatorFormulas.__generate_title_text(f, attr_map)
         CreatorFormulas.__thumbnail_options(f, attr_map)
 
         # ----------------- 9) DB Upload Options -----------------
 
-        description = InputPage("Input a generic description.").prompt(default_value=attr_map.get("description"))
+        description = InputPage("Input a generic description."
+                                ).prompt(default_value=attr_map.get("description"))
         f.spa("description", description)
 
 
-        account_name = InputPage("Input the associated account name this content will be uploaded to").prompt(
-            default_value=attr_map.get("account_name")
-        )
+        account_name = InputPage("Input the associated account name this content will be uploaded to"
+                                 ).prompt(default_value=attr_map.get("account_name"))
         f.spa("account_name", account_name)
 
         f.ap(f"""
@@ -259,7 +261,7 @@ manager.cleanup(tts_tmp)
         # 6) Set a cyclical image edit and place it
         # 7) Glue it all together and render
         # 8) Optional, make a short version of the video.
-        # 9) Optional, make a thumbnail.
+        # 9) Optional, make a thumbnail + Generate desc and title.
         # 10) Upload to db
 
         f = ManageFormula()
@@ -417,16 +419,13 @@ short_base.render(f"{output_tmp}/short.mp4")
 
             """)
 
-        # ----------------- 9) Optional, make a thumbnail. -----------------
+        # ----------------- 9) Optional, make a thumbnail. Make desc and title -----------------
 
+        CreatorFormulas.__generate_description_text(f, attr_map)
+        CreatorFormulas.__generate_title_text(f, attr_map)
         CreatorFormulas.__thumbnail_options(f, attr_map)
 
         # ----------------- 10) Upload to db. -----------------
-
-        # Change to be prompt instead.
-        CreatorFormulas.__generate_description_text(f, attr_map)
-        CreatorFormulas.__generate_title_text(f, attr_map)
-        CreatorFormulas.__generate_thumbnail_text(f, attr_map)
 
         description = InputPage("Input a generic description that will be posted on all your videos?").prompt(default_value=attr_map.get("description"))
         f.spa("description", description)
@@ -461,7 +460,8 @@ manager.cleanup(tts_tmp)
         # 5) Set background content
         # 6) Set a cyclical image edit and place it
         # 7) Glue it all together and render
-        # 10) Upload to db
+        # 8) Generate title and description.
+        # 9) Upload to db
 
         f = ManageFormula()
         f.set_properties_type("creator", "cycling_images_story_shorts")
@@ -552,10 +552,12 @@ short_base.render(f"{output_tmp}/video.mp4")
 
         """)
 
-        # ----------------- 8) Upload to db. -----------------
-        # description = InputPage("Input a generic description that will be posted on all your videos?").prompt(default_value=attr_map.get("description"))
-        # f.spa("description", description)
+        # ----------------- 8) Generate title and description. -----------------
 
+        CreatorFormulas.__generate_description_text(f, attr_map)
+        CreatorFormulas.__generate_title_text(f, attr_map)
+
+        # ----------------- 9) Upload to db. -----------------
 
         account_name = InputPage("Input the associated account name this content will be uploaded to").prompt(default_value=attr_map.get("account_name"))
         f.spa("account_name", account_name)
@@ -763,47 +765,55 @@ while footage_duration_sum < narration.duration():
 
 
             archive_thumb = PickerPage(["Yes", "No"]).prompt("Do you wish to archive the thumbnail after use?\n"
-                                                       "Ensure that you have a constant supply of thumbnail images if you do."
+                                                             "Ensure that you have a constant supply of thumbnail images if you do."
                                                              , suggested_index=attr_map.get("archive_thumb"))
             f.spa("archive_thumb", archive_thumb)
 
+            gen_thumb = PickerPage(["Yes - Generate text", "No - Use the initial characters"]).prompt("Would you like to generate the thumbnail or use the first few characters of the narration?\n"
+                                                       , suggested_index=attr_map.get("gen_thumb"))
+            f.spa("gen_thumb", gen_thumb)
+
 
             thumb_font = InputPage("Input the font you wish to use. \n"
-                             "Valid Options: simplex, plain, duplex, complex, triplex, small, s_simplex, s_complex\n"
-                             "Recommended: simplex").prompt(default_value=attr_map.get("thumb_font"))
+                                   "Valid Options: simplex, plain, duplex, complex, triplex, small, s_simplex, s_complex\n\nHow the fonts look:\n"
+                                   "https://codeyarns.com/tech/2015-03-11-fonts-in-opencv.html#gsc.tab=0 \n\n"
+                                   "Recommended: simplex").prompt(default_value=attr_map.get("thumb_font"))
             f.spa("thumb_font", thumb_font)
 
 
             thumb_font_scale = InputPage("Input the font scale you wish to use. (Integer)\n"
-                                   "Recommended: 6").prompt(default_value=attr_map.get("thumb_font_scale"))
+                                         "Recommended: 6").prompt(default_value=attr_map.get("thumb_font_scale"))
             f.spa("thumb_font_scale", thumb_font_scale)
 
 
             thumb_font_thickness = InputPage("Input the font thickness you wish to use. (Integer)\n"
-                                       "Recommended: 12").prompt(default_value=attr_map.get("thumb_font_thickness"))
+                                             "Recommended: 12").prompt(default_value=attr_map.get("thumb_font_thickness"))
             f.spa("thumb_font_thickness", thumb_font_thickness)
 
 
             thumb_font_pos_x = InputPage("Input the x pixel position you wish to place the text\n"
-                                   "Text is placed from the top left corner of the first character\n"
-                                   "Recommended for reddit thumbnails: 75").prompt(default_value=attr_map.get("thumb_font_pos_x"))
+                                         "Note: x axis is horizontal and there are 1920 pixels move from 0  ->\n"
+                                         "Additionally: Text is placed from the top left corner of the first character \n"
+                                         "Recommended for reddit thumbnails: 75").prompt(default_value=attr_map.get("thumb_font_pos_x"))
             f.spa("thumb_font_pos_x", thumb_font_pos_x)
 
 
             thumb_font_pos_y = InputPage("Input the y pixel position you wish to place the text\n"
-                                   "Recommended for reddit thumbnails: 540").prompt(default_value=attr_map.get("thumb_font_pos_y"))
+                                         "Note: y axis is vertical and there are 1080 pixels to move from 0  \\|/ \n"
+                                         "Additionally: Text is placed from the top left corner of the first character \n"
+                                         "Recommended for reddit thumbnails: 540").prompt(default_value=attr_map.get("thumb_font_pos_y"))
             f.spa("thumb_font_pos_y", thumb_font_pos_y)
 
 
             # The maximum total number of words shown in the thumbnail text
             thumb_max_total_words = InputPage("Input the maximum number of words you wish to have in the thumbnail text.\n"
-                                        "Recommended for reddit thumbnails: 15").prompt(default_value=attr_map.get("thumb_max_total_words"))
+                                              ).prompt(default_value=attr_map.get("thumb_max_total_words"))
             f.spa("thumb_max_total_words", thumb_max_total_words)
 
 
             # Each line can hold 38ish characters in reddit thumbnails I've tested. The average word is 4.7 characters.
             thumb_words_per_line = InputPage("Input the maximum number of words you wish to have per line in the thumbnail text\n"
-                                       "Recommended for reddit thumbnails: 5").prompt(default_value=attr_map.get("thumb_words_per_line"))
+                                             ).prompt(default_value=attr_map.get("thumb_words_per_line"))
             f.spa("thumb_words_per_line", thumb_words_per_line)
 
             thumb_highlights = PickerPage(["Highlights", "Random Highlights", "No Highlights"]).prompt("Do you wish for the thumbnail text to have highlights, randomized higlights, or no highlights at all."
@@ -836,7 +846,21 @@ thumb = MakeThumbnail(canvas=canvas)
 thumb.place_img(img_location, (1920, 1080), (0, 0))
 
 # thumb text
-ttxt = ThumbnailText(story_text)
+            """)
+
+            # Add in the thumbnail generation if selected.
+            if gen_thumb == 0:
+                CreatorFormulas.__generate_thumbnail_text(f, attr_map)
+                f.ap("""       
+thumb_text = TextUtils.read_txt(f"{output_tmp}/thumb.txt", llm_tmp_str)
+                """)
+            else:
+                f.ap("""
+thumb_text = story_text 
+                """)
+
+            f.ap(f"""
+ttxt = ThumbnailText(thumb_text)
 ttxt.set_font_attr("{thumb_font}", {thumb_font_scale}, {thumb_font_thickness}, (0, 0, 0))
 ttxt.set_pos({thumb_font_pos_x}, {thumb_font_pos_y})
 ttxt.limit_words({thumb_max_total_words}, {thumb_words_per_line})
@@ -953,7 +977,7 @@ TextUtils.write_txt(f"{output_tmp}/desc.txt", llm_tmp_str)
 
 # Set llm variables
 model = "gpt-4"
-system_prompt = "You will be given prompts containing the transcription for some video content on youtube. This will include all of the text content spoken and displayed in the video. What I want you to do is make some thumbnail text from this video's transcription. Make one and only one short simple statment that will catch the viewers eyes like: 'this happend...' or 'IT'S HERE', or 'WTF, this ____  happend!', or '[x] situation is...' or 'Done!'. You want around 1 to 5 words in your thumbnail text. This will be displayed in large text to the viewr on youtube. Get as many related keywords as you can to maximize search engine results. You will be limited to a total character limit of 20. Under no circumstances do you go over the stated character limit. Do not include any double quotes or single quotes characters in your output."
+system_prompt = "You will be given prompts containing the transcription for some video content on youtube. This will include all of the text content spoken and displayed in the video. What I want you to do is make some thumbnail text from this video's transcription. Make one and only one short simple statment that will catch the viewers eyes like: 'this happend...' or 'IT'S HERE', or 'WTF, this ____  happend!', or '[x] situation is...' or 'Done!'. You want around 3 to 5 words in your thumbnail text. This will be displayed in large text to the viewr on youtube. Get as many related keywords as you can to maximize search engine results. You will be limited to a total character limit of 20. Under no circumstances do you go over the stated character limit. Do not include any double quotes or single quotes characters in your output."
 ai_prompt = story_text
 
 
