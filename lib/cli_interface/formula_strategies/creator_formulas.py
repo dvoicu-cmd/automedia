@@ -816,8 +816,13 @@ while footage_duration_sum < narration.duration():
                                              ).prompt(default_value=attr_map.get("thumb_words_per_line"))
             f.spa("thumb_words_per_line", thumb_words_per_line)
 
+            # Determine text color
+            dark_text = PickerPage(["Black Text", "White Text"]).prompt("What color do you want your thumbnail text to be.\n"
+                                                                        , suggested_index=attr_map.get("dark_text"))
+            f.spa("dark_text", dark_text)
+
             thumb_highlights = PickerPage(["Highlights", "Random Highlights", "No Highlights"]).prompt("Do you wish for the thumbnail text to have highlights, randomized higlights, or no highlights at all."
-                                                                                                 , suggested_index=attr_map.get("thumb_highlights"))
+                                                                                                       , suggested_index=attr_map.get("thumb_highlights"))
             f.spa("thumb_highlights", thumb_highlights)
 
             bg_color = None
@@ -836,35 +841,53 @@ while footage_duration_sum < narration.duration():
             
 print("-> Creating Thumbnail")
 
-# create thumbnail
-# 0 -> id, 1 -> file_location, 2 -> media_type, 3 -> title, 4 -> description, 5 -> to_archive
-record = db.read_rand_media_file_of_pool({thumb_base_image_id})
-img_location = db.nas_root() + "/" + record[1]
-
+# create thumbnail - set up first
 canvas = SixteenByNine('1920x1080')
 thumb = MakeThumbnail(canvas=canvas)
-thumb.place_img(img_location, (1920, 1080), (0, 0))
 
-# thumb text
+# 0 -> id, 1 -> file_location, 2 -> media_type, 3 -> title, 4 -> description, 5 -> to_archive
+record = db.read_rand_media_file_of_pool({thumb_base_image_id})
+if record:  # If the record is valid place the base, else just keep going.
+    img_location = db.nas_root() + "/" + record[1]
+    thumb.place_img(img_location, (1920, 1080), (0, 0))
             """)
+
+            if archive_thumb == 0:
+                f.ap("""
+    db.update_to_archived("media_files", record[0])
+                """)
+            f.ap(f"""
+else:
+    print("ERROR: record for thumbnail base is empty, continuing operation")
+                """)
 
             # Add in the thumbnail generation if selected.
             if gen_thumb == 0:
                 CreatorFormulas.__generate_thumbnail_text(f, attr_map)
                 f.ap("""       
-thumb_text = TextUtils.read_txt(f"{output_tmp}/thumb.txt", llm_tmp_str)
+thumb_text = TextUtils.read_txt(f"{output_tmp}/thumb.txt")
                 """)
             else:
                 f.ap("""
 thumb_text = story_text 
                 """)
 
-            f.ap(f"""
+            # determine if thumbnail text is black or white.
+            if dark_text == 0:
+                f.ap(f"""
 ttxt = ThumbnailText(thumb_text)
 ttxt.set_font_attr("{thumb_font}", {thumb_font_scale}, {thumb_font_thickness}, (0, 0, 0))
 ttxt.set_pos({thumb_font_pos_x}, {thumb_font_pos_y})
 ttxt.limit_words({thumb_max_total_words}, {thumb_words_per_line})
-            """)
+                """)
+
+            else:
+                f.ap(f"""
+ttxt = ThumbnailText(thumb_text)
+ttxt.set_font_attr("{thumb_font}", {thumb_font_scale}, {thumb_font_thickness}, (255, 255, 255))
+ttxt.set_pos({thumb_font_pos_x}, {thumb_font_pos_y})
+ttxt.limit_words({thumb_max_total_words}, {thumb_words_per_line})
+                """)
 
             # Determining the thumbnail bg color settings
             # Highlight all
@@ -902,9 +925,6 @@ thumb.place_text(ttxt)
 thumb.write(2, f"{output_tmp}", "thumbnail")
 
             """)
-
-            if archive_thumb == 0:
-                f.ap('db.update_to_archived("media_files", record[0])')
 
         elif make_thumb == 1:
             f.ap("""

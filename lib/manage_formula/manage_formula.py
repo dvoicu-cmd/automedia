@@ -96,6 +96,15 @@ print(f"------------ Elapsed Time: {elapsed_time} ------------")
         # Do the rename.
         os.rename(old_path, new_path)
 
+        # Read in the formula and change all occurrences of the old title to the new one.
+        with open(new_path, 'r') as file:
+            content = file.read()
+
+        modified_content = re.sub(rf'"{old_formula_name}"', f'"{new_formula_name}"', content)
+
+        with open(new_path, 'w') as file:
+            file.write(modified_content)
+
         # Change the name in the properties cfg file
         ManageFormula().__update_property_attr(old_formula_name, "formula_name", new_formula_name)
 

@@ -359,7 +359,7 @@ thumb.place_img(img_location, ({img_scale}, {img_scale}), ({img_pos_x}, {img_pos
 
 # Write thumbnail.    
 thumb.write(2, f"{output_tmp}", f"{name}_{manager.get_rand_id()}")
-thumb_location = f"{output_tmp}/{name}_{manager.get_rand_id()}"
+thumb_location = f"{output_tmp}/{name}_{manager.get_rand_id()}.jpg"
 
         """)
 
