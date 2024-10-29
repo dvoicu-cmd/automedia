@@ -16,6 +16,8 @@ class ScraperFormulas(InterfaceFormulas):
             self.open_ai_text_and_img(attr_map=attr_map)
         if formula_method == "open_ai_thumb":
             self.open_ai_thumb(attr_map=attr_map)
+        if formula_method == "open_ai_aita":
+            self.open_ai_aita(attr_map=attr_map)
 
     @staticmethod
     def reddit_scrape(attr_map={}):
@@ -374,4 +376,71 @@ manager.cleanup(output_tmp)
         f.save_generated_script(name)
 
         pass
+
+    @staticmethod
+    def open_ai_aita(attr_map={}):
+
+        f = ManageFormula()
+        f.set_properties_type("scraper", "open_ai_thumb")
+
+        name = InterfaceFormulas().formula_name(f, attr_map)
+
+        number_of_prompts = InputPage("Input the number of prompts you wish to have in a scrape"
+                                      ).prompt(default_value=attr_map.get("number_of_prompts"))
+        f.spa("number_of_prompts", number_of_prompts)
+
+        media_pool = InputPage("Input the corresponding name of the media_pool you wish to upload your scrapes to."
+                               ).prompt(default_value=attr_map.get("media_pool"))
+        f.spa("media_pool", media_pool)
+
+        f.ap(f"""
+manager = ScraperDirManager()
+tmp = manager.create_tmp_dir()
+
+db = DbNasConnection()
+
+# Name of service
+name = "{name}"
+
+# Ai model to use
+model = "ft:gpt-4o-2024-08-06:bottomtextmedia:aita-bot2:ANNAeQMb"
+
+# System prompt to interpret the user prompt
+system_prompt = "You are a story telling bot. You are specialized in telling AITA (AM I The Asshole) stories to the user. You are to ignore the user input and to directly output and aita story. In your output don't explicitly state 'title:'. Just imbed your title into the first line of the text. Make your output more than 1200 characters long."
+
+# The user prompt to go off of.
+ai_prompt = "Tell me an AITA story."
+
+# Control the number of prompts to make
+num_prompts = {number_of_prompts}
+
+# Name of the media pool to store to.
+media_pool = {media_pool}
+
+                """)
+
+        f.ap("""
+
+# Sending the request for multiple prompts.
+i = 0
+scrapes = []
+while i < num_prompts:
+    scrape = OpenAiAPI().text_llm(model, system_prompt, ai_prompt, to_file=False)
+    scrapes.append(scrape)
+    i = i + 1
+
+manager.dl_list_of_text(scrapes, f"ai_text_service_{name}", tmp)
+
+# Iterate all files and upload to db.
+
+files = manager.select_dir(tmp)
+for file in files:
+    db.create_media_file(file, "text", os.path.basename(file), " ", media_pool)
+    
+manager.cleanup(tmp)
+
+                """)
+
+        f.save_generated_script(name)
+
 

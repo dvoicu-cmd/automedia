@@ -11,7 +11,7 @@ def main():
     v1 = pg.main_menu("Scraper")
     if v1 == 'custom':
         # CUSTOM SCRAPER FORMULA CREATION
-        v2 = PickerPage(["Reddit Scrape", "Ai Text Prompt", "Ai Text and Images", "Thumbnail Bases with Ai Image", "Back"]).prompt("Select a formula to use")
+        v2 = PickerPage(["Reddit Scrape", "Ai Text Prompt", "Ai Text and Images", "Thumbnail Bases with Ai Image", "Ai aita prompt", "Back"]).prompt("Select a formula to use")
         try:
             if v2 == 0:
                 ScraperFormulas().reddit_scrape()
@@ -24,7 +24,10 @@ def main():
                 DisplayPage().prompt("Successfully created ai text and image formula.")
             if v2 == 3:
                 ScraperFormulas().open_ai_thumb()
-                DisplayPage().prompt("Successfully created thumbnail with ai image formula")
+                DisplayPage().prompt("Successfully created thumbnail with ai image formula.")
+            if v2 == 4:
+                ScraperFormulas().open_ai_aita()
+                DisplayPage().prompt("Successfully created Ai aita prompt formula.")
             if v2 == 4:  # Back
                 pass
         except Exception as e:
