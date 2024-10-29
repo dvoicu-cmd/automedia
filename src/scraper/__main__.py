@@ -28,7 +28,7 @@ def main():
             if v2 == 4:
                 ScraperFormulas().open_ai_aita()
                 DisplayPage().prompt("Successfully created Ai aita prompt formula.")
-            if v2 == 4:  # Back
+            if v2 == 5:  # Back
                 pass
         except Exception as e:
             if isinstance(e, InputCancelled):

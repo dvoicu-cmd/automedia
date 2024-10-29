@@ -381,7 +381,7 @@ manager.cleanup(output_tmp)
     def open_ai_aita(attr_map={}):
 
         f = ManageFormula()
-        f.set_properties_type("scraper", "open_ai_thumb")
+        f.set_properties_type("scraper", "open_ai_aita")
 
         name = InterfaceFormulas().formula_name(f, attr_map)
 
