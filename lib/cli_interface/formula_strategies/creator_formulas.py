@@ -1,3 +1,5 @@
+import pdb
+
 from .formulas_interface import InterfaceFormulas
 
 from lib.manage_formula.manage_formula import ManageFormula
@@ -77,7 +79,7 @@ class CreatorFormulas:
         # ----------------- 3) Media Pool Selection Options -----------------
 
         # prompt for media_pool_ids
-        text_content = InputPage("Input the media pool id for the story content").prompt(default_value="text_content")
+        text_content = InputPage("Input the media pool id for the story content").prompt(default_value=attr_map.get("text_content"))
         f.spa("text_content", text_content)
 
         f.ap(f"""
@@ -108,7 +110,7 @@ db.update_to_archived("media_files", record[0])
 
         # ----------------- 3) Apply Multiple Stories -----------------
 
-        num_text_content = InputPage("Input the number of stories to load from the media pool").prompt(default_value="num_text_content")
+        num_text_content = InputPage("Input the number of stories to load from the media pool").prompt(default_value=attr_map.get("num_text_content"))
         f.spa("num_text_content", num_text_content)
 
         f.ap(f"""
