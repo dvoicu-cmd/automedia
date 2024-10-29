@@ -124,7 +124,7 @@ ai_prompt = "{ai_prompt}"
 num_prompts = {number_of_prompts}
 
 # Name of the media pool to store to.
-media_pool = {media_pool}
+media_pool = "{media_pool}"
         
         """)
 
@@ -415,7 +415,7 @@ ai_prompt = "Tell me an AITA story."
 num_prompts = {number_of_prompts}
 
 # Name of the media pool to store to.
-media_pool = {media_pool}
+media_pool = "{media_pool}"
 
                 """)
 
