@@ -26,10 +26,12 @@ from src import *
 start_time = datetime.datetime.now()
 t = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
 print(f"------------ Starting Script: {t} ------------")  
-# User defined code
+# ---------------------- User defined code ----------------------
 """
 
         self.template_bottom = """
+# ---------------------- End defined code ----------------------
+        
 # Current time
 end_time = datetime.datetime.now()
 elapsed_time = end_time - start_time
@@ -64,7 +66,7 @@ print(f"------------ Elapsed Time: {elapsed_time} ------------")
         :param formula_name:
         :return:
         """
-        script_content = self.template_top + '\n'
+        script_content = self.template_top + '\n' + self.template_bottom
         save_location = f"{ManageService().read_script_path()}/{formula_name}.py"
 
         with open(save_location, "w") as file:

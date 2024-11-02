@@ -4,10 +4,16 @@ from src.publisher.platform_strategies.yt_upload import YtUpload
 from lib.central_connector.db_nas_connection import DbNasConnection
 import time
 
+
 def test_2fa():
     print("calling yt")
-    yt = YtUpload("redditreadcreators@gmail.com", "qR1kYbTD7R", "ybq3joz5rckh4bvybe4fpgloqffgsyf2")
+    yt = YtUpload("dannnytests@gmail.com", "3hngBguof0", "")
     print("SUCCESS Logged in headless")
+
+def days():
+    days_ls = YtUpload.ls_days_ahead(5)
+    print(days_ls)
+
 
 def test_upload():
     start_time = time.time()
@@ -37,4 +43,4 @@ def test_upload():
     print(f"Elapsed Time: {elapsed_time}s")
 
 
-test_upload()
+days()

@@ -11,16 +11,18 @@ def main():
     v1 = pg.main_menu("Publisher")
     if v1 == 'custom':
         # CUSTOM PUBLISHER FORMULA CREATION
-        v2 = PickerPage(["YT Formula", "Local Formula", "Back"]).prompt("Select a formula to use")
+        v2 = PickerPage(["Local Formula", "YT Formula", "YT Schedule", "Back"]).prompt("Select a formula to use")
         try:
             if v2 == 0:
-                PublisherFormulas().create_formula("yt_formula")
-                DisplayPage().prompt(f"Successfully created new formula.")
+                PublisherFormulas().create_formula("Local Formula")
+                DisplayPage().prompt(f"Successfully created new local formula.")
             if v2 == 1:
-                PublisherFormulas().create_formula("local_formula")
-                DisplayPage().prompt(f"Successfully created new formula.")
-
+                PublisherFormulas().create_formula("yt_formula")
+                DisplayPage().prompt(f"Successfully created new yt upload formula.")
             if v2 == 2:
+                PublisherFormulas().create_formula("yt_schedule")
+                DisplayPage().prompt(f"Successfully created new yt scheduling upload formula.")
+            if v2 == 3:
                 pass
         except Exception as e:
             if isinstance(e, InputCancelled):
