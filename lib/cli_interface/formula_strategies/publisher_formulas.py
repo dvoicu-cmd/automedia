@@ -27,8 +27,11 @@ class PublisherFormulas(InterfaceFormulas):
         yt_account_name = InputPage("Input the name of the account you want to set up a YT publisher for").prompt(default_value=attr_map.get("name"))
         f.spa("name", yt_account_name)
 
-        brand_account = InputPage("Input the specific brand account to select for your upload").prompt(default_value=attr_map.get("brand_account"))
+        brand_account = InputPage("Input the specific brand account to select for your upload.\nNOTE: You must input the user name that does not start with the @ symbol").prompt(default_value=attr_map.get("brand_account"))
         f.spa("brand_account", brand_account)
+
+        video_tags = InputPage("Input any assosiated tags you wish to attach to each upload.\nInput must be words separated by commas. For example: tag1,tag2,tag3, ... tagN.").prompt(default_value=attr_map.get("video_tags"))
+        f.spa("video_tags", video_tags)
 
         f.ap(f"""
         
@@ -55,6 +58,7 @@ except:
 
 # Input select the specific brand account to upload to.
 target_brand_account = "{brand_account}"
+tags = "{video_tags}"
         
         """)
 
@@ -74,6 +78,7 @@ yt.set_account(target_brand_account)  # Target brand account
 yt.set_title(TextUtils.read_txt(title))
 yt.set_description(TextUtils.read_txt(description))
 yt.enable_thumbnail(thumbnail)  # Attempt to set up the thumbnail (if verified)
+yt.set_tags(tags)
     
 # try to upload short video (if there is one)
 try:
@@ -118,12 +123,15 @@ if not exec_fail:
         f.spa("yt_account_name", yt_account_name)
 
         # The brand account to upload videos to on youtube studio.
-        brand_account = InputPage("Input the specific brand account to select for your upload").prompt(default_value=attr_map.get("brand_account"))
+        brand_account = InputPage("Input the specific brand account to select for your upload.\nNOTE: You must input the user name that does not start with the @ symbol").prompt(default_value=attr_map.get("brand_account"))
         f.spa("brand_account", brand_account)
+
+        video_tags = InputPage("Input any assosiated tags you wish to attach to each upload.\nInput must be words separated by commas. For example: tag1,tag2,tag3, ... tagN.").prompt(default_value=attr_map.get("video_tags"))
+        f.spa("video_tags", video_tags)
 
         # Number of videos to schedule
         number_videos = InterfaceFormulas.formula_input("number_videos",
-                                                        "Input the number of videos you wish to schedule an upload. This will schedule a video per day.",
+                                                        "Input the number of days ahead you wish have an upload schedule for.\nNOTE: there is a default upload limit of 10 videos by default. Be aware of if your account contains content with an assosiated short as that will mean you will schedule 2 uploads per day.",
                                                         f, attr_map)
         f.spa("number_videos", number_videos)
 
@@ -167,7 +175,8 @@ for date in dates_list:
     content_record = db.read_rand_content_file(acc_record[0])  # Reads the content.
 
     # Input select the specific brand account to upload to.
-    target_brand_account = "{brand_account}"    
+    target_brand_account = "{brand_account}"
+    tags = "{video_tags}"    
         """)
 
         f.ap("""
@@ -187,6 +196,7 @@ for date in dates_list:
     yt.set_description(TextUtils.read_txt(description))
     yt.enable_schedule(time_to_schedule, date)
     yt.enable_thumbnail(thumbnail)  # Attempt to set up the thumbnail (if verified)
+    yt.set_tags(tags)
     
     try:
         print("Starting exec upload short")

@@ -232,26 +232,26 @@ class YtUpload(Upload):
                 self.__wait_verify(e)
                 self.driver.find_element(by=By.XPATH, value=e).click()
 
-            # # Toggle advanced settings
-            # e = '/html/body/ytcp-uploads-dialog/tp-yt-paper-dialog/div/ytcp-animatable[1]/ytcp-ve/ytcp-video-metadata-editor/div/div/ytcp-button'
-            # self.__wait_verify(e)
-            # self.driver.find_element(by=By.XPATH, value=e).click()
-            #
-            # # Wait and verify paid promotions loaded.
-            # e = '/html/body/ytcp-uploads-dialog/tp-yt-paper-dialog/div/ytcp-animatable[1]/ytcp-ve/ytcp-video-metadata-editor/div/ytcp-video-metadata-editor-advanced/div[1]/ytcp-checkbox-lit/div[1]'
-            # self.__wait_verify(e)
-            #
-            # # Enable paid promotions if configured to do so.
-            # if self.paid_promo:
-            #     self.driver.find_element(by=By.XPATH, value=e).click()
-            #
-            # # Input tags,
-            # try:
-            #     e = '/html/body/ytcp-uploads-dialog/tp-yt-paper-dialog/div/ytcp-animatable[1]/ytcp-ve/ytcp-video-metadata-editor/div/ytcp-video-metadata-editor-advanced/div[6]/ytcp-form-input-container/div[1]/div/ytcp-free-text-chip-bar/ytcp-chip-bar/div/input'
-            #     self.__wait_verify(e)
-            #     self.driver.type(e, self.tags)
-            # except selenium.common.exceptions.NoSuchElementException:
-            #     pass  # Just ignore tags, they are not that important if they brick.
+            # Toggle advanced settings
+            e = '/html/body/ytcp-uploads-dialog/tp-yt-paper-dialog/div/ytcp-animatable[1]/ytcp-ve/ytcp-video-metadata-editor/div/div/ytcp-button'
+            self.__wait_verify(e)
+            self.driver.find_element(by=By.XPATH, value=e).click()
+
+            # Wait and verify paid promotions loaded.
+            e = '/html/body/ytcp-uploads-dialog/tp-yt-paper-dialog/div/ytcp-animatable[1]/ytcp-ve/ytcp-video-metadata-editor/div/ytcp-video-metadata-editor-advanced/div[1]/ytcp-checkbox-lit/div[1]'
+            self.__wait_verify(e)
+
+            # Enable paid promotions if configured to do so.
+            if self.paid_promo:
+                self.driver.find_element(by=By.XPATH, value=e).click()
+
+            # Input tags,
+            try:
+                e = '/html/body/ytcp-uploads-dialog/tp-yt-paper-dialog/div/ytcp-animatable[1]/ytcp-ve/ytcp-video-metadata-editor/div/ytcp-video-metadata-editor-advanced/div[6]/ytcp-form-input-container/div[1]/div/ytcp-free-text-chip-bar/ytcp-chip-bar/div/input'
+                self.__wait_verify(e)
+                self.driver.type(e, self.tags)
+            except selenium.common.exceptions.NoSuchElementException:
+                pass  # Just ignore tags, they are not that important if they brick.
 
             # get the next button and click it to move to next page.
             self.__wait_verify('#next-button')
