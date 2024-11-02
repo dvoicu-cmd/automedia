@@ -281,15 +281,11 @@ class YtUpload(Upload):
                 drop_down_scheduler = self.driver.find_element(By.XPATH, e)
                 drop_down_scheduler.click()
 
-                pdb.set_trace()
-
                 # Open date drop down
                 e = '/html/body/ytcp-uploads-dialog/tp-yt-paper-dialog/div/ytcp-animatable[1]/ytcp-uploads-review/div[2]/div[1]/ytcp-video-visibility-select/div[3]/div[2]/ytcp-visibility-scheduler/div[1]/ytcp-datetime-picker/div/div[1]/ytcp-text-dropdown-trigger/ytcp-dropdown-trigger/div/div[3]'
                 self.__wait_verify(e)
                 drop_down_date = self.driver.find_element(By.XPATH, e)
                 drop_down_date.click()
-
-                pdb.set_trace()
 
                 # Input the date
                 # So when you start inputting the date value, the interface makes this overlay that covers the screen
