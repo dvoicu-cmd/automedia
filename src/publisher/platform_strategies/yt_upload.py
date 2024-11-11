@@ -8,7 +8,6 @@ from selenium.webdriver.common.keys import Keys
 from seleniumbase import Driver
 import seleniumbase.common.exceptions
 from pyotp.totp import TOTP
-import pdb
 
 
 class YtUpload(Upload):
@@ -30,7 +29,7 @@ class YtUpload(Upload):
         # If you have issues with multiple instances, you can type ps and kill the main chromium instance
         # Access on chrome this url: chrome://inspect
         # Here you can see the headless instance running and you can debug as needed.
-        self.driver = Driver(uc=True, headless=True, remote_debug="127.0.0.1:9222")  # remote_debug="127.0.0.1:9222"
+        self.driver = Driver(uc=True, headless=True)  # remote_debug="127.0.0.1:9222"
         # Selenium base's pageLoadStrategy is set to normal by default -> pages will fully load before you can interact.
         # https://seleniumbase.io/help_docs/how_it_works/#no-more-flaky-tests
         self.TIMEOUT = time_out
