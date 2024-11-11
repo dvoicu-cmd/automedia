@@ -53,8 +53,8 @@ yt = None
 try:
     yt = YtUpload(acc_record[2], acc_record[3], acc_record[4])
 except:
-    exec_fail = True
-    pass
+    # You don't want to continue if you fail to set up the youtube webdriver
+    raise ChildProcessError("YT Upload failed to be set up")
 
 # Input select the specific brand account to upload to.
 target_brand_account = "{brand_account}"

@@ -29,7 +29,7 @@ class YtUpload(Upload):
         # If you have issues with multiple instances, you can type ps and kill the main chromium instance
         # Access on chrome this url: chrome://inspect
         # Here you can see the headless instance running and you can debug as needed.
-        self.driver = Driver(uc=True, headless=True)  # remote_debug="127.0.0.1:9222"
+        self.driver = Driver(uc=True, headless=True, remote_debug="127.0.0.1:9222")  # remote_debug="127.0.0.1:9222"
         # Selenium base's pageLoadStrategy is set to normal by default -> pages will fully load before you can interact.
         # https://seleniumbase.io/help_docs/how_it_works/#no-more-flaky-tests
         self.TIMEOUT = time_out
@@ -343,21 +343,18 @@ class YtUpload(Upload):
 
         # Define the specific pages and how to handle them.
         def email_page():
-            self.driver.wait_for_element('#identifierId')
             self.__wait_verify('#identifierId')
             self.driver.uc_click('#identifierId', reconnect_time=0.5)
             self.driver.type('#identifierId', account)
             self.driver.uc_click('#identifierNext > div > button', reconnect_time=0.5)
 
         def password_page():
-            self.driver.wait_for_element('#password > div.aCsJod.oJeWuf > div > div.Xb9hP > input')
             self.__wait_verify('#password > div.aCsJod.oJeWuf > div > div.Xb9hP > input')
             self.driver.uc_click('#password > div.aCsJod.oJeWuf > div > div.Xb9hP > input', reconnect_time=0.5)
             self.driver.type('#password > div.aCsJod.oJeWuf > div > div.Xb9hP > input', password)
             self.driver.uc_click('#passwordNext > div > button')
 
         def auth_2fa():
-            self.driver.wait_for_element('#totpPin')
             self.__wait_verify('#totpPin')
             self.driver.uc_click('#totpPin', reconnect_time=0.5)
             totp_code = TOTP(auto_secrete)
