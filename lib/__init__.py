@@ -17,12 +17,12 @@ from .manage_formula.manage_formula import ManageFormula
 from .manage_directory_structure.creator_dir_manager import CreatorDirManager
 from .manage_directory_structure.scraper_dir_manager import ScraperDirManager
 from .manage_directory_structure.publisher_dir_manager import PublisherDirManager
+from .webdriver_util.display_manager import DisplayManager
 
 # Functionss
 from .cli_interface import page_util_funcs as pg
 from .cli_interface.page.sigint_handling.signal_handler_functions import set_watch_signal
-from .cli_interface.page.sigint_handling.signal_handler_functions import set_watch_signal
 
 __all__ = ['DbNasConnection', 'ManageService', 'Queue', 'TextUtils', 'InputPage', 'PickerPage', 'DisplayPage',
            'ManageFormula', 'CreatorDirManager', 'ScraperDirManager', 'PublisherDirManager', 'InputCancelled',
-           'pg', 'set_watch_signal', 'set_watch_signal'] + formula_strategies_all
+           'DisplayManager', 'pg', 'set_watch_signal'] + formula_strategies_all

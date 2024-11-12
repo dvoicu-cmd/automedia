@@ -11,8 +11,10 @@ import seleniumbase.common.exceptions
 from pyotp.totp import TOTP
 import platform
 
+from lib.webdriver_util.display_manager import DisplayManager
 from pyvirtualdisplay.display import Display
 import Xlib.display
+import atexit
 
 
 
@@ -33,22 +35,25 @@ class YtUpload(Upload):
         # Headless display management
         if platform.system() == "Linux":
             print("Linux detected")
-            # on linux you must have a virtual display
-            if os.environ.get('DISPLAY') is None:
-                disp = Display(visible=True, size=(1366, 768), backend="xvfb", use_xauth=True)
-                disp.start()
-                os.environ['DISPLAY'] = ":0"  # set DISPLAY to the new virtual display
-                print("Created new virtual display :0 .")
-            else:
-                print("A virtual display is already running.")
+            self.dm = DisplayManager()
+            self.dm.activate_display()
 
-            # Ight so basically, if this is imported on the top of this file, it breaks everything.
-            # So just import it here.
-            import pyautogui
-
-            # Set display for object
-            print("Setting display for driver.")
-            pyautogui._pyautogui_x11._display = Xlib.display.Display(os.environ['DISPLAY'])
+            # # on linux you must have a virtual display
+            # if os.environ.get('DISPLAY') is None:
+            #     disp = Display(visible=True, size=(1366, 768), backend="xvfb", use_xauth=True)
+            #     disp.start()
+            #     os.environ['DISPLAY'] = ":0"  # set DISPLAY to the new virtual display
+            #     print("Created new virtual display :0 .")
+            # else:
+            #     print("A virtual display is already running.")
+            #
+            # # Ight so basically, if this is imported on the top of this file, it breaks everything.
+            # # So just import it here.
+            # import pyautogui
+            #
+            # # Set display for object
+            # print("Setting display for driver.")
+            # pyautogui._pyautogui_x11._display = Xlib.display.Display(os.environ['DISPLAY'])
 
         elif platform.system() == "Darwin":
             print("Mac detected")
@@ -461,6 +466,10 @@ class YtUpload(Upload):
 
     def quit(self):
         self.driver.quit()
+        try:
+            self.dm.stop_display()
+        except:
+            pass
 
     @staticmethod
     def ls_days_ahead(n):
