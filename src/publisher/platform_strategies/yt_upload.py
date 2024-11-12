@@ -227,7 +227,6 @@ class YtUpload(Upload):
             # Set thumbnail if configured to do so
             if self.thumbnail_config["set_thumbnail"]:
                 i = 0
-                pdb.set_trace()
                 # id='file-loader' The input for the file
                 # e = '/html/body/ytcp-uploads-dialog/tp-yt-paper-dialog/div/ytcp-animatable[1]/ytcp-ve/ytcp-video-metadata-editor/div/ytcp-video-metadata-editor-basics/div[3]/ytcp-thumbnails-compact-editor/div[3]/ytcp-thumbnails-compact-editor-uploader/ytcp-thumbnail-uploader/input'  # old headless tumbnail button.
                 e = '/html/body/ytcp-uploads-dialog/tp-yt-paper-dialog/div/ytcp-animatable[1]/ytcp-ve/ytcp-video-metadata-editor/div/ytcp-video-metadata-editor-basics/div[3]/ytcp-video-thumbnail-editor/div[3]/ytcp-video-custom-still-editor/div/ytcp-thumbnail-uploader/input'
