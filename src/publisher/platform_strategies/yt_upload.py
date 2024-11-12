@@ -6,8 +6,15 @@ import selenium.common.exceptions
 from selenium.webdriver.common.by import By
 from selenium.webdriver.common.keys import Keys
 from seleniumbase import Driver
+from seleniumbase import SB
 import seleniumbase.common.exceptions
 from pyotp.totp import TOTP
+import platform
+
+import pyautogui
+from pyvirtualdisplay.display import Display
+import Xlib.display
+
 
 
 class YtUpload(Upload):
@@ -24,14 +31,36 @@ class YtUpload(Upload):
             auth_secret (str): The 32 character keys for the 2fa authentication code.
         """
 
+        # Headless display management
+        if platform.system() == "Linux":
+            print("Linux detected")
+            # on linux you must have a virtual display
+            if os.environ.get('DISPLAY') is None:
+                disp = Display(visible=True, size=(1366, 768), backend="xvfb", use_xauth=True)
+                disp.start()
+                os.environ['DISPLAY'] = ":0"  # set DISPLAY to the new virtual display
+                print("Created new virtual display :0 .")
+            else:
+                print("A virtual display is already running.")
+
+            # Set display for object
+            print("Setting display for driver.")
+            pyautogui._pyautogui_x11._display = Xlib.display.Display(os.environ['DISPLAY'])
+
+        elif platform.system() == "Darwin":
+            print("Mac detected")
+            pass
+
+
         # REMEMBER TO GET RID OF remote_debug WHEN PUSHING FOR PRODUCTION.
         # It spins up multiple debug instances and takes up too much memory on deployment machines.
         # If you have issues with multiple instances, you can type ps and kill the main chromium instance
         # Access on chrome this url: chrome://inspect
-        # Here you can see the headless instance running and you can debug as needed.
-        self.driver = Driver(uc=True, headless=True, remote_debug="127.0.0.1:9222")  # remote_debug="127.0.0.1:9222"
+        # Here you can see the headless instance running and you can debug as needed. headless=True
+        self.driver = Driver(uc=True)  # remote_debug="127.0.0.1:9222"
         # Selenium base's pageLoadStrategy is set to normal by default -> pages will fully load before you can interact.
         # https://seleniumbase.io/help_docs/how_it_works/#no-more-flaky-tests
+
         self.TIMEOUT = time_out
         self.MAX_TRY = max_try
         self.__login_google(email, password, auth_secret)
