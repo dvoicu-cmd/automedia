@@ -11,7 +11,6 @@ import seleniumbase.common.exceptions
 from pyotp.totp import TOTP
 import platform
 
-import pyautogui
 from pyvirtualdisplay.display import Display
 import Xlib.display
 
@@ -42,6 +41,10 @@ class YtUpload(Upload):
                 print("Created new virtual display :0 .")
             else:
                 print("A virtual display is already running.")
+
+            # Ight so basically, if this is imported on the top of this file, it breaks everything.
+            # So just import it here.
+            import pyautogui
 
             # Set display for object
             print("Setting display for driver.")
