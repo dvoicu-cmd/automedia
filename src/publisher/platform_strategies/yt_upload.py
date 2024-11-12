@@ -1,4 +1,5 @@
 import os
+import pdb
 from datetime import date, timedelta
 import re
 from .upload import Upload
@@ -12,9 +13,6 @@ from pyotp.totp import TOTP
 import platform
 
 from lib.webdriver_util.display_manager import DisplayManager
-from pyvirtualdisplay.display import Display
-import Xlib.display
-import atexit
 
 
 
@@ -23,7 +21,7 @@ class YtUpload(Upload):
     Class for uploading content to YouTube via YouTube studio.
     """
 
-    def __init__(self, email, password, auth_secret, time_out=5, max_try=5):
+    def __init__(self, email, password, auth_secret, time_out=10, max_try=5):
         """
         Constructor
         Args:
@@ -34,31 +32,13 @@ class YtUpload(Upload):
 
         # Headless display management
         if platform.system() == "Linux":
-            print("Linux detected")
+            print("Linux detected, enabling virtual display.")
+            # Need to have a virtual display for linux
             self.dm = DisplayManager()
             self.dm.activate_display()
-
-            # # on linux you must have a virtual display
-            # if os.environ.get('DISPLAY') is None:
-            #     disp = Display(visible=True, size=(1366, 768), backend="xvfb", use_xauth=True)
-            #     disp.start()
-            #     os.environ['DISPLAY'] = ":0"  # set DISPLAY to the new virtual display
-            #     print("Created new virtual display :0 .")
-            # else:
-            #     print("A virtual display is already running.")
-            #
-            # # Ight so basically, if this is imported on the top of this file, it breaks everything.
-            # # So just import it here.
-            # import pyautogui
-            #
-            # # Set display for object
-            # print("Setting display for driver.")
-            # pyautogui._pyautogui_x11._display = Xlib.display.Display(os.environ['DISPLAY'])
-
         elif platform.system() == "Darwin":
-            print("Mac detected")
+            print("Mac detected, no virtual display needed.")
             pass
-
 
         # REMEMBER TO GET RID OF remote_debug WHEN PUSHING FOR PRODUCTION.
         # It spins up multiple debug instances and takes up too much memory on deployment machines.
@@ -71,7 +51,9 @@ class YtUpload(Upload):
 
         self.TIMEOUT = time_out
         self.MAX_TRY = max_try
+        print("Attempting google login")
         self.__login_google(email, password, auth_secret)
+        print("Object set up, google login success.")
         self.account_name = None
         self.title = "default"
         self.description = "default"
@@ -199,6 +181,7 @@ class YtUpload(Upload):
         Executes the upload process given a specific file
         :param file_path: The file to upload
         """
+        print(f"Init exec upload {file_path}")
         if not os.path.exists(file_path):
             print(f"YT fail on path: {file_path}")
             raise ValueError(f"P path does not exists: {file_path}")
@@ -206,7 +189,9 @@ class YtUpload(Upload):
         try:  # if anything goes wrong, you want to ensure that that driver closes so you don't spawn 50+ driver instances.
 
             # Change to the desired brand account.
+            print(f"Selecting account: {self.account_name}")
             self.__change_account()
+            print("Success, proceeding to upload...")
 
             # placeholder var to hold long XPaths
             e = ''
@@ -242,7 +227,11 @@ class YtUpload(Upload):
             # Set thumbnail if configured to do so
             if self.thumbnail_config["set_thumbnail"]:
                 i = 0
-                e = '/html/body/ytcp-uploads-dialog/tp-yt-paper-dialog/div/ytcp-animatable[1]/ytcp-ve/ytcp-video-metadata-editor/div/ytcp-video-metadata-editor-basics/div[3]/ytcp-thumbnails-compact-editor/div[3]/ytcp-thumbnails-compact-editor-uploader/ytcp-thumbnail-uploader/input'
+                pdb.set_trace()
+                # id='file-loader' The input for the file
+                # e = '/html/body/ytcp-uploads-dialog/tp-yt-paper-dialog/div/ytcp-animatable[1]/ytcp-ve/ytcp-video-metadata-editor/div/ytcp-video-metadata-editor-basics/div[3]/ytcp-thumbnails-compact-editor/div[3]/ytcp-thumbnails-compact-editor-uploader/ytcp-thumbnail-uploader/input'  # old headless tumbnail button.
+                e = '/html/body/ytcp-uploads-dialog/tp-yt-paper-dialog/div/ytcp-animatable[1]/ytcp-ve/ytcp-video-metadata-editor/div/ytcp-video-metadata-editor-basics/div[3]/ytcp-video-thumbnail-editor/div[3]/ytcp-video-custom-still-editor/div/ytcp-thumbnail-uploader/input'
+                # e = '/html/body/ytcp-uploads-dialog/tp-yt-paper-dialog/div/ytcp-animatable[1]/ytcp-ve/ytcp-video-metadata-editor/div/ytcp-video-metadata-editor-basics/div[3]/ytcp-video-thumbnail-editor/div[3]/ytcp-video-custom-still-editor/div/ytcp-thumbnail-uploader/ytcp-thumbnail-editor/div[1]/ytcp-ve/button'  # This is the button, not the specific input.
                 while i < self.MAX_TRY:
                     try:
                         thumbnail_input = self.driver.find_element(by=By.XPATH, value=e)
@@ -346,13 +335,15 @@ class YtUpload(Upload):
             publish_button = self.driver.find_element(By.XPATH, e)
             publish_button.click()
 
+            print(f"Successfully uploaded: {file_path}")
+
             # Wait a little bit after upload
             self.driver.sleep(self.TIMEOUT*1.5)
 
             self.driver.refresh()
 
         except Exception as e:
-            self.driver.quit()
+            self.quit()
             raise e
 
         try:
@@ -408,7 +399,7 @@ class YtUpload(Upload):
             except Exception as e:
                 i = i + 1
                 if i == self.MAX_TRY:
-                    self.driver.quit()
+                    self.quit()
                     raise e
                 print(f"Threw err: {e} \n attempt num:{i}")
                 self.driver.sleep(self.TIMEOUT)
@@ -432,13 +423,15 @@ class YtUpload(Upload):
             except Exception as e:
                 i = i + 1
                 if i == self.MAX_TRY:
-                    self.driver.quit()
+                    self.quit()
                     raise e
                 print(f"Threw err: {e} \n attempt num:{i}")
                 self.driver.sleep(self.TIMEOUT)
                 self.driver.find_element('#totpNext > div > button').clear()
                 continue
 
+        # Just wait a little bit, you want to confirm that everything loads.
+        self.driver.sleep(self.TIMEOUT)
 
         # if the current google account has multiple brand accounts it will go to a special prompt page.
         # If not your on the main YT studio page.
@@ -458,7 +451,7 @@ class YtUpload(Upload):
             except Exception as e:
                 i = i + 1
                 if i == self.MAX_TRY:
-                    self.driver.quit()
+                    self.quit()
                     raise e
                 print(f"Threw err: {e} \n attempt num:{i}")
                 self.driver.refresh()
@@ -546,7 +539,7 @@ class YtUpload(Upload):
                 i = i + 1
                 if i == self.MAX_TRY:
                     print("MAX RETRY LIMIT REACHED, QUITING DRIVER.")
-                    self.driver.quit()
+                    self.quit()
                     raise e
                 print(f"Threw err: {e} \n attempt num:{i}")
                 self.driver.sleep(self.TIMEOUT)
