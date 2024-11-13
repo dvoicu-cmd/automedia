@@ -13,6 +13,7 @@ from pyotp.totp import TOTP
 import platform
 
 from lib.webdriver_util.display_manager import DisplayManager
+from lib.text_util.util import TextUtils
 
 
 
@@ -73,6 +74,8 @@ class YtUpload(Upload):
         # title has 100-character limit
         if not len(title) > 100:
             self.title = title
+        else:
+            self.title = TextUtils.cut_words(title, 100)
 
     def set_account(self, account_name):
         """
@@ -91,6 +94,8 @@ class YtUpload(Upload):
         # 5000 character limit
         if not len(description) > 5000:
             self.description = description
+        else:
+            self.description = TextUtils.cut_words(description, 5000)
 
     def set_tags(self, tags):
         """
@@ -102,6 +107,8 @@ class YtUpload(Upload):
         # character count 500 (including commas)
         if not len(tags) > 500:
             self.tags = tags
+        else:
+            self.tags = TextUtils.cut_words(tags, 500, split_around=',')
 
     def toggle_child_content(self):
         """
@@ -136,6 +143,8 @@ class YtUpload(Upload):
             if file_size_in_mb <= 2:
                 self.thumbnail_config["set_thumbnail"] = True
                 self.thumbnail_config["path"] = img_path
+            else:
+                print("THUMBNAIL FILE EXCEEDS 2MB")
 
     def disable_thumbnail(self):
         """
@@ -186,7 +195,8 @@ class YtUpload(Upload):
             print(f"YT fail on path: {file_path}")
             raise ValueError(f"P path does not exists: {file_path}")
 
-        try:  # if anything goes wrong, you want to ensure that that driver closes so you don't spawn 50+ driver instances.
+        # if anything goes wrong, you want to ensure that that driver closes. So now you don't run 50+ driver instances.
+        try:
 
             # Change to the desired brand account.
             print(f"Selecting account: {self.account_name}")
