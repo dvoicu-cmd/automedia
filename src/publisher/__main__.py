@@ -14,7 +14,7 @@ def main():
         v2 = PickerPage(["Local Formula", "YT Formula", "YT Schedule", "Back"]).prompt("Select a formula to use")
         try:
             if v2 == 0:
-                PublisherFormulas().create_formula("Local Formula")
+                PublisherFormulas().create_formula("local_formula")
                 DisplayPage().prompt(f"Successfully created new local formula.")
             if v2 == 1:
                 PublisherFormulas().create_formula("yt_formula")
