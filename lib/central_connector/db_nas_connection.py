@@ -65,7 +65,7 @@ import datetime
 # else:
 #     import mariadb
 
-# import mariadb
+import mariadb
 
 
 class DbNasConnection:
