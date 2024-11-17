@@ -26,11 +26,12 @@ class MakeThumbnail:
 
         self.image[position[1]:y2, position[0]:x2] = additional_image
 
-    def place_text(self, t: ThumbnailText, random_bg=False):
+    def place_text(self, t: ThumbnailText, random_bg=False, y_spacing=55):
         """
         Places text given the params from text object
         :param t:
         :param random_bg: option to turn on sporadic background highlights. ie: randomly apply background highlights.
+        :param y_spacing: optional variable to increase the y-axis spacing on the thumbnails of text.
         :return:
         """
         lines = t.text_content.split('\n')
@@ -38,7 +39,12 @@ class MakeThumbnail:
         # If you want to apply sporadic background highlights, have the random_bg variable turned on.
         apply_bg = True
 
+        j = 0
         for i, line in enumerate(lines):
+
+            # extra spacing for y to
+            j = j + y_spacing
+
             if random_bg:
                 apply_bg = random.choice([True, False])
 
@@ -52,7 +58,7 @@ class MakeThumbnail:
 
                 # get the text pos of the word
                 x = t.position[0]
-                y = t.position[1] + i*(t.font_scale*20)
+                y = t.position[1] + i*(t.font_scale*20) + j
 
                 # get the padding of the text
                 x_pad = t.bg_padding[0]
@@ -65,12 +71,12 @@ class MakeThumbnail:
                 new_img = cv2.addWeighted(overlay, t.bg_opacity, self.image, 1 - t.bg_opacity, 0)
 
                 # Put in the text
-                cv2.putText(new_img, line, (t.position[0], t.position[1] + i*(t.font_scale*20)), t.font, t.font_scale, t.font_color, t.font_thickness)
+                cv2.putText(new_img, line, (t.position[0], t.position[1] + i*(t.font_scale*20) + j), t.font, t.font_scale, t.font_color, t.font_thickness)
 
                 self.image = new_img
             else:
                 # Just place the text
-                cv2.putText(self.image, line, (t.position[0], t.position[1] + i*(t.font_scale*20)), t.font, t.font_scale, t.font_color, t.font_thickness)
+                cv2.putText(self.image, line, (t.position[0], t.position[1] + i*(t.font_scale*20) + j), t.font, t.font_scale, t.font_color, t.font_thickness)
 
     @staticmethod
     def create_img_circle(img_path, radius):

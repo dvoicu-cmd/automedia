@@ -12,7 +12,7 @@ class ThumbnailText:
     font_thickness: int
     # Background properties
     has_bg: bool  # check if a text background is enabled
-    bg_padding: tuple  # (x,y) tuple determining the padding between the text and bg
+    bg_padding: tuple  # (x,y) tuple determining the padding/thickness between the text and bg
     bg_color: tuple  # (r,g,b) the rgb values of the background
     bg_opacity: float  # 0 to 1 float value determining the opacity
 

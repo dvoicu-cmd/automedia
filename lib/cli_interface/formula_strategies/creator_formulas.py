@@ -198,7 +198,7 @@ base.render(f"{output_tmp}/video.mp4")
                                                       , suggested_index=attr_map.get("make_short"))
         f.spa("make_short", make_short)
 
-        if make_short:
+        if make_short == 0:
             f.ap("""
             
 print("-> Creating Short")
@@ -818,6 +818,10 @@ while footage_duration_sum < narration.duration():
                                              ).prompt(default_value=attr_map.get("thumb_words_per_line"))
             f.spa("thumb_words_per_line", thumb_words_per_line)
 
+            thumb_extra_y_spacing = InputPage("Input an integer value for extra line spacing on the thumbnail text.\n"
+                                              "Recommended: 55 pixel spacing.").prompt(default_value=attr_map.get("thumb_extra_y_spacing"))
+            f.spa("thumb_extra_y_spacing", thumb_extra_y_spacing)
+
             # Determine text color
             dark_text = PickerPage(["Black Text", "White Text"]).prompt("What color do you want your thumbnail text to be.\n"
                                                                         , suggested_index=attr_map.get("dark_text"))
@@ -898,7 +902,7 @@ ttxt.limit_words({thumb_max_total_words}, {thumb_words_per_line})
                 
 # All Highlights Option Selected
 ttxt.set_background((50, 50), {bg_color}, 1)
-thumb.place_text(ttxt)
+thumb.place_text(ttxt, y_spacing={thumb_extra_y_spacing})
                 
                 """)
 
@@ -908,7 +912,7 @@ thumb.place_text(ttxt)
 
 # Randomized Highlights Option Selected
 ttxt.set_background((50, 50), {bg_color}, 1)
-thumb.place_text(ttxt, random_bg=True)
+thumb.place_text(ttxt, random_bg=True, y_spacing={thumb_extra_y_spacing})
 
                 """)
 
@@ -916,7 +920,7 @@ thumb.place_text(ttxt, random_bg=True)
                 f.ap(f"""
                
 # No Highlights Option Selected 
-thumb.place_text(ttxt)
+thumb.place_text(ttxt, y_spacing={thumb_extra_y_spacing})
 
                 """)
 
