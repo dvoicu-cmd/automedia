@@ -117,28 +117,27 @@ if not exec_fail:
         service_name = InterfaceFormulas().formula_name(f, attr_map)
 
         # Account information
-        yt_account_name = InterfaceFormulas.formula_input("yt_account_name",
-                                                          "Input the name of the account you want to set up a YT publisher for",
-                                                          f, attr_map)
+        yt_account_name = InputPage("Input the name of the account you want to set up a YT publisher for."
+                                    ).prompt(default_value=attr_map.get("yt_account_name"))
         f.spa("yt_account_name", yt_account_name)
 
         # The brand account to upload videos to on youtube studio.
-        brand_account = InputPage("Input the specific brand account to select for your upload.\nNOTE: You must input the user name that does not start with the @ symbol").prompt(default_value=attr_map.get("brand_account"))
+        brand_account = InputPage("Input the specific brand account to select for your upload.\nNOTE: You must input the user name that does not start with the @ symbol"
+                                  ).prompt(default_value=attr_map.get("brand_account"))
         f.spa("brand_account", brand_account)
 
-        video_tags = InputPage("Input any assosiated tags you wish to attach to each upload.\nInput must be words separated by commas. For example: tag1,tag2,tag3, ... tagN.").prompt(default_value=attr_map.get("video_tags"))
+        video_tags = InputPage("Input any assosiated tags you wish to attach to each upload.\nInput must be words separated by commas. For example: tag1,tag2,tag3, ... tagN."
+                               ).prompt(default_value=attr_map.get("video_tags"))
         f.spa("video_tags", video_tags)
 
         # Number of videos to schedule
-        number_videos = InterfaceFormulas.formula_input("number_videos",
-                                                        "Input the number of days ahead you wish have an upload schedule for.\nNOTE: there is a default upload limit of 10 videos by default. Be aware of if your account contains content with an assosiated short as that will mean you will schedule 2 uploads per day.",
-                                                        f, attr_map)
+        number_videos = InputPage("Input the number of days ahead you wish have an upload schedule for.\nNOTE: there is a default upload limit of 10 videos by default. Be aware of if your account contains content with an assosiated short as that will mean you will schedule 2 uploads per day."
+                                  ).prompt(default_value=attr_map.get("number_videos"))
         f.spa("number_videos", number_videos)
 
         # Specific time to schedule
-        time_to_schedule = InterfaceFormulas. formula_input("time_to_schedule",
-                                                            "Input the time for an upload to be scheduled. \nAccepted format: TT:TT AA, ex: 12:30 AM, 6:00 PM",
-                                                            f, attr_map)
+        time_to_schedule = InputPage("Input the time for an upload to be scheduled. \nAccepted format: TT:TT AA, ex: 12:30 AM, 6:00 PM"
+                                     ).prompt(default_value=attr_map.get("time_to_schedule"))
         f.spa("time_to_schedule", time_to_schedule)
 
         f.ap(f"""
