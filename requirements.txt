@@ -21,6 +21,7 @@ pyttsx3  # Additional dependencies needed: espeak ffmpeg libespeak1
 Xlib~=0.21  # Additional virtual display libraries
 pyautogui~=0.9.54
 pyvirtualdisplay~=3.0  # additionally install xvfb, python3-tk, python3-dev
+websocket-client~=1.8.0
 
 
 

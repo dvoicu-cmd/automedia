@@ -1,6 +1,14 @@
+from context import src
+
 import json
+import urllib
+import uuid
+import websocket
 from urllib import request, parse
+import time
+
 import random
+from src.scraper.platform_strategies.comfy_ui_api import ComfyUiAPI
 
 #This is the ComfyUI api prompt format.
 
@@ -11,19 +19,21 @@ import random
 #keep in mind ComfyUI is pre alpha software so this format will change a bit.
 
 #this is the one for the default workflow
+
+# Note that asking for the same text response, will give the exact same image.
 prompt_text = """
 {
   "5": {
     "inputs": {
-      "width": 1920,
-      "height": 1080,
+      "width": 200,
+      "height": 200,
       "batch_size": 1
     },
     "class_type": "EmptyLatentImage"
   },
   "6": {
     "inputs": {
-      "text": "A landscape image of an alien planet unlike earth. It is beautiful but I don't know how to describe it. It has lush grass but the color is atypical. The mountants are of weird shapes that make no sense yet all the sense in the world. And the sky, oh my the sky. It is nothing I have seen before. It is magic.",
+      "text": "more gun",
       "clip": [
         "11",
         0
@@ -140,19 +150,8 @@ prompt_text = """
 }
 """
 
-def queue_prompt(prompt):
-    p = {"prompt": prompt}
-    data = json.dumps(p).encode('utf-8')
-    req = request.Request("http://10.10.2.153:8188/prompt", data=data)
-    request.urlopen(req)
+
+comfy = ComfyUiAPI()
+comfy.stable_diffusion("")
 
 
-prompt = json.loads(prompt_text)
-# #set the text prompt for our positive CLIPTextEncode
-# prompt["6"]["inputs"]["text"] = "masterpiece best quality man"
-#
-# #set the seed for our KSampler node
-# prompt["3"]["inputs"]["seed"] = 5
-
-
-queue_prompt(prompt)

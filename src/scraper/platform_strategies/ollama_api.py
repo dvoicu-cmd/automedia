@@ -4,6 +4,7 @@ import json
 
 from lib.manage_directory_structure.scraper_dir_manager import  ScraperDirManager
 
+
 class OllamaAPI:
     def __init__(self, host_name):
         self.dm = ScraperDirManager()
@@ -48,7 +49,4 @@ class OllamaAPI:
             return None
         else:
             return llm_response
-
-
-
 
