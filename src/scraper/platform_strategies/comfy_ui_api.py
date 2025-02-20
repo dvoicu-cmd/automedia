@@ -4,6 +4,8 @@ import uuid
 import websocket
 from urllib import request, parse
 import time
+import numpy as np
+import cv2
 
 from lib.manage_directory_structure.scraper_dir_manager import  ScraperDirManager
 
@@ -21,7 +23,7 @@ class ComfyUiAPI:
             "inputs": {
             "width": 200,
             "height": 200,
-            "batch_size": 1
+            "batch_size": 2
             },
             "class_type": "EmptyLatentImage",
             "_meta": {
@@ -30,7 +32,7 @@ class ComfyUiAPI:
         },
         "6": {
             "inputs": {
-            "text": "JSON.",
+            "text": "man falling down stairs. The electric boogalu",
             "clip": [
                 "11",
                 0
@@ -191,74 +193,42 @@ class ComfyUiAPI:
         ws.connect(f"ws://{self.comfy_address}/ws?clientId={client_id}")
         return ws
 
-    def __get_history(self, prompt_id):
-        req = request.Request(f"{self.comfy_address}/history/{prompt_id}")
-        with request.urlopen(req) as response:
-            response_data = response.read().decode("utf-8")  # Read and decode response
-            response_json = json.loads(response_data)  # Parsed JSON
-            return response_json
 
-
-    def __track_progress(self, prompt_json, prompt_id):
+    def __track_progress(self, prompt_id):
         ws = self.__open_new_websocket_connection()
 
         while True:
-            out = ws.recv()
+            out = ws.recv()  # receive messages
             if isinstance(out, str):
                 message = json.loads(out)
-                print(f"recived message from comfy: {message}")
+                print(f"got message from comfy: \n{message}")
 
                 # For status messages. This is for when the server has queued prompts
                 # You want to break out of this websocket if the queue is 0
                 if message['type'] == 'status':
-                    print(message['data']['status']['exec_info']['queue_remaining'])
-                    # # data = json.loads(message['data'])
-                    # print(f"message data: {data}")
+                    # Get current queue count.
+                    current_queue = message['data']['status']['exec_info']['queue_remaining']
+                    if current_queue == 0:
+                        print("nothing in queue, exit")
+                        ws.close()
+                        break
 
-                #
-                # if message['type'] == 'progress':
-                #
-                #     try:
-                #         data = message['data']
-                #         current_step = data['value']
-                #         final_step = data['max']
-                #         message_prompt_id = message['prompt_id']
-                #
-                #         print(data)
-                #         print(current_step)
-                #         print(final_step)
-                #         print(message_prompt_id)
-                #
-                #         if current_step >= final_step:
-                #             print(f"finished execution of prompt:{prompt_id}")
-                #             time.sleep(10)
-                #             break  # Execution is done
-                #
-                #     except KeyError as e:
-                #         print("Errr err errrrrrrrrr fuck")
-                #         print(e)
-                #         continue
+                # For in progress messages
+                if message['type'] == 'progress':
 
-                # print('In K-Sampler -> Step: ', current_step, ' of: ', data['max'])
+                    msg_prompt_id = message['data']['prompt_id']
+                    current_step = message['data']['value']
+                    max_steps = message['data']['max']
 
-                # if message['type'] == 'execution_cached':
-                #     data = message['data']
-                #     for itm in data['nodes']:
-                #         if itm not in finished_nodes:
-                #             finished_nodes.append(itm)
-                #             print('Progess: ', len(finished_nodes), '/', len(node_ids), ' Tasks done')
-                # if message['type'] == 'executing':
-                #     data = message['data']
-                #     if data['node'] not in finished_nodes:
-                #         finished_nodes.append(data['node'])
-                #         print('Progess: ', len(finished_nodes), '/', len(node_ids), ' Tasks done')
-                # if data['node'] is None and data['prompt_id'] == prompt_id:
-                #         break #Execution is done
+                    # When there have been enough steps for the specific prompt_id, exit this websocket.
+                    if prompt_id == msg_prompt_id and current_step >= max_steps:
+                        print("Finished processing")
+                        ws.close()
+                        break
 
             else:
                 continue
         return
-
 
     def __queue_prompt(self, prompt_json):
         """
@@ -280,6 +250,45 @@ class ComfyUiAPI:
 
         return None  # Return None if "prompt_id" isn't found
 
+    def __get_history(self, prompt_id):
+        req = request.Request(f"http://{self.comfy_address}/history/{prompt_id}")
+        with request.urlopen(req) as response:
+            response_data = response.read().decode("utf-8")  # Read and decode response
+            json_history = json.loads(response_data)  # Parsed JSON
+            return json_history
+
+    def __get_image_paths(self, prompt_id, json_history):
+        # print(json_history[prompt_id]["outputs"])
+        # Get the specific json section with the output name data on the server.
+        outputs = json_history[prompt_id]["outputs"]["9"]["images"]
+        image_map = []
+        for item in outputs:
+            filename = item["filename"]
+            subfolder = item["subfolder"]
+
+            image_map.append([filename, subfolder])
+
+        return image_map
+
+    def __get_images(self, image_map):
+        got_images = []
+
+        for specific_map in image_map:
+            #http://ollama-host:8188/view?filename=ComfyUI_00031_.png
+            # map[0] -> The filename, map[1] -> the subfolder
+            req = request.Request(f"http://{self.comfy_address}/view?filename={specific_map[0]}&subfolder={specific_map[1]}")
+            with request.urlopen(req) as response:
+                response_data = response.read()  # Read binary image data
+                np_array = np.frombuffer(response_data, np.uint8)  # Convert to NumPy array
+                image = cv2.imdecode(np_array, cv2.IMREAD_COLOR)  # Decode image using OpenCV
+                got_images.append(image)
+
+        i = 0
+        for image in got_images:
+            filename = f"dl_{i}.png"
+            cv2.imwrite(filename, image)  # SAVES THE IMAGE. LETS GO
+            i += 1
+
 
 
     def stable_diffusion(self, prompt, path_dir_output='', name=None):
@@ -296,10 +305,17 @@ class ComfyUiAPI:
         print(f"Prompt ID: {prompt_id}")
 
         print("tracking progress of prompt")
-        self.__track_progress(self.prompt_json_format, prompt_id)
+        self.__track_progress(self.prompt_json_format)
 
         print("getting prompt history")
-        result = self.__get_history(prompt_id)
-        print(f"Result json \n {prompt_id}")
+        history = self.__get_history(prompt_id)
+        print(f"Result json \n {history}")
+
+        print("getting image maps")
+        img_maps = self.__get_image_paths(prompt_id, history)
+
+        images = self.__get_images(image_map=img_maps)
+
+        print(images)
 
         pass
