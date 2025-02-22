@@ -151,7 +151,8 @@ prompt_text = """
 """
 
 
-comfy = ComfyUiAPI("ollama-host:8188", 512,512, 5, "I wanna go to the mooooooooooooooooooon!!!!")
-comfy.stable_diffusion("")
+comfy = ComfyUiAPI("ollama-host")
+comfy.set_prompt(512, 512, 2, "Yeah.")
+comfy.stable_diffusion()
 
 
