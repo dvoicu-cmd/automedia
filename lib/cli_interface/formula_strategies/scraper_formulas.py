@@ -8,6 +8,12 @@ from lib.cli_interface.page.picker_pages import PickerPage
 class ScraperFormulas(InterfaceFormulas):
 
     def create_formula(self, formula_method: str, attr_map={}):
+        if formula_method == "ollama_text":
+            self.ollama_text(attr_map=attr_map)
+        if formula_method == "ollama_comfy_text_and_img":
+            self.ollama_comfy_text_and_img(attr_map=attr_map)
+        if formula_method == "comfy_thumb":
+            self.comfy_thumb(attr_map=attr_map)
         if formula_method == "reddit_scrape":
             self.reddit_scrape(attr_map=attr_map)
         if formula_method == "open_ai_text":
@@ -18,54 +24,8 @@ class ScraperFormulas(InterfaceFormulas):
             self.open_ai_thumb(attr_map=attr_map)
         if formula_method == "open_ai_aita":
             self.open_ai_aita(attr_map=attr_map)
+        pass
 
-    @staticmethod
-    def reddit_scrape(attr_map={}):
-        f = ManageFormula()
-        f.set_properties_type("scraper", "reddit_scrape")
-
-        name = InterfaceFormulas().formula_name(f, attr_map)
-
-        desc = InputPage("Input the description for the scrapes."
-                         ).prompt(default_value=attr_map.get("desc"))
-        f.spa("desc", desc)
-
-        subreddit = InputPage("Input the subreddit name to scrape from."
-                              ).prompt(default_value=attr_map.get("subreddit"))
-        f.spa("subreddit", subreddit)
-
-        media_pool = InputPage("Input the corresponding media_pool name to upload scrapes to."
-                               ).prompt(default_value=attr_map.get("media_pool"))
-        f.spa("media_pool", media_pool)
-
-        f.ap(f"""
-        
-manager = ScraperDirManager()
-tmp = manager.create_tmp_dir()
-
-db = DbNasConnection()
-
-scrapes = RedditScrape().scrape("{subreddit}", "hot", "text", 1, 5)
-        
-        """)
-
-        # This is stupid, but it works.
-        s = f'manager.dl_list_of_text(scrapes, f"{subreddit}_'
-        s = s + '{manager.get_rand_id()}", tmp)'
-        f.ap(s)
-
-        f.ap(f"""
-        
-files = manager.select_dir(tmp)
-
-for file in files:
-    db.create_media_file(file, "text", os.path.basename(file), "{desc}", "{media_pool}")
-
-manager.cleanup(tmp)
-        
-        """)
-
-        f.save_generated_script(name)
 
     @staticmethod
     def open_ai_text(attr_map={}):
@@ -377,8 +337,13 @@ manager.cleanup(output_tmp)
 
         pass
 
+
+    # ------------------------ Formulas not in use ------------------------
+
+
     @staticmethod
     def open_ai_aita(attr_map={}):
+        # NOT IN USE
 
         f = ManageFormula()
         f.set_properties_type("scraper", "open_ai_aita")
@@ -443,4 +408,53 @@ manager.cleanup(tmp)
 
         f.save_generated_script(name)
 
+    @staticmethod
+    def reddit_scrape(attr_map={}):
+        # NOT IN USE
+
+        f = ManageFormula()
+        f.set_properties_type("scraper", "reddit_scrape")
+
+        name = InterfaceFormulas().formula_name(f, attr_map)
+
+        desc = InputPage("Input the description for the scrapes."
+                         ).prompt(default_value=attr_map.get("desc"))
+        f.spa("desc", desc)
+
+        subreddit = InputPage("Input the subreddit name to scrape from."
+                              ).prompt(default_value=attr_map.get("subreddit"))
+        f.spa("subreddit", subreddit)
+
+        media_pool = InputPage("Input the corresponding media_pool name to upload scrapes to."
+                               ).prompt(default_value=attr_map.get("media_pool"))
+        f.spa("media_pool", media_pool)
+
+        f.ap(f"""
+
+manager = ScraperDirManager()
+tmp = manager.create_tmp_dir()
+
+db = DbNasConnection()
+
+scrapes = RedditScrape().scrape("{subreddit}", "hot", "text", 1, 5)
+
+        """)
+
+        # This is stupid, but it works.
+        s = f'manager.dl_list_of_text(scrapes, f"{subreddit}_'
+        s = s + '{manager.get_rand_id()}", tmp)'
+        f.ap(s)
+
+        f.ap(f"""
+
+files = manager.select_dir(tmp)
+
+for file in files:
+    db.create_media_file(file, "text", os.path.basename(file), "{desc}", "{media_pool}")
+
+manager.cleanup(tmp)
+
+        """)
+
+        f.save_generated_script(name)
 

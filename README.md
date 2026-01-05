@@ -58,3 +58,14 @@ An account to publish to is established. A scraper is then created to pull speci
 
 Further documentation on system is in the doc directory.
 
+## Demo
+### CLI Navigation
+![cli](/doc/cli_menus.gif)
+
+### Youtube Uploading Automation Setup - AKA: Making a Formula
+![general](/doc/general_nav.gif)
+
+### More Navigation
+![yt](/doc/formula_example.gif)
+
+

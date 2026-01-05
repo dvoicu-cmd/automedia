@@ -11,25 +11,41 @@ def main():
     v1 = pg.main_menu("Scraper")
     if v1 == 'custom':
         # CUSTOM SCRAPER FORMULA CREATION
-        v2 = PickerPage(["Reddit Scrape", "Ai Text Prompt", "Ai Text and Images", "Thumbnail Bases with Ai Image", "Ai aita prompt", "Back"]).prompt("Select a formula to use")
+        v2 = PickerPage(["Ai Text Prompt", "Ai Text and Images", "Thumbnail Bases with Ai Images", "Back"
+                         ]).prompt("Select a formula to use:")
+
         try:
-            if v2 == 0:
-                ScraperFormulas().reddit_scrape()
-                DisplayPage().prompt("Successfully created reddit scraper formula.")
-            if v2 == 1:
-                ScraperFormulas().open_ai_text()
-                DisplayPage().prompt("Successfully created ai text formula.")
-            if v2 == 2:
-                ScraperFormulas().open_ai_text_and_img()
-                DisplayPage().prompt("Successfully created ai text and image formula.")
-            if v2 == 3:
-                ScraperFormulas().open_ai_thumb()
-                DisplayPage().prompt("Successfully created thumbnail with ai image formula.")
-            if v2 == 4:
-                ScraperFormulas().open_ai_aita()
-                DisplayPage().prompt("Successfully created Ai aita prompt formula.")
-            if v2 == 5:  # Back
+            if v2 == 0:  # Text Prompt
+                v3 = PickerPage(["Ollama", "OpenAI"]).prompt("Select which service you wish to use:")
+                if v3 == 0:
+                    ScraperFormulas().ollama_text()
+                    DisplayPage().prompt("Successfully created ai text formula with ollama.")
+                if v3 == 1:
+                    ScraperFormulas().open_ai_text()
+                    DisplayPage().prompt("Successfully created ai text formula with openAI.")
+
+            if v2 == 1:  # Text & Images
+                v3 = PickerPage(["Ollama & ComfyUI", "OpenAI"]).prompt("Select which service you wish to use:")
+                if v3 == 0:
+                    ScraperFormulas().ollama_comfy_text_and_img()
+                    DisplayPage().prompt("Successfully created ai text and image formula with ollama & comfy.")
+                if v3 == 1:
+                    ScraperFormulas().open_ai_text_and_img()
+                    DisplayPage().prompt("Successfully created ai text and image formula with openai.")
+
+            if v2 == 2:  # Thumbnail Bases with Ai Images
+                v3 = PickerPage(["ComfyUI", "OpenAI"]).prompt("Select which service you wish to use:")
+                if v3 == 0:
+                    ScraperFormulas().comfy_thumb()
+                    DisplayPage().prompt("Successfully created thumbnail with ai image formula with comfy")
+                if v3 == 1:
+                    ScraperFormulas().open_ai_thumb()
+                    DisplayPage().prompt("Successfully created thumbnail with ai image formula with openai")
+
+            if v2 == 3:  # Back
                 pass
+
+
         except Exception as e:
             if isinstance(e, InputCancelled):
                 InputPage("").print_cancelled_input()
